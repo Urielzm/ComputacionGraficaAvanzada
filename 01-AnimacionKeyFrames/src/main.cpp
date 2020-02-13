@@ -46,7 +46,7 @@ Shader shader;
 //Shader con skybox
 Shader shaderSkybox;
 //Shader con multiples luces
-Shader shaderMulLighting;
+Shader shaderMulLighting;//inicializa el shader 
 
 std::shared_ptr<FirstPersonCamera> camera(new FirstPersonCamera());
 
@@ -54,7 +54,7 @@ Sphere skyboxSphere(20, 20);
 Box boxCesped;
 Box boxWalls;
 Box boxHighway;
-Box boxLandingPad;
+Box boxLandingPad; //creamos un objeto tipo cajita(caja negra)
 // Models complex instances
 Model modelRock;
 Model modelAircraft;
@@ -70,6 +70,9 @@ Model modelLamboFrontLeftWheel;
 Model modelLamboFrontRightWheel;
 Model modelLamboRearLeftWheel;
 Model modelLamboRearRightWheel;
+
+Model modelHT;
+
 // Dart lego
 Model modelDartLegoBody;
 Model modelDartLegoHead;
@@ -81,7 +84,14 @@ Model modelDartLegoRightHand;
 Model modelDartLegoLeftLeg;
 Model modelDartLegoRightLeg;
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID; //, textureLandingPadID;
+//buzz
+Model modelBuzzCuerpo;
+Model modelBuzzManoDerecha;
+Model modelBuzzManoIzquierda;
+Model modelBuzzPieDerecho;
+Model modelBuzzPieIzquierdo;
+
+GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID , textureLandingPadID; //creamos el identificador de la textura
 GLuint skyboxTextureID;
 
 GLenum types[6] = {
@@ -110,9 +120,11 @@ glm::mat4 modelMatrixHeli = glm::mat4(1.0f);
 glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
+glm::mat4 modelMatrixBuzz = glm::mat4(1.0f);
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
+float rotBuzzLeftArm = 0.0, rotBuzzRightArm = 0.0, rotBuzzLeftLeg = 0.0, rotBuzzRightLeg = 0.0;
 bool enableCountSelected = true;
 
 // Variables to animations keyframes
@@ -135,8 +147,13 @@ float interpolationDart = 0.0;
 int maxNumPasosDart = 200;
 int numPasosDart = 0;
 
+
 // Var animate helicopter
 float rotHelHelY = 0.0;
+int contador_vueltas = 0;
+int detener = 0;
+//float heliPosY = 0.0;
+//int estadoHeli = 0;
 
 // Var animate lambo dor
 int stateDoor = 0;
@@ -211,7 +228,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Inicialización de los shaders
 	shader.initialize("../Shaders/colorShader.vs", "../Shaders/colorShader.fs");
 	shaderSkybox.initialize("../Shaders/skyBox.vs", "../Shaders/skyBox.fs");
-	shaderMulLighting.initialize("../Shaders/iluminacion_texture_res.vs", "../Shaders/multipleLights.fs");
+	shaderMulLighting.initialize("../Shaders/iluminacion_texture_res.vs", "../Shaders/multipleLights.fs");//nos dice donde esta el shader ../ se regresa al nive anterior
 
 	// Inicializacion de los objetos.
 	skyboxSphere.init();
@@ -227,8 +244,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxHighway.init();
 	boxHighway.setShader(&shaderMulLighting);
 
-	boxLandingPad.init();
-	boxLandingPad.setShader(&shaderMulLighting);
+	boxLandingPad.init();//inicializar los buffer
+	boxLandingPad.setShader(&shaderMulLighting);//para encapsulamiento y le indicamos con que shader vamos a iniciar esta caja
 
 	modelRock.loadModel("../models/rock/rock.obj");
 	modelRock.setShader(&shaderMulLighting);
@@ -244,7 +261,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelEclipseRearWheels.loadModel("../models/Eclipse/2003eclipse_rear_wheels.obj");
 	modelEclipseRearWheels.setShader(&shaderMulLighting);
 	// Helicopter
-	modelHeliChasis.loadModel("../models/Helicopter/Mi_24_chasis.obj");
+	modelHeliChasis.loadModel("../models/Helicopter/chasis2.obj");
 	modelHeliChasis.setShader(&shaderMulLighting);
 	modelHeliHeli.loadModel("../models/Helicopter/Mi_24_heli.obj");
 	modelHeliHeli.setShader(&shaderMulLighting);
@@ -263,6 +280,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelLamboRearLeftWheel.setShader(&shaderMulLighting);
 	modelLamboRearRightWheel.loadModel("../models/Lamborginhi_Aventador_OBJ/Lamborghini_Aventador_rear_right_wheel.obj");
 	modelLamboRearRightWheel.setShader(&shaderMulLighting);
+
+	modelHT.loadModel("../models/Helicopter/helice.obj");
+	modelHT.setShader(&shaderMulLighting);
 
 	// Dart Lego
 	modelDartLegoBody.loadModel("../models/LegoDart/LeoDart_body.obj");
@@ -283,6 +303,18 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoLeftLeg.setShader(&shaderMulLighting);
 	modelDartLegoRightLeg.loadModel("../models/LegoDart/LeoDart_right_leg.obj");
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
+
+	//Buzz
+	modelBuzzCuerpo.loadModel("../models/buzz/CuerpoBuzz.obj");
+	modelBuzzCuerpo.setShader(&shaderMulLighting);
+	modelBuzzManoDerecha.loadModel("../models/buzz/manoDerechaBuzz.obj");
+	modelBuzzManoDerecha.setShader(&shaderMulLighting);
+	modelBuzzManoIzquierda.loadModel("../models/buzz/manoIzquierdaBuzz.obj");
+	modelBuzzManoIzquierda.setShader(&shaderMulLighting);
+	modelBuzzPieDerecho.loadModel("../models/buzz/pieDerechoBuzz.obj");
+	modelBuzzPieDerecho.setShader(&shaderMulLighting);
+	modelBuzzPieIzquierdo.loadModel("../models/buzz/pieIzquierdoBuzz.obj");
+	modelBuzzPieIzquierdo.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -443,14 +475,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureHighway.freeImage(bitmap);
 
-	/*// Definiendo la textura a utilizar
-	Texture textureLandingPad("../Textures/landingPad.jpg");
+	// Definiendo la textura a utilizar
+	Texture textureLandingPad("../Textures/landingPad.jpg");//../ nos referimos a un directorio antes 
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureLandingPad.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureLandingPad.convertToData(bitmap, imageWidth,
 			imageHeight);
-	// Creando la textura con id 1
+	// Creando la textura con id 1, &textureLandingPadID -> nosotros lo creamos
 	glGenTextures(1, &textureLandingPadID);
 	// Enlazar esa textura a una tipo de textura de 2D.
 	glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
@@ -473,10 +505,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	} else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
-	textureLandingPad.freeImage(bitmap);*/
+	textureLandingPad.freeImage(bitmap);
 }
 
-void destroy() {
+void destroy() {//para poder eliminar los objetos que no utilizo y no se queden en memoria
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	// --------- IMPORTANTE ----------
@@ -518,6 +550,12 @@ void destroy() {
 	modelLamboRearRightWheel.destroy();
 	modelLamboRightDor.destroy();
 	modelRock.destroy();
+	//buzz
+	modelBuzzCuerpo.destroy();
+	modelBuzzManoDerecha.destroy();
+	modelBuzzManoIzquierda.destroy();
+	modelBuzzPieDerecho.destroy();
+	modelBuzzPieIzquierdo.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -532,14 +570,14 @@ void destroy() {
 	glDeleteTextures(1, &skyboxTextureID);
 }
 
-void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes) {
+void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes) {//para cuando cambiamos de tamaño la ventana.
 	screenWidth = widthRes;
 	screenHeight = heightRes;
 	glViewport(0, 0, widthRes, heightRes);
 }
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action,
-		int mode) {
+		int mode) {//evento que nos sirve para poder cachar los eventos del teclado release, repeat y 
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
@@ -549,7 +587,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 	}
 }
 
-void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
+void mouseCallback(GLFWwindow *window, double xpos, double ypos) {//para cuando este moviendo el mouse
 	offsetX = xpos - lastMousePosX;
 	offsetY = ypos - lastMousePosY;
 	lastMousePosX = xpos;
@@ -573,7 +611,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 	}
 }
 
-bool processInput(bool continueApplication) {
+bool processInput(bool continueApplication) {//para poder validar si esta una tecla presionada y hacemos una accion
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
@@ -680,6 +718,33 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(-0.02, 0.0, 0.0));
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
+	//Buzz movimientos
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		rotBuzzLeftArm += 0.02;
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		rotBuzzLeftArm -= 0.02;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		rotBuzzRightArm += 0.02;
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		rotBuzzRightArm -= 0.02;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		rotBuzzLeftLeg += 0.02;
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		rotBuzzLeftLeg -= 0.02;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+		rotBuzzRightLeg += 0.02;
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+		rotBuzzRightLeg -= 0.02;
+
+
 
 	glfwPollEvents();
 	return continueApplication;
@@ -697,16 +762,23 @@ void applicationLoop() {
 	float rotWheelsY = 0.0;
 	int numberAdvance = 0;
 	int maxAdvance = 0.0;
+	int estadoHeli = 0;
+	float heliPosY = 0.0;
 
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
 
-	modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 10.0, -5.0));
+	modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 0.0, -5.0));
 
 	modelMatrixAircraft = glm::translate(modelMatrixAircraft, glm::vec3(10.0, 2.0, -17.5));
 
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(23.0, 0.0, 0.0));
+	modelMatrixLambo = glm::rotate(modelMatrixLambo, 160.0f, glm::vec3(0, 1, 0));
 
-	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
+	//modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
+	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(21.0, 0.0, -1.0));
+
+	//buzz
+	modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(23.0, 0.0, 8.0));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -861,12 +933,12 @@ void applicationLoop() {
 		boxHighway.setOrientation(glm::vec3(0.0, 0.0, 0.0));
 		boxHighway.render();
 		// Landing pad
-		/*glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
+		glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
 		boxLandingPad.setScale(glm::vec3(10.0, 0.05, 10.0));
 		boxLandingPad.setPosition(glm::vec3(5.0, 0.05, -5.0));
 		boxLandingPad.setOrientation(glm::vec3(0.0, 0.0, 0.0));
 		boxLandingPad.render();
-		glBindTexture(GL_TEXTURE_2D, 0);*/
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		/*******************************************
 		 * Custom objects obj
@@ -900,12 +972,29 @@ void applicationLoop() {
 		// Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
 		modelHeliChasis.render(modelMatrixHeliChasis);
+		//modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(0.0, heliPosY, 0.0));
+		
+
+		//modelMatrixHeliChasis = glm::translate(modelMatrixHeliChasis, glm::vec3(0.0, 0.0, -50.0));
 
 		glm::mat4 modelMatrixHeliHeli = glm::mat4(modelMatrixHeliChasis);
 		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli, glm::vec3(0.0, 0.0, -0.249548));
 		modelMatrixHeliHeli = glm::rotate(modelMatrixHeliHeli, rotHelHelY, glm::vec3(0, 1, 0));
 		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli, glm::vec3(0.0, 0.0, 0.249548));
 		modelHeliHeli.render(modelMatrixHeliHeli);
+
+		glm::mat4 modelMatrixHT = glm::mat4(modelMatrixHeliChasis);
+		modelMatrixHT = glm::translate(modelMatrixHT, glm::vec3(0.364821, 2.09018, -5.637920));
+		modelMatrixHT = glm::rotate(modelMatrixHT, rotHelHelY, glm::vec3(1, 0, 0));
+		modelMatrixHT = glm::translate(modelMatrixHT, glm::vec3(-0.364821, -2.09018, 5.63792));
+		//modelMatrixHT = glm::translate(modelMatrixHT, glm::vec3(0.0, 0.0, 0.249548));
+		modelHT.render(modelMatrixHT);
+
+		/*modelMatrixDartLeftHand = glm::translate(modelMatrixDartLeftHand, glm::vec3(0.201343, 1.68317, 0.99774));
+		modelMatrixDartLeftHand = glm::rotate(modelMatrixDartLeftHand, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+		modelMatrixDartLeftHand = glm::rotate(modelMatrixDartLeftHand, rotDartLeftHand, glm::vec3(0, 1, 0));
+		modelMatrixDartLeftHand = glm::rotate(modelMatrixDartLeftHand, glm::radians(5.0f), glm::vec3(1, 0, 0));
+		modelMatrixDartLeftHand = glm::translate(modelMatrixDartLeftHand, glm::vec3(-0.201343, -1.68317, -0.99774));*/
 
 		// Lambo car
 		glDisable(GL_CULL_FACE);
@@ -977,6 +1066,44 @@ void applicationLoop() {
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
 
+		//Buzz
+		glDisable(GL_CULL_FACE);
+		glm::mat4 modelMatrixBuzzCuerpo = glm::mat4(modelMatrixBuzz);
+		modelMatrixBuzzCuerpo = glm::scale(modelMatrixBuzzCuerpo, glm::vec3(3.5, 3.5, 3.5));
+		modelBuzzCuerpo.render(modelMatrixBuzzCuerpo);
+
+		glm::mat4 modelMatrixBuzzLeftArm = glm::mat4(modelMatrixBuzzCuerpo);
+		modelMatrixBuzzLeftArm = glm::translate(modelMatrixBuzzLeftArm, glm::vec3(0.132865, 0.577957, -0.050098));
+		modelMatrixBuzzLeftArm = glm::rotate(modelMatrixBuzzLeftArm, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+		modelMatrixBuzzLeftArm = glm::rotate(modelMatrixBuzzLeftArm, rotBuzzLeftArm, glm::vec3(0, 0, 1));
+		modelMatrixBuzzLeftArm = glm::rotate(modelMatrixBuzzLeftArm, glm::radians(5.0f), glm::vec3(1, 0, 0));
+		modelMatrixBuzzLeftArm = glm::translate(modelMatrixBuzzLeftArm, glm::vec3(-0.132865, -0.577957, 0.050098));
+		modelBuzzManoIzquierda.render(modelMatrixBuzzLeftArm);
+
+
+		glm::mat4 modelMatrixBuzztRightArm = glm::mat4(modelMatrixBuzzCuerpo);
+		modelMatrixBuzztRightArm = glm::translate(modelMatrixBuzztRightArm, glm::vec3(-0.130829, 0.579602, -0.037182));
+		modelMatrixBuzztRightArm = glm::rotate(modelMatrixBuzztRightArm, glm::radians(5.0f), glm::vec3(1, 0, 0));
+		modelMatrixBuzztRightArm = glm::rotate(modelMatrixBuzztRightArm, rotBuzzRightArm, glm::vec3(0, 0, 1));
+		modelMatrixBuzztRightArm = glm::rotate(modelMatrixBuzztRightArm, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+		modelMatrixBuzztRightArm = glm::translate(modelMatrixBuzztRightArm, glm::vec3(0.130829, -0.579602, 0.037182));
+		modelBuzzManoDerecha.render(modelMatrixBuzztRightArm);
+
+
+		glm::mat4 modelMatrixBuzzLeftLeg = glm::mat4(modelMatrixBuzzCuerpo);
+		modelMatrixBuzzLeftLeg = glm::translate(modelMatrixBuzzLeftLeg, glm::vec3(0.058588, 0.397063, -0.00734));
+		modelMatrixBuzzLeftLeg = glm::rotate(modelMatrixBuzzLeftLeg, rotBuzzLeftLeg, glm::vec3(1, 0, 0));
+		modelMatrixBuzzLeftLeg = glm::translate(modelMatrixBuzzLeftLeg, glm::vec3(-0.058588, -0.397063, 0.00734));
+		modelBuzzPieIzquierdo.render(modelMatrixBuzzLeftLeg);
+
+		glm::mat4 modelMatrixBuzzRightLeg = glm::mat4(modelMatrixBuzzCuerpo);
+		modelMatrixBuzzRightLeg = glm::translate(modelMatrixBuzzRightLeg, glm::vec3(-0.08796, 0.305697, -0.020254));
+		modelMatrixBuzzRightLeg = glm::rotate(modelMatrixBuzzRightLeg, rotBuzzRightLeg, glm::vec3(1, 0, 0));
+		modelMatrixBuzzRightLeg = glm::translate(modelMatrixBuzzRightLeg, glm::vec3(0.08796, -0.305697, 0.020254));
+		modelBuzzPieDerecho.render(modelMatrixBuzzRightLeg);
+
+		glEnable(GL_CULL_FACE);
+
 		/*******************************************
 		 * Skybox
 		 *******************************************/
@@ -994,7 +1121,7 @@ void applicationLoop() {
 		glDepthFunc(oldDepthFuncMode);
 
 		// Para salvar el frame
-		/*if(record && modelSelected == 1){
+		if(record && modelSelected == 1){
 			matrixDartJoints.push_back(rotDartHead);
 			matrixDartJoints.push_back(rotDartLeftArm);
 			matrixDartJoints.push_back(rotDartLeftHand);
@@ -1006,8 +1133,8 @@ void applicationLoop() {
 				appendFrame(myfile, matrixDartJoints);
 				saveFrame = false;
 			}
-		}*/
-		/*else if(keyFramesDartJoints.size() > 0){
+		}
+		else if(keyFramesDartJoints.size() > 0){
 			// Para reproducir el frame
 			interpolationDartJoints = numPasosDartJoints / (float) maxNumPasosDartJoints;
 			numPasosDartJoints++;
@@ -1026,16 +1153,16 @@ void applicationLoop() {
 			rotDartRightHand = interpolate(keyFramesDartJoints, indexFrameDartJoints, indexFrameDartJointsNext, 4, interpolationDartJoints);
 			rotDartLeftLeg = interpolate(keyFramesDartJoints, indexFrameDartJoints, indexFrameDartJointsNext, 5, interpolationDartJoints);
 			rotDartRightLeg = interpolate(keyFramesDartJoints, indexFrameDartJoints, indexFrameDartJointsNext, 6, interpolationDartJoints);
-		}*/
+		}
 
-		/*if (record && modelSelected == 2) {
+		if (record && modelSelected == 2) {
 			matrixDart.push_back(modelMatrixDart);
 			if (saveFrame) {
 				appendFrame(myfile, matrixDart);
 				saveFrame = false;
 			}
-		}*/
-		/*else if (keyFramesDart.size() > 0) {
+		}
+		else if (keyFramesDart.size() > 0) {
 			// Para reproducir el frame
 			interpolationDart = numPasosDart / (float)maxNumPasosDart;
 			numPasosDart++;
@@ -1048,16 +1175,62 @@ void applicationLoop() {
 			if (indexFrameDartNext > keyFramesDart.size() - 1)
 				indexFrameDartNext = 0;
 			modelMatrixDart = interpolate(keyFramesDart, indexFrameDart, indexFrameDartNext, 0, interpolationDart);
-		}*/
+		}
 
 		// Constantes de animaciones
-		rotHelHelY += 0.5;
+		
 
 		/*******************************************
 		 * State machines
 		 *******************************************/
+		// State machine for helicoptero
+
+		switch(estadoHeli) {
+			//modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 0.0, -5.0));
+		case 0:
+			rotHelHelY += 0.5;
+			modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(0.0, 0.05, 0.0));
+			heliPosY += 0.05;
+			if (heliPosY >= 10.0) {
+				estadoHeli = 1;
+				detener = 1;
+			}
+			break;
+		case 1:
+			rotHelHelY += 0.5;
+			modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(0.0, -0.05, 0.0));
+			heliPosY -= 0.05;
+			if (heliPosY <= 0) {
+				if (detener == 1)
+				{
+					estadoHeli = 2;
+				}
+				//estadoHeli = 0;
+			}
+			break;
+		case 2:
+			if (contador_vueltas < 15) {
+				rotHelHelY += 0.3;
+			}
+			else if (contador_vueltas >= 5 && contador_vueltas < 30) {
+				rotHelHelY += 0.1;
+			}
+			else {
+				rotHelHelY += 0.0;
+				estadoHeli = 3;
+			}
+			contador_vueltas += 1;
+			break;
+		case 3:
+			rotHelHelY += 0.0;
+			detener = 0;
+			contador_vueltas = 0;
+			break;
+
+		}
+
 		// State machine for eclipse car
-		/*switch(state){
+		switch(state){
 		case 0:
 			if(numberAdvance == 0)
 				maxAdvance = 65.0;
@@ -1099,10 +1272,10 @@ void applicationLoop() {
 					numberAdvance = 1;
 			}
 			break;
-		}*/
+		}
 
 		// State machine for the lambo car
-		/*switch(stateDoor){
+		switch(stateDoor){
 		case 0:
 			dorRotCount += 0.5;
 			if(dorRotCount > 75)
@@ -1115,7 +1288,7 @@ void applicationLoop() {
 				stateDoor = 0;
 			}
 			break;
-		}*/
+		}
 
 		glfwSwapBuffers(window);
 	}
