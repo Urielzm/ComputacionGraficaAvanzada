@@ -289,7 +289,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
 
 	//Mayow
-	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	//mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	//mayowModelAnimate.loadModel("../models/dragonait/practica2.fbx");
+	mayowModelAnimate.loadModel("../models/pokemon/Garchomp.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));

@@ -265,6 +265,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelHeliChasis.setShader(&shaderMulLighting);
 	modelHeliHeli.loadModel("../models/Helicopter/Mi_24_heli.obj");
 	modelHeliHeli.setShader(&shaderMulLighting);
+	modelHT.loadModel("../models/Helicopter/helice.obj");
+	modelHT.setShader(&shaderMulLighting);
 	// Lamborginhi
 	modelLambo.loadModel("../models/Lamborginhi_Aventador_OBJ/Lamborghini_Aventador_chasis.obj");
 	modelLambo.setShader(&shaderMulLighting);
@@ -281,8 +283,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelLamboRearRightWheel.loadModel("../models/Lamborginhi_Aventador_OBJ/Lamborghini_Aventador_rear_right_wheel.obj");
 	modelLamboRearRightWheel.setShader(&shaderMulLighting);
 
-	modelHT.loadModel("../models/Helicopter/helice.obj");
-	modelHT.setShader(&shaderMulLighting);
+	
 
 	// Dart Lego
 	modelDartLegoBody.loadModel("../models/LegoDart/LeoDart_body.obj");
@@ -542,6 +543,7 @@ void destroy() {//para poder eliminar los objetos que no utilizo y no se queden 
 	modelEclipseRearWheels.destroy();
 	modelHeliChasis.destroy();
 	modelHeliHeli.destroy();
+	modelHT.destroy();
 	modelLambo.destroy();
 	modelLamboFrontLeftWheel.destroy();
 	modelLamboFrontRightWheel.destroy();
@@ -974,7 +976,6 @@ void applicationLoop() {
 		modelHeliChasis.render(modelMatrixHeliChasis);
 		//modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(0.0, heliPosY, 0.0));
 		
-
 		//modelMatrixHeliChasis = glm::translate(modelMatrixHeliChasis, glm::vec3(0.0, 0.0, -50.0));
 
 		glm::mat4 modelMatrixHeliHeli = glm::mat4(modelMatrixHeliChasis);
