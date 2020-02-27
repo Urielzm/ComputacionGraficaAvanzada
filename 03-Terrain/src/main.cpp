@@ -43,6 +43,10 @@
 int screenWidth;
 int screenHeight;
 
+
+//Variable para cambiar la animación
+int varIndexAnimacion;
+
 GLFWwindow *window;
 
 Shader shader;
@@ -80,8 +84,16 @@ Model modelDartLegoRightLeg;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+Model cawboyModelAnimate;
+//model Garchomp
+Model garchompModelAnimate;
+//model Dragonait
+Model dragonaitModelAnimate;
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+//Instanciamos objeto tipo terreno 
+//150 -> area, 8-> es la altura
+//Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 150, 15, "../Textures/pruebaTerreno4.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint skyboxTextureID;
@@ -112,6 +124,9 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixCawboy = glm::mat4(1.0f);
+glm::mat4 modelMatrixGarchomp = glm::mat4(1.0f);
+glm::mat4 modelMatrixDragonait = glm::mat4(1.0f);
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
@@ -226,7 +241,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
 	modelAircraft.setShader(&shaderMulLighting);
 
-	terrain.init();
+	terrain.init();//inicializacion y el terreno 
 	terrain.setShader(&shaderMulLighting);
 
 	// Helicopter
@@ -274,6 +289,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
+	cawboyModelAnimate.loadModel("../models/cowboy/Character Running.fbx");
+	cawboyModelAnimate.setShader(&shaderMulLighting);
+
+	//Garchomp
+	garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
+	garchompModelAnimate.setShader(&shaderMulLighting);
+
+	//Dragonait
+	dragonaitModelAnimate.loadModel("../models/dragonait/practica2_2.fbx");
+	dragonaitModelAnimate.setShader(&shaderMulLighting);
+
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
 	// Definimos el tamanio de la imagen
@@ -306,7 +332,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	}
 
 	// Definiendo la textura a utilizar
-	Texture textureCesped("../Textures/cesped.jpg");
+	Texture textureCesped("../Textures/terreno3_p.jpg");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureCesped.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -507,6 +533,8 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	garchompModelAnimate.destroy();
+	dragonaitModelAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -567,6 +595,14 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS ) {
+		
+		varIndexAnimacion = 1;
+	}
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+		varIndexAnimacion = 0;
+	}
+		
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera->moveFrontCamera(true, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -690,6 +726,13 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
+	modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(-8.0, 0.0, 5));
+
+	modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(-8.0, 0.0, 8));
+
+	modelMatrixDragonait= glm::translate(modelMatrixDragonait, glm::vec3(15.0f, 0.0, -5.0f));
+	modelMatrixDragonait = glm::rotate(modelMatrixDragonait, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
 	keyFramesDartJoints = getKeyRotFrames(fileName);
@@ -754,14 +797,16 @@ void applicationLoop() {
 		/*******************************************
 		 * Terrain Cesped
 		 *******************************************/
-		glm::mat4 modelCesped = glm::mat4(1.0);
+		/*glm::mat4 modelCesped = glm::mat4(1.0);
 		modelCesped = glm::translate(modelCesped, glm::vec3(0.0, 0.0, 0.0));
-		modelCesped = glm::scale(modelCesped, glm::vec3(200.0, 0.001, 200.0));
+		modelCesped = glm::scale(modelCesped, glm::vec3(200.0, 0.001, 200.0));*/
 		// Se activa la textura del agua
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureCespedID);
-		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(80, 80)));
-		terrain.setPosition(glm::vec3(100, 0, 100));
+		glActiveTexture(GL_TEXTURE0);//indica que texturas va ausar 
+		glBindTexture(GL_TEXTURE_2D, textureCespedID);// lo vamos a hacer de dos dimensiones, manejar una textura y que vamos a usarla
+		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(150, 150)));//Repetimos la textura con una variable uniform 
+		// le decmos que se duplique 80 veces
+		//se pone con el identificador uniform, forza a poner un valor, para todos los trapecios sera el mismo. 
+		terrain.setPosition(glm::vec3(75, 0, 75));//
 		terrain.render();
 		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -869,6 +914,26 @@ void applicationLoop() {
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.setAnimationIndex(0);
 		mayowModelAnimate.render(modelMatrixMayowBody);
+
+		modelMatrixCawboy[3][1] = terrain.getHeightTerrain(modelMatrixCawboy[3][0], modelMatrixCawboy[3][2]);
+		glm::mat4 cawboyModel = glm::mat4(modelMatrixCawboy);
+		cawboyModel = glm::scale(cawboyModel, glm::vec3(0.002, 0.002, 0.002));
+		cawboyModelAnimate.setAnimationIndex(0);
+		cawboyModelAnimate.render(cawboyModel);
+
+		//Garchomp
+		modelMatrixGarchomp[3][1] = terrain.getHeightTerrain(modelMatrixGarchomp[3][0], modelMatrixGarchomp[3][2]);
+		glm::mat4 garchompModel = glm::mat4(modelMatrixGarchomp);
+		garchompModel = glm::scale(garchompModel, glm::vec3(0.006, 0.006, 0.006));
+		garchompModelAnimate.setAnimationIndex(varIndexAnimacion);
+		garchompModelAnimate.render(garchompModel);
+
+		//Dragonait
+		modelMatrixDragonait[3][1] = terrain.getHeightTerrain(modelMatrixDragonait[3][0], modelMatrixDragonait[3][2]);
+		glm::mat4 dragonaitModel = glm::mat4(modelMatrixDragonait);
+		dragonaitModel = glm::scale(dragonaitModel, glm::vec3(0.009, 0.009, 0.009));
+		dragonaitModelAnimate.setAnimationIndex(0);
+		dragonaitModelAnimate.render(dragonaitModel);
 
 		/*******************************************
 		 * Skybox
