@@ -533,6 +533,7 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	cawboyModelAnimate.destroy();
 	garchompModelAnimate.destroy();
 	dragonaitModelAnimate.destroy();
 
@@ -915,6 +916,7 @@ void applicationLoop() {
 		mayowModelAnimate.setAnimationIndex(0);
 		mayowModelAnimate.render(modelMatrixMayowBody);
 
+		//Cawboy
 		modelMatrixCawboy[3][1] = terrain.getHeightTerrain(modelMatrixCawboy[3][0], modelMatrixCawboy[3][2]);
 		glm::mat4 cawboyModel = glm::mat4(modelMatrixCawboy);
 		cawboyModel = glm::scale(cawboyModel, glm::vec3(0.002, 0.002, 0.002));
