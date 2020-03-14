@@ -106,6 +106,9 @@ public:
 	void setDistanceFromTarget(float distanceFromTarget) {
 		this->distanceFromTarget = distanceFromTarget;
 	}
+	void setAngleArundTarteg(float angleAroundTarget) {
+		this->angleAroundTarget = angleAroundTarget;
+	}
 
 protected:
 	glm::vec3 position;
@@ -124,5 +127,6 @@ protected:
 	float sensitivity;
 	float speed;
 };
+
 
 #endif // CAMERA_H

@@ -18,6 +18,7 @@ void ThirdPersonCamera::mouseMoveCamera(float xoffset, float yoffset, float dt){
     // Calculate pitch
     pitch += yoffset * cameraSpeed;
     // Calculate Angle Arround
+	//cuando queremos dar la vuelta completamente no podemos por eso los rangos
     angleAroundTarget -= xoffset * cameraSpeed;
     if(pitch > M_PI / 2)
         pitch = M_PI / 2 - 0.01;
@@ -26,6 +27,7 @@ void ThirdPersonCamera::mouseMoveCamera(float xoffset, float yoffset, float dt){
     updateCamera();
 }
 
+//scrooll
 void ThirdPersonCamera::scrollMoveCamera(float soffset, float dt){
     // Camera controls
     float cameraSpeed = sensitivity * dt;
@@ -33,6 +35,7 @@ void ThirdPersonCamera::scrollMoveCamera(float soffset, float dt){
     float zoomLevel = soffset * cameraSpeed;
     distanceFromTarget -= zoomLevel;
     updateCamera();
+	
 }
 
 void ThirdPersonCamera::updateCamera(){
@@ -42,15 +45,16 @@ void ThirdPersonCamera::updateCamera(){
     float verticalDistance = distanceFromTarget * sin(pitch);
 
     //Calculate camera position
-    float theta = angleTarget + angleAroundTarget;
-    float offsetx = horizontalDistance * sin(theta);
-    float offsetz = horizontalDistance * cos(theta);
+    float theta = angleTarget + angleAroundTarget;// si mi camara apunta hacia delante se debe mover en esa camara
+    float offsetx = horizontalDistance * sin(theta);//
+    float offsetz = horizontalDistance * cos(theta);//
     position.x = cameraTarget.x - offsetx;
     position.z = cameraTarget.z - offsetz;
     position.y = cameraTarget.y + verticalDistance;
 
+	//angulo de yaw, 
     yaw = angleTarget - (180 + angleAroundTarget);
-
+	//para cuadno se de la vuelta
     if (distanceFromTarget < 0)
     	front = glm::normalize(position - cameraTarget);
     else
