@@ -56,11 +56,7 @@ Shader shaderMulLighting;
 Shader shaderTerrain;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
-<<<<<<< HEAD
 //std::shared_ptr<Camera> camera2(new FirstPersonCamera());
-=======
-std::shared_ptr<Camera> camera2(new FirstPersonCamera());
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 
 
 float distanceFromTarget = 7.0;
@@ -323,14 +319,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
 
-<<<<<<< HEAD
 	
-=======
-	camera2->setPosition(glm::vec3(0.0, 0.0, 0.0));
-	camera2->setDistanceFromTarget(distanceFromTarget);
-	camera2->setSensitivity(1.0);
-
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 	// Definimos el tamanio de la imagen
 	int imageWidth, imageHeight;
 	FIBITMAP *bitmap;
@@ -811,20 +800,12 @@ bool processInput(bool continueApplication) {
 	}
 
 
-<<<<<<< HEAD
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-=======
-	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 		camera->mouseMoveCamera(0.0, offsetY, deltaTime);
 	offsetX = 0;
 	offsetY = 0;
-
-	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
-
-	}
 
 	// Seleccionar modelo
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
@@ -839,12 +820,9 @@ bool processInput(bool continueApplication) {
 			fileName = "../animaciones/animation_dart.txt";
 		std::cout << "modelSelected:" << modelSelected << std::endl;
 	}
-<<<<<<< HEAD
 	else if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) {
 		enableCountSelected = true;
 	}
-=======
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 	//if (glfwGetKey(window, GLFW_KEY_8) == GLFW_RELEASE)
 		//op = 1;
 
@@ -943,7 +921,6 @@ bool processInput(bool continueApplication) {
 	// Cawboy animate model movements
 	if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		modelMatrixCawboy = glm::rotate(modelMatrixCawboy, glm::radians(1.0f), glm::vec3(0, 1, 0));
-<<<<<<< HEAD
 
 	}
 	else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -956,20 +933,6 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(0, 0, -0.02));
 
-=======
-		
-	}
-	else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		modelMatrixCawboy = glm::rotate(modelMatrixCawboy, glm::radians(-1.0f), glm::vec3(0, 1, 0));
-		
-	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(0, 0, 0.02));
-		
-	}
-	else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(0, 0, -0.02));
-		
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 	}
 
 	glfwPollEvents();
@@ -997,11 +960,7 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
-<<<<<<< HEAD
 	modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(-6.0f, 0.0f, -6.0f));
-=======
-	modelMatrixCawboy = glm::translate(modelMatrixCawboy , glm::vec3(-6.0f, 0.0f, -6.0f));
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -1012,11 +971,7 @@ void applicationLoop() {
 
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
-<<<<<<< HEAD
 		if (currTime - lastTime < 0.016666667) {//colocar 1/30 para 60 frames
-=======
-		if(currTime - lastTime < 0.016666667){//colocar 1/30 para 60 frames
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 			glfwPollEvents();
 			continue;
 		}
@@ -1043,25 +998,15 @@ void applicationLoop() {
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixCawboy));//angulo
 			target = modelMatrixCawboy[3];//posicion del cawboy
 		}
-<<<<<<< HEAD
 		else {
-=======
-		else{
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
 			target = modelMatrixMayow[3];
 		}
 
-<<<<<<< HEAD
 		if (std::isnan(angleTarget))//para ver que si sea un numero
 			angleTarget = 0.0;//para que no se pierda
 		if (axis.y < 0)//para ver si el signo del eje y es negativo 
-=======
-		if(std::isnan(angleTarget))//para ver que si sea un numero
-			angleTarget = 0.0;//para que no se pierda
-		if(axis.y < 0)//para ver si el signo del eje y es negativo 
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 			angleTarget = -angleTarget;
 		if (modelSelected == 1)
 			angleTarget -= glm::radians(90.0f);
@@ -1069,19 +1014,9 @@ void applicationLoop() {
 		camera->setAngleTarget(angleTarget);//para ver la orientacion
 		camera->updateCamera();//actualizamos la camara para todos los vectores necesarios, poruqe 
 
-<<<<<<< HEAD
 		view = camera->getViewMatrix();
 		
 
-=======
-		if (op == 0) {
-			view = camera->getViewMatrix();
-		}
-		else {
-			view = camera2->getViewMatrix();
-		}
-		
->>>>>>> 4099b5e5763a1e781312f70edb2c7a3d418bf765
 
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
