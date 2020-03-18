@@ -43,6 +43,9 @@
 int screenWidth;
 int screenHeight;
 
+//Variable para cambiar la animación
+int varIndexAnimacion;
+
 GLFWwindow *window;
 
 Shader shader;
@@ -82,11 +85,21 @@ Model modelDartLegoRightLeg;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+//Dragonait
+Model dragonaitModelAnimate;
+//Garchomp
+Model garchompModelAnimate;
+//Cawboy
+Model cawboyModelAnimate;
+
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+//Aqui instanciamos las diferentes alturas de los terrenos
+Terrain terrain(-1, -1, 200, 8, "../Textures/pruebaTerreno4.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
-GLuint textureTerrainBackgroundID; //, textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
+/*Creamosl os identificadores de la textura, el back ground, r -> red  g es de green, 
+*/
+GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
 GLuint skyboxTextureID;
 
 GLenum types[6] = {
@@ -115,6 +128,9 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixCawboy = glm::mat4(1.0f);
+glm::mat4 modelMatrixGarchomp = glm::mat4(1.0f);
+glm::mat4 modelMatrixDragonait = glm::mat4(1.0f);
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
@@ -278,6 +294,18 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	//cawboy
+	cawboyModelAnimate.loadModel("../models/cowboy/Character Running.fbx");
+	cawboyModelAnimate.setShader(&shaderMulLighting);
+
+	//Garchomp
+	garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
+	garchompModelAnimate.setShader(&shaderMulLighting);
+
+	//Dragonait
+	dragonaitModelAnimate.loadModel("../models/dragonait/practica2_2.fbx");
+	dragonaitModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -470,7 +498,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureLandingPad.freeImage(bitmap);
 
-	// Definiendo la textura a utilizar
+	// Definiendo la textura a utilizar de fondo
 	Texture textureTerrainBackground("../Textures/grassy2.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
@@ -502,8 +530,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBackground.freeImage(bitmap);
 
-	/*// Definiendo la textura a utilizar
-	Texture textureTerrainR("../Textures/mud.png");
+	// Definiendo la textura a utilizar rojo
+	Texture textureTerrainR("../Textures/Tierra_3.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainR.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -532,10 +560,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	} else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
-	textureTerrainR.freeImage(bitmap);*/
+	textureTerrainR.freeImage(bitmap);
 
-	/*// Definiendo la textura a utilizar
-	Texture textureTerrainG("../Textures/grassFlowers.png");
+	// Definiendo la textura a utilizar verde
+	Texture textureTerrainG("../Textures/Hojas_2.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainG.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -564,10 +592,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	} else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
-	textureTerrainG.freeImage(bitmap);*/
+	textureTerrainG.freeImage(bitmap);
 
-	/*// Definiendo la textura a utilizar
-	Texture textureTerrainB("../Textures/path.png");
+	// Definiendo la textura a utilizar blue 
+	Texture textureTerrainB("../Textures/piedras_rio.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainB.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -596,10 +624,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	} else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
-	textureTerrainB.freeImage(bitmap);*/
+	textureTerrainB.freeImage(bitmap);
 
-	/*// Definiendo la textura a utilizar
-	Texture textureTerrainBlendMap("../Textures/blendMap.png");
+	// Definiendo la textura a utilizar
+	Texture textureTerrainBlendMap("../Textures/m4.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBlendMap.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -628,7 +656,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	} else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
-	textureTerrainBlendMap.freeImage(bitmap);*/
+	textureTerrainBlendMap.freeImage(bitmap);
 }
 
 void destroy() {
@@ -673,8 +701,12 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	cawboyModelAnimate.destroy();
+	garchompModelAnimate.destroy();
+	dragonaitModelAnimate.destroy();
 
 	// Textures Delete
+	//liberamos memoria, para que la compu recicle la memoria siempre que usemos textura hay que liberar memoria
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &textureCespedID);
 	glDeleteTextures(1, &textureWallID);
@@ -682,10 +714,10 @@ void destroy() {
 	glDeleteTextures(1, &textureHighwayID);
 	glDeleteTextures(1, &textureLandingPadID);
 	glDeleteTextures(1, &textureTerrainBackgroundID);
-	/*glDeleteTextures(1, &textureTerrainRID);
+	glDeleteTextures(1, &textureTerrainRID);
 	glDeleteTextures(1, &textureTerrainGID);
 	glDeleteTextures(1, &textureTerrainBID);
-	glDeleteTextures(1, &textureTerrainBlendMapID);*/
+	glDeleteTextures(1, &textureTerrainBlendMapID);
 
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -736,6 +768,13 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
+	}
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+
+		varIndexAnimacion = 1;
+	}
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+		varIndexAnimacion = 0;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -861,6 +900,13 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
+	modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(-8.0, 0.0, 5));
+
+	modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(-8.0, 0.0, 8));
+
+	modelMatrixDragonait = glm::translate(modelMatrixDragonait, glm::vec3(15.0f, 0.0, -5.0f));
+	modelMatrixDragonait = glm::rotate(modelMatrixDragonait, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
 	keyFramesDartJoints = getKeyRotFrames(fileName);
@@ -948,22 +994,23 @@ void applicationLoop() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID);
 		shaderTerrain.setInt("backgroundTexture", 0);
-		/*// Se activa la textura de tierra
+		// Se activa la textura de tierra
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
-		shaderTerrain.setInt("rTexture", 1);*/
-		/*// Se activa la textura de hierba
+		shaderTerrain.setInt("rTexture", 1);
+		// Se activa la textura de flores
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
-		shaderTerrain.setInt("gTexture", 2);*/
-		/*// Se activa la textura del camino
-		glActiveTexture(GL_TEXTURE3);
+		shaderTerrain.setInt("gTexture", 2);
+		// Se activa la textura del camino
+		glActiveTexture(GL_TEXTURE3);// los numeros tres deben correspondergl_texture y el 3
 		glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
-		shaderTerrain.setInt("bTexture", 3);*/
-		/*// Se activa la textura del blend map
+		shaderTerrain.setInt("bTexture", 3);
+		// Se activa la textura del blend map
 		glActiveTexture(GL_TEXTURE4);
+		//identificador del blend map
 		glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID);
-		shaderTerrain.setInt("blendMapTexture", 4);*/
+		shaderTerrain.setInt("blendMapTexture", 4);// tiene que ser igual al nombre que le pones en el shader
 		shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(40, 40)));
 		terrain.render();
 		shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
@@ -1072,6 +1119,27 @@ void applicationLoop() {
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.setAnimationIndex(0);
 		mayowModelAnimate.render(modelMatrixMayowBody);
+
+		//Cawboy
+		modelMatrixCawboy[3][1] = terrain.getHeightTerrain(modelMatrixCawboy[3][0], modelMatrixCawboy[3][2]);
+		glm::mat4 cawboyModel = glm::mat4(modelMatrixCawboy);
+		cawboyModel = glm::scale(cawboyModel, glm::vec3(0.002, 0.002, 0.002));
+		cawboyModelAnimate.setAnimationIndex(0);
+		cawboyModelAnimate.render(cawboyModel);
+
+		//Garchomp
+		modelMatrixGarchomp[3][1] = terrain.getHeightTerrain(modelMatrixGarchomp[3][0], modelMatrixGarchomp[3][2]);
+		glm::mat4 garchompModel = glm::mat4(modelMatrixGarchomp);
+		garchompModel = glm::scale(garchompModel, glm::vec3(0.006, 0.006, 0.006));
+		garchompModelAnimate.setAnimationIndex(varIndexAnimacion);
+		garchompModelAnimate.render(garchompModel);
+
+		//Dragonait
+		modelMatrixDragonait[3][1] = terrain.getHeightTerrain(modelMatrixDragonait[3][0], modelMatrixDragonait[3][2]);
+		glm::mat4 dragonaitModel = glm::mat4(modelMatrixDragonait);
+		dragonaitModel = glm::scale(dragonaitModel, glm::vec3(0.009, 0.009, 0.009));
+		dragonaitModelAnimate.setAnimationIndex(0);
+		dragonaitModelAnimate.render(dragonaitModel);
 
 		/*******************************************
 		 * Skybox
