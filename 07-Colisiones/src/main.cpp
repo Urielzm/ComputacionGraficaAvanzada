@@ -93,6 +93,8 @@ Model modelLampPost2;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+//Model animate nano souit
+Model nanosuitModel;
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
 
@@ -126,6 +128,8 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixNanosuit = glm::mat4(1.0f);
+
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -320,6 +324,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	//nanosuit
+	nanosuitModel.loadModel("../models/nanosuit/nanosuit.obj");
+	nanosuitModel.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -719,6 +727,7 @@ void destroy() {
 	modelLamp1.destroy();
 	modelLamp2.destroy();
 	modelLampPost2.destroy();
+	nanosuitModel.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -803,7 +812,7 @@ bool processInput(bool continueApplication) {
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
 		enableCountSelected = false;
 		modelSelected++;
-		if(modelSelected > 2)
+		if(modelSelected > 4)
 			modelSelected = 0;
 		if(modelSelected == 1)
 			fileName = "../animaciones/animation_dart_joints.txt";
@@ -887,21 +896,31 @@ bool processInput(bool continueApplication) {
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(-0.02, 0.0, 0.0));
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
+		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));	
 
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+	if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
 		animationIndex = 0;
 	}
+
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		modelMatrixLambo = glm::rotate(modelMatrixLambo, glm::radians(1.0f), glm::vec3(0, 1, 0));
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		modelMatrixLambo = glm::rotate(modelMatrixLambo, -glm::radians(1.0f), glm::vec3(0, 1, 0));
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0.0, 0.0, 0.02));
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0.02, 0.0, -0.02));
+
 
 	glfwPollEvents();
 	return continueApplication;
@@ -927,6 +946,9 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	modelMatrixNanosuit = glm::translate(modelMatrixNanosuit, glm::vec3(13.0f, 0.05f, 10.0f));
+	modelMatrixNanosuit = glm::rotate(modelMatrixNanosuit, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -957,15 +979,20 @@ void applicationLoop() {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 				(float) screenWidth / (float) screenHeight, 0.01f, 100.0f);
 
-		if(modelSelected == 1){
+		if(modelSelected == 1 || modelSelected==2){
 			axis = glm::axis(glm::quat_cast(modelMatrixDart));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixDart));
 			target = modelMatrixDart[3];
 		}
-		else{
+		else if(modelSelected==3){
 			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
 			target = modelMatrixMayow[3];
+		}
+		else if (modelSelected == 4) {
+			axis = glm::axis(glm::quat_cast(modelMatrixLambo));
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixLambo));
+			target = modelMatrixLambo[3];
 		}
 
 		if(std::isnan(angleTarget))
@@ -1188,7 +1215,10 @@ void applicationLoop() {
 			modelLampPost2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
 			modelLampPost2.render();
 		}
-
+		modelMatrixNanosuit[3][1] = terrain.getHeightTerrain(modelMatrixNanosuit[3][0], modelMatrixNanosuit[3][2]);
+		glm::mat4 modelMatrixNanosuitBody = glm::mat4(modelMatrixNanosuit);
+		modelMatrixNanosuitBody=glm::scale(modelMatrixNanosuitBody, glm::vec3(0.15,0.15,0.15));
+		nanosuitModel.render(modelMatrixNanosuitBody);
 		// Dart lego
 		// Se deshabilita el cull faces IMPORTANTE para la capa
 		glDisable(GL_CULL_FACE);
@@ -1297,6 +1327,20 @@ void applicationLoop() {
 		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
 
+		//collider de lambo
+		// El objetivo es crear un objeto de tipo collider AbstractModel::OBB, el cual tiene las propiedades siguientes:
+		// c: Centro de la caja, e: Medias dimensiones de las aritas, u: OrientaciÃ³n en forma de quaternion.
+		glm::mat4 modelMatrixColliderLambo = glm::mat4(modelMatrixLambo);
+		AbstractModel::OBB lamboCollider;
+		lamboCollider.u = glm::quat_cast(modelMatrixLambo);
+		modelMatrixColliderLambo[3][1] = terrain.getHeightTerrain(modelMatrixColliderLambo[3][0], modelMatrixColliderLambo[3][2]);
+		modelMatrixColliderLambo = glm::scale(modelMatrixColliderLambo, glm::vec3(1.3, 1.3, 1.3));
+		modelMatrixColliderLambo = glm::translate(modelMatrixColliderLambo, modelLambo.getObb().c);
+		lamboCollider.c = glm::vec3(modelMatrixColliderLambo[3]);
+		lamboCollider.e = modelLambo.getObb().e*glm::vec3(1.3, 1.3, 1.3);
+		// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix TranformaciÃ³n Original
+		addOrUpdateColliders(collidersOBB, "lambo", lamboCollider, modelMatrixLambo);
+
 		//Collider del la rock
 		AbstractModel::SBB rockCollider;
 		glm::mat4 modelMatrixColliderRock= glm::mat4(matrixModelRock);
@@ -1340,6 +1384,21 @@ void applicationLoop() {
 			std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) = lampCollider;
 		}
 
+		//collider del Nanosuit
+		AbstractModel::SBB nanosuitCollider;
+		//Heredamos de la matriz que tiene escalacion 
+		glm::mat4 modelMatrixColliderNanosuit= glm::mat4(modelMatrixNanosuit);
+		modelMatrixColliderNanosuit = glm::scale(modelMatrixColliderNanosuit, glm::vec3(0.15, 0.15, 0.15));
+		//trasladamos el modelo al centro de la esfera
+		modelMatrixColliderNanosuit = glm::translate(modelMatrixColliderNanosuit, nanosuitModel.getSbb().c);
+		nanosuitCollider.c = glm::vec3(modelMatrixColliderNanosuit[3]);
+		//colocando el radio 
+		nanosuitCollider.ratio = nanosuitModel.getSbb().ratio*0.15;
+		//agregarlo a un vector para que sea iteractivo a un hashmap 
+		//se le pasa modelMatrixNanosuit para que no avence, para que se reinicie 
+		addOrUpdateColliders(collidersSBB, "nanosuit", nanosuitCollider, modelMatrixNanosuit);
+
+
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
 		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
@@ -1359,6 +1418,7 @@ void applicationLoop() {
 		/*******************************************
 		 * Render de colliders
 		 *******************************************/
+		//Aqui se dibuja la caja
 		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
@@ -1369,7 +1429,7 @@ void applicationLoop() {
 			boxCollider.enableWireMode();
 			boxCollider.render(matrixCollider);
 		}
-
+		//Aqui la esfera
 		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
