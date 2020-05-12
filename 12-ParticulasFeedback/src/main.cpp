@@ -187,7 +187,7 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
 		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
-		{"fire", glm::vec3(0.0, 0.0, 7.0)}
+		{"fire", glm::vec3(-10.0, 0.0, 5.0)}
 };
 
 double deltaTime;
@@ -200,6 +200,7 @@ GLuint nParticles = 8000;
 double currTimeParticlesAnimation, lastTimeParticlesAnimation;
 
 // Definition for the particle system fire
+// Declaracion de las particulas fuego
 GLuint initVelFire, startTimeFire;
 GLuint VAOParticlesFire;
 GLuint nParticlesFire = 2000;
@@ -207,7 +208,8 @@ GLuint posBuf[2], velBuf[2], age[2];
 GLuint particleArray[2];
 GLuint feedback[2];
 GLuint drawBuf = 1;
-float particleSize = 0.5, particleLifetime = 3.0;
+//tamanio de la particula y tiempo de vida
+float particleSize = 0.5, particleLifetime = 6.0;
 double currTimeParticlesAnimationFire, lastTimeParticlesAnimationFire;
 
 // Colliders
@@ -289,13 +291,16 @@ void initParticleBuffers() {
 	glBindVertexArray(0);
 }
 
+//inicializacion de los buffer de las particulas de fuego
 void initParticleBuffersFire() {
 	// Generate the buffers
-	glGenBuffers(2, posBuf);    // position buffers
+	glGenBuffers(2, posBuf);    // position buffers generar dos buffer para la posicion
 	glGenBuffers(2, velBuf);    // velocity buffers
-	glGenBuffers(2, age);       // age buffers
+	glGenBuffers(2, age);       // age buffers buffer para la edad de la particula
 
 	// Allocate space for all buffers
+	//se carga los datos de la particula en memoria, la transferencia de memoria será dinamica, los datos también
+	//Eso se indica con la bandera: GL_DYNAMIC_COPY
 	int size = nParticlesFire * sizeof(GLfloat);
 	glBindBuffer(GL_ARRAY_BUFFER, posBuf[0]);
 	glBufferData(GL_ARRAY_BUFFER, 3 * size, 0, GL_DYNAMIC_COPY);
@@ -311,6 +316,7 @@ void initParticleBuffersFire() {
 	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
 
 	// Fill the first age buffer
+	//Inicialización de la edad de la particula.
 	std::vector<GLfloat> initialAge(nParticlesFire);
 	float rate = particleLifetime / nParticlesFire;
 	for(unsigned int i = 0; i < nParticlesFire; i++ ) {
@@ -320,6 +326,7 @@ void initParticleBuffersFire() {
 	}
 	// Shuffle them for better looking results
 	//Random::shuffle(initialAge);
+	//Se mezclan aleatoriamente las particulas ------------Revisar posteriormente
 	auto rng = std::default_random_engine {};
 	std::shuffle(initialAge.begin(), initialAge.end(), rng);
 	glBindBuffer(GL_ARRAY_BUFFER, age[0]);
@@ -331,6 +338,7 @@ void initParticleBuffersFire() {
 	glGenVertexArrays(2, particleArray);
 
 	// Set up particle array 0
+	//Se configura los atributos de los vertices de las particulas.
 	glBindVertexArray(particleArray[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, posBuf[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -363,6 +371,7 @@ void initParticleBuffersFire() {
 	// Setup the feedback objects
 	glGenTransformFeedbacks(2, feedback);
 
+	//Se crean las transformaciones de la retroalimentación
 	// Transform feedback 0
 	glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[0]);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, posBuf[0]);
@@ -395,15 +404,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	if (bFullScreen)
 		window = glfwCreateWindow(width, height, strTitle.c_str(),
-				glfwGetPrimaryMonitor(), nullptr);
+			glfwGetPrimaryMonitor(), nullptr);
 	else
 		window = glfwCreateWindow(width, height, strTitle.c_str(), nullptr,
-				nullptr);
+			nullptr);
 
 	if (window == nullptr) {
 		std::cerr
-				<< "Error to create GLFW window, you can try download the last version of your video card that support OpenGL 3.3+"
-				<< std::endl;
+			<< "Error to create GLFW window, you can try download the last version of your video card that support OpenGL 3.3+"
+			<< std::endl;
 		destroy();
 		exit(-1);
 	}
@@ -438,7 +447,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderMulLighting.initialize("../Shaders/iluminacion_textura_animation_fog.vs", "../Shaders/multipleLights_fog.fs");
 	shaderTerrain.initialize("../Shaders/terrain_fog.vs", "../Shaders/terrain_fog.fs");
 	shaderParticlesFountain.initialize("../Shaders/particlesFountain.vs", "../Shaders/particlesFountain.fs");
-	shaderParticlesFire.initialize("../Shaders/particlesFire.vs", "../Shaders/particlesFire.fs", {"Position", "Velocity", "Age"});
+	//Creamos un shader para particulas de fuego {"Position", "Velocity", "Age"} variables que vamos a estar retroalimentando el programa
+	shaderParticlesFire.initialize("../Shaders/particlesFire.vs", "../Shaders/particlesFire.fs", { "Position", "Velocity", "Age" });
 
 	// Inicializacion de los objetos.
 	skyboxSphere.init();
@@ -548,11 +558,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		skyboxTexture = Texture(fileNames[i]);
 		FIBITMAP *bitmap = skyboxTexture.loadImage(true);
 		unsigned char *data = skyboxTexture.convertToData(bitmap, imageWidth,
-				imageHeight);
+			imageHeight);
 		if (data) {
 			glTexImage2D(types[i], 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		} else
+				GL_BGRA, GL_UNSIGNED_BYTE, data);
+		}
+		else
 			std::cout << "Failed to load texture" << std::endl;
 		skyboxTexture.freeImage(bitmap);
 	}
@@ -563,7 +574,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureCesped.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureCesped.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureCespedID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -581,10 +592,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureCesped.freeImage(bitmap);
@@ -595,7 +607,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureWall.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureWall.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureWallID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -613,10 +625,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureWall.freeImage(bitmap);
@@ -627,7 +640,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureWindow.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureWindow.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureWindowID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -645,10 +658,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureWindow.freeImage(bitmap);
@@ -659,7 +673,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureHighway.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureHighway.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureHighwayID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -677,10 +691,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureHighway.freeImage(bitmap);
@@ -691,7 +706,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureLandingPad.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureLandingPad.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureLandingPadID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -709,10 +724,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureLandingPad.freeImage(bitmap);
@@ -723,7 +739,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainBackground.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBackground.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBackgroundID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -741,10 +757,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBackground.freeImage(bitmap);
@@ -755,7 +772,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainR.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainR.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainRID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -773,10 +790,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainR.freeImage(bitmap);
@@ -787,7 +805,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainG.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainG.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainGID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -805,10 +823,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainG.freeImage(bitmap);
@@ -819,7 +838,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainB.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainB.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -837,10 +856,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainB.freeImage(bitmap);
@@ -851,7 +871,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainBlendMap.loadImage(true);
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBlendMap.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBlendMapID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -869,10 +889,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
@@ -917,16 +938,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	textureParticleFire.freeImage(bitmap);
 
+	//Se crean datos aleatorios en el plano xy para generar la posicion de las partiuculas.
 	std::uniform_real_distribution<float> distr01 = std::uniform_real_distribution<float>(0.0f, 1.0f);
 	std::mt19937 generator;
 	std::random_device rd;
 	generator.seed(rd());
 	int size = nParticlesFire * 2;
 	std::vector<GLfloat> randData(size);
-	for( int i = 0; i < randData.size(); i++ ) {
+	for (int i = 0; i < randData.size(); i++) {
 		randData[i] = distr01(generator);
 	}
-
+	//De datos aleatorios se guardan en forma de una textura.
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_1D, texId);
 	glTexStorage1D(GL_TEXTURE_1D, 1, GL_R32F, size);
@@ -934,14 +956,24 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	//Configurar el comportamiento de las particulas
+	//paso 1: conciste en calcular la posicion, velocidad y edad.
+	//paso 2: Dibujar las particulas
 	shaderParticlesFire.setInt("Pass", 1);
+	//Unidad de textura 
 	shaderParticlesFire.setInt("ParticleTex", 0);
+	//Unidad de textura de las posiciones aleatorias
 	shaderParticlesFire.setInt("RandomTex", 1);
+	//Ciclo de vida de la particuala  3 segundos
 	shaderParticlesFire.setFloat("ParticleLifetime", particleLifetime);
+	//Tamanio que va a tener la particula
 	shaderParticlesFire.setFloat("ParticleSize", particleSize);
+	//Aceleracion de la particual
 	shaderParticlesFire.setVectorFloat3("Accel", glm::value_ptr(glm::vec3(0.0f,0.1f,0.0f)));
+	//Offset de la posicion en el eje y
 	shaderParticlesFire.setVectorFloat3("Emitter", glm::value_ptr(glm::vec3(0.0f)));
 
+	//Offset de velocidad 
 	glm::mat3 basis;
 	glm::vec3 u, v, n;
 	v = glm::vec3(0,1,0);
@@ -1680,17 +1712,23 @@ void applicationLoop() {
 				 * End Render particles systems
 				 */
 			}
+			//Renderizar el sistema de particulas de fuego
 			else if(it->second.first.compare("fire") == 0){
 				/**********
 				 * Init Render particles systems
 				 */
+				//Obtener el tiempo actual
 				lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
 				currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
 
+				//Actualizar la posicion, velocidad y edad del sistema de particulas (Pass = 1)
 				shaderParticlesFire.setInt("Pass", 1);
+				//El tiempo de animación del sistema de partiuculas 
 				shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+				//El incremento del tiempo DeltaT
 				shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
 
+				//Llamar al shader para actualizar los buffers Pass=1
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_1D, texId);
 				glEnable(GL_RASTERIZER_DISCARD);
@@ -1704,12 +1742,15 @@ void applicationLoop() {
 				glEndTransformFeedback();
 				glDisable(GL_RASTERIZER_DISCARD);
 
+				//Paso 2 Renderizar el sistema de particulas
 				shaderParticlesFire.setInt("Pass", 2);
+				//Enviar las transformaciones
 				glm::mat4 modelFireParticles = glm::mat4(1.0);
 				modelFireParticles = glm::translate(modelFireParticles, it->second.second);
 				modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
 				shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
+				//Estamos haciendo el render de las particulas
 				shaderParticlesFire.turnOn();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textureParticleFireID);

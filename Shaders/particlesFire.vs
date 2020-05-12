@@ -48,6 +48,7 @@ const vec2 texCoords[] = vec2[](vec2(0,0), vec2(1,0), vec2(1,1), vec2(0,0), vec2
 
 void main()
 {
+	//fase 1 - calculo de la posicion velocidad y edad
 	if(Pass == 1){
 		Age = VertexAge + DeltaT;
 
@@ -63,6 +64,7 @@ void main()
 	        Velocity = VertexVelocity + Accel * DeltaT;
 	    }
 	}
+	//Fse 2 - se renderiza la escena
 	else{
 		Transp = 0.0;
 	    if(VertexAge >= 0.0) {

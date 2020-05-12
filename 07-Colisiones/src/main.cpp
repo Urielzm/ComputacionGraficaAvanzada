@@ -911,15 +911,27 @@ bool processInput(bool continueApplication) {
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
 		animationIndex = 0;
 	}
-
-	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0,0,1.45));
 		modelMatrixLambo = glm::rotate(modelMatrixLambo, glm::radians(1.0f), glm::vec3(0, 1, 0));
-	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, -1.45));
+	}
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, -1.45));
 		modelMatrixLambo = glm::rotate(modelMatrixLambo, -glm::radians(1.0f), glm::vec3(0, 1, 0));
-	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, 1.45));
+	}
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, 1.45));
 		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0.0, 0.0, 0.02));
-	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, -1.45));
+	}
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, -1.45));
 		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0.02, 0.0, -0.02));
+		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, 1.45));
+	}
+		
 
 
 	glfwPollEvents();
@@ -1539,6 +1551,8 @@ void applicationLoop() {
 						modelMatrixMayow = std::get<1>(jt->second);
 					if (jt->first.compare("dart") == 0)
 						modelMatrixDart = std::get<1>(jt->second);
+					if (jt->first.compare("lambo") == 0)
+						modelMatrixLambo = std::get<1>(jt->second);
 				}
 			}
 		}

@@ -21,7 +21,7 @@ uniform int numBones;
 uniform vec2 scaleUV;
 uniform vec2 offsetX;
 
-uniform float density = 0.008;
+uniform float density = 0.05;
 uniform float gradient = 1.5;
 
 void main(){
@@ -47,6 +47,6 @@ void main(){
 	our_uv.x += offsetX.x;
 	our_uv.y += offsetX.y;
 	float distance = length(fragPosViewSpace);
-	visibility = exp(-pow((distance * density), gradient));
-	visibility = clamp(visibility, 0.0, 1.0);
+	visibility=exp(-pow((distance * density), gradient));
+	visibility =clamp(visibility, 0.0, 1.0);
 }

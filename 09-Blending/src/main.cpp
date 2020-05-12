@@ -95,8 +95,11 @@ Model modelGrass;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+//modelo Human
+Model modelGarchompAnimate;
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
@@ -128,6 +131,8 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixGarchomp = glm::mat4(1.0f);
+
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -173,7 +178,8 @@ std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
 std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"aircraft", glm::vec3(10.0, 0.0, -17.5)},
 		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
-		{"heli", glm::vec3(5.0, 10.0, -5.0)}
+		{"heli", glm::vec3(5.0, 10.0, -5.0)},
+		{"human", glm::vec3(13.0f, 128912.0, 5.0)}
 };
 
 double deltaTime;
@@ -245,8 +251,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);//activa la prueba de profundidad 
+	glEnable(GL_CULL_FACE);//prueba de recordte de caras ocultas, descarta geometrias que no se ven 
+	//con cull_face, para las geometrias que no vemos, cuando gira 
 
 	// Inicialización de los shaders
 	shader.initialize("../Shaders/colorShader.vs", "../Shaders/colorShader.fs");
@@ -327,12 +334,18 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelLampPost2.setShader(&shaderMulLighting);
 
 	//Grass
-	modelGrass.loadModel("../models/grass/grassModel.obj");
+	//modelGrass.loadModel("../models/grass/grassModel.obj");
+	modelGrass.loadModel("../models/grass/grassModel_solo.obj");
 	modelGrass.setShader(&shaderMulLighting);
 
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	//Garchomp
+	//modelGarchompAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
+	modelGarchompAnimate.loadModel("../models/Human/human_walking.fbx");
+	modelGarchompAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -733,9 +746,12 @@ void destroy() {
 	modelLamp2.destroy();
 	modelLampPost2.destroy();
 	modelGrass.destroy();
+	
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	//Garchomp
+	modelGarchompAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -817,7 +833,7 @@ bool processInput(bool continueApplication) {
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
 		enableCountSelected = false;
 		modelSelected++;
-		if(modelSelected > 2)
+		if(modelSelected > 4)
 			modelSelected = 0;
 		if(modelSelected == 1)
 			fileName = "../animaciones/animation_dart_joints.txt";
@@ -903,19 +919,32 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+	if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
 		animationIndex = 0;
 	}
+
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		modelMatrixGarchomp = glm::rotate(modelMatrixGarchomp, glm::radians(1.0f), glm::vec3(0, 1, 0));
+	}
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		modelMatrixGarchomp = glm::rotate(modelMatrixGarchomp, glm::radians(-1.0f), glm::vec3(0, 1, 0));
+	}if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(0, 0, 0.02));
+	}
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(0, 0, -0.02));
+	}
+
 
 	glfwPollEvents();
 	return continueApplication;
@@ -941,6 +970,9 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	//Garchomp
+	modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(13.0f, 128912.0, 5.0));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -971,15 +1003,20 @@ void applicationLoop() {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 				(float) screenWidth / (float) screenHeight, 0.01f, 100.0f);
 
-		if(modelSelected == 1){
+		if(modelSelected == 1 || modelSelected == 2){
 			axis = glm::axis(glm::quat_cast(modelMatrixDart));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixDart));
 			target = modelMatrixDart[3];
 		}
-		else{
+		else if( modelSelected == 3){
 			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
 			target = modelMatrixMayow[3];
+		}
+		else if (modelSelected == 4) {
+			axis = glm::axis(glm::quat_cast(modelMatrixGarchomp));
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixGarchomp));
+			target = modelMatrixGarchomp[3];
 		}
 
 		if(std::isnan(angleTarget))
@@ -1107,6 +1144,8 @@ void applicationLoop() {
 			shaderTerrain.setFloat("pointLights[" + std::to_string(lamp1Position.size() + i) + "].linear", 0.09);
 			shaderTerrain.setFloat("pointLights[" + std::to_string(lamp1Position.size() + i) + "].quadratic", 0.02);
 		}
+		glDepthFunc(GL_LESS);
+
 
 		/*******************************************
 		 * Terrain Cesped
@@ -1238,6 +1277,12 @@ void applicationLoop() {
 		mayowModelAnimate.setAnimationIndex(animationIndex);
 		mayowModelAnimate.render(modelMatrixMayowBody);
 
+		//Garchomp
+		modelMatrixGarchomp[3][1] = terrain.getHeightTerrain(modelMatrixGarchomp[3][0], modelMatrixGarchomp[3][2]);
+		glm::mat4 modelMatrixGarchompBody = glm::mat4(modelMatrixGarchomp);
+		modelMatrixGarchompBody = glm::scale(modelMatrixGarchompBody, glm::vec3(0.0125f, 0.0125f, 0.0125f));
+		modelGarchompAnimate.render(modelMatrixGarchompBody);
+
 		/*******************************************
 		 * Skybox
 		 *******************************************/
@@ -1263,6 +1308,8 @@ void applicationLoop() {
 		blendingUnsorted.find("lambo")->second = glm::vec3(modelMatrixLambo[3]);
 		// Update the helicopter
 		blendingUnsorted.find("heli")->second = glm::vec3(modelMatrixHeli[3]);
+		//Update the human
+		blendingUnsorted.find("human")->second = glm::vec3(modelMatrixGarchomp[3]);
 
 		/**********
 		 * Sorter with alpha objects
@@ -1278,7 +1325,9 @@ void applicationLoop() {
 		 * Render de las transparencias
 		 */
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendColor(1,0,1,1);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_CONSTANT_COLOR);
+		//glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_CONSTANT_COLOR);
 		glDisable(GL_CULL_FACE);
 		for(std::map<float, std::pair<std::string, glm::vec3> >::reverse_iterator it = blendingSorted.rbegin(); it != blendingSorted.rend(); it++){
 			if(it->second.first.compare("aircraft") == 0){
@@ -1317,6 +1366,14 @@ void applicationLoop() {
 				modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli, glm::vec3(0.0, 0.0, 0.249548));
 				modelHeliHeli.render(modelMatrixHeliHeli);
 			}
+			else if (it->second.first.compare("human") == 0) {
+				glm::mat4 modelMatrixGarchompBlend = glm::mat4(modelMatrixGarchomp);
+				modelMatrixGarchompBlend[3][1] = terrain.getHeightTerrain(modelMatrixGarchompBlend[3][0], 
+					modelMatrixGarchompBlend[3][2]);
+				modelMatrixGarchompBlend = glm::scale(modelMatrixGarchompBlend, glm::vec3(0.0125f, 0.0125f, 0.0125f));
+				modelGarchompAnimate.render(modelMatrixGarchompBlend);
+			}
+
 		}
 		glEnable(GL_CULL_FACE);
 
@@ -1409,6 +1466,25 @@ void applicationLoop() {
 		mayowCollider.e = mayowModelAnimate.getObb().e * glm::vec3(0.021, 0.021, 0.021) * glm::vec3(0.787401574, 0.787401574, 0.787401574);
 		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
 		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider, modelMatrixMayow);
+
+		// human collider
+		AbstractModel::OBB garchomCollider;
+		glm::mat4 modelMatrixColliderGarchomp = glm::mat4(modelMatrixGarchomp);
+		//obtener el quaternion antes de la transformación
+		garchomCollider.u = glm::quat_cast(modelMatrixGarchomp);
+		//realizar la transformnacion de 1 a 100
+		modelMatrixColliderGarchomp = glm::scale(modelMatrixColliderGarchomp, glm::vec3(100.0, 100.0, 100.0)* 
+			glm::vec3(0.0125f, 0.0125f, 0.0125f));
+		//modelMatrixColliderGarchomp = glm::scale(modelMatrixColliderGarchomp, glm::vec3(0.0125f, 0.0125f, 0.0125f));
+		//aplicar una transformación al centro de la caja, la matriz y el vector de traslación
+		//del modelo animado vamos a tener su orientación y su centro
+		modelMatrixColliderGarchomp = glm::translate(modelMatrixColliderGarchomp, modelGarchompAnimate.getObb().c);
+		//ahora colocamos sus dimensiones al collider a traves de 
+		garchomCollider.e = modelGarchompAnimate.getObb().e * glm::vec3(100.0, 100.0, 100.0)*glm::vec3(0.0125f, 0.0125f, 0.0125f);//Todo pendeitne
+		//ahora aplicamos al centro, con el elemento 3
+		garchomCollider.c = glm::vec3(modelMatrixColliderGarchomp[3]);
+		//lo agregamos a l elemnto de traslaciones
+		addOrUpdateColliders(collidersOBB, "Garchomp", garchomCollider, modelMatrixGarchomp);
 
 		/*******************************************
 		 * Render de colliders

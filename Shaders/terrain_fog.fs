@@ -125,5 +125,5 @@ vec3 calculateSpotLights(){
 void main()
 {
     color = vec4(calculateDirectionalLight(directionalLight.light, directionalLight.direction) + calculatePointLights() + calculateSpotLights(), 1.0);
-	color = mix(vec4(fogColor, 1.0), color, visibility);
+    color = mix(vec4(fogColor, 1.0), color, visibility);
 }

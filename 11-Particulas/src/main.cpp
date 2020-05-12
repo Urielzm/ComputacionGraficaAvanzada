@@ -134,6 +134,8 @@ glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
+//agregando otra fuente
+glm::mat4 modelMatrixFountain1 = glm::mat4(1.0f);
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -176,17 +178,23 @@ std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
 
 // Blending model unsorted
+//Agregar la posición a las particulas a los objetos con transparencia
 std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"aircraft", glm::vec3(10.0, 0.0, -17.5)},
 		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
-		{"fountain", glm::vec3(5.0, 0.0, -40.0)}
+		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
+		{"fountain2", glm::vec3(40.0, 0.0, -40.0)}
 };
 
 double deltaTime;
 double currTime, lastTime;
 
 // Definition for the particle system
+//Se crea el identificador para generar las velocidades  y el tiempo de inicio de las particulas
+//Se crea el VAO de la particula 
+//Definir el numero de particulas
+//Variables del tiempo de vida del sistema de partiucals
 GLuint initVel, startTime;
 GLuint VAOParticles;
 GLuint nParticles = 8000;
@@ -208,12 +216,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen);
 void destroy();
 bool processInput(bool continueApplication = true);
 
+//Metodo que inicializa el sistema de particulas
 void initParticleBuffers() {
 	// Generate the buffers
+	//Inicialización de los buffers 
 	glGenBuffers(1, &initVel);   // Initial velocity buffer
 	glGenBuffers(1, &startTime); // Start time buffer
 
 	// Allocate space for all buffers
+	//el tamaño del buffer = numero de particuals * 3 componentes (x, y, z) * tamaño de un flotante.
 	int size = nParticles * 3 * sizeof(float);
 	glBindBuffer(GL_ARRAY_BUFFER, initVel);
 	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
@@ -224,17 +235,23 @@ void initParticleBuffers() {
 	glm::vec3 v(0.0f);
 	float velocity, theta, phi;
 	GLfloat *data = new GLfloat[nParticles * 3];
+	//se llena el buffer con las velocidades, las cuales son aleatorias, pero con un patron de coordenadas esfericas
 	for (unsigned int i = 0; i < nParticles; i++) {
 
 		theta = glm::mix(0.0f, glm::pi<float>() / 6.0f, ((float)rand() / RAND_MAX));
 		phi = glm::mix(0.0f, glm::two_pi<float>(), ((float)rand() / RAND_MAX));
-
-		v.x = sinf(theta) * cosf(phi);
+		
+		//se genera la velocidad de la particula en coordenadas esfericas
+		/*v.x = sinf(theta) * cosf(phi);
 		v.y = cosf(theta);
 		v.z = sinf(theta) * sinf(phi);
 
 		velocity = glm::mix(0.6f, 0.8f, ((float)rand() / RAND_MAX));
-		v = glm::normalize(v) * velocity;
+		v = glm::normalize(v) * velocity;*/
+		//Nuevo comportamiento:
+		v.x = sinf(theta);
+		v.y = 0.8;
+		v.z = cosf(theta);
 
 		data[3 * i] = v.x;
 		data[3 * i + 1] = v.y;
@@ -248,6 +265,7 @@ void initParticleBuffers() {
 	data = new GLfloat[nParticles];
 	float time = 0.0f;
 	float rate = 0.00075f;
+	//cada particula va a iniciar en un determinado tiempo. 
 	for (unsigned int i = 0; i < nParticles; i++) {
 		data[i] = time;
 		time += rate;
@@ -1063,6 +1081,10 @@ void applicationLoop() {
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]) + 0.2;
 	modelMatrixFountain = glm::scale(modelMatrixFountain, glm::vec3(10.0f, 10.0f, 10.0f));
 
+	modelMatrixFountain1 = glm::translate(modelMatrixFountain1, glm::vec3(10.0, 0.0, -40.0));
+	modelMatrixFountain1[3][1] = terrain.getHeightTerrain(modelMatrixFountain1[3][0], modelMatrixFountain1[3][2]) + 0.2;
+	modelMatrixFountain1 = glm::scale(modelMatrixFountain1, glm::vec3(10.0f, 10.0f, 10.0f));
+
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
 	keyFramesDartJoints = getKeyRotFrames(fileName);
@@ -1464,7 +1486,7 @@ void applicationLoop() {
 				modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(modelMatrixParticlesFountain[3][0], modelMatrixParticlesFountain[3][2]) + 0.36 * 10.0;
 				modelMatrixParticlesFountain = glm::scale(modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
 				currTimeParticlesAnimation = TimeManager::Instance().GetTime();
-				if(currTimeParticlesAnimation - lastTimeParticlesAnimation > 10.0)
+				if(currTimeParticlesAnimation - lastTimeParticlesAnimation > 15.0)
 					lastTimeParticlesAnimation = currTimeParticlesAnimation;
 				//glDisable(GL_DEPTH_TEST);
 				glDepthMask(GL_FALSE);
@@ -1473,12 +1495,54 @@ void applicationLoop() {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
 				shaderParticlesFountain.turnOn();
+				//se coloca el tiempo de ejecucion del sistema de particulas. 0 - 10 segundos
 				shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
-				shaderParticlesFountain.setFloat("ParticleLifetime", 3.5f);
+				//se coloca el tiempo maximo de la paricula, en este caso el tiempo es 3.5 segundos
+				shaderParticlesFountain.setFloat("ParticleLifetime", 5.0f);
 				shaderParticlesFountain.setInt("ParticleTex", 0);
+				//se coloca la grabedad del sistema 
 				shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));
+				//Se coloca la matriz del modelo. 
 				shaderParticlesFountain.setMatrix4("model", 1, false, glm::value_ptr(modelMatrixParticlesFountain));
 				glBindVertexArray(VAOParticles);
+				//Como primitiva del sistema de particulas son puntos, cuantos puntos = nParticulas
+				glDrawArrays(GL_POINTS, 0, nParticles);
+				glDepthMask(GL_TRUE);
+				//glEnable(GL_DEPTH_TEST);
+				shaderParticlesFountain.turnOff();
+				/**********
+				 * End Render particles systems
+				 */
+			}
+			else if (it->second.first.compare("fountain2") == 0) {
+				/**********
+				 * Init Render particles systems
+				 */
+				glm::mat4 modelMatrixParticlesFountain = glm::mat4(1.0);
+				modelMatrixParticlesFountain = glm::translate(modelMatrixParticlesFountain, it->second.second);
+				modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(modelMatrixParticlesFountain[3][0], modelMatrixParticlesFountain[3][2]) + 0.36 * 10.0;
+				modelMatrixParticlesFountain = glm::scale(modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
+				currTimeParticlesAnimation = TimeManager::Instance().GetTime();
+				if (currTimeParticlesAnimation - lastTimeParticlesAnimation > 15.0)
+					lastTimeParticlesAnimation = currTimeParticlesAnimation;
+				//glDisable(GL_DEPTH_TEST);
+				glDepthMask(GL_FALSE);
+				// Set the point size
+				glPointSize(10.0f);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
+				shaderParticlesFountain.turnOn();
+				//se coloca el tiempo de ejecucion del sistema de particulas. 0 - 10 segundos
+				shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
+				//se coloca el tiempo maximo de la paricula, en este caso el tiempo es 3.5 segundos
+				shaderParticlesFountain.setFloat("ParticleLifetime", 2.0f);
+				shaderParticlesFountain.setInt("ParticleTex", 0);
+				//se coloca la grabedad del sistema 
+				shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));
+				//Se coloca la matriz del modelo. 
+				shaderParticlesFountain.setMatrix4("model", 1, false, glm::value_ptr(modelMatrixParticlesFountain));
+				glBindVertexArray(VAOParticles);
+				//Como primitiva del sistema de particulas son puntos, cuantos puntos = nParticulas
 				glDrawArrays(GL_POINTS, 0, nParticles);
 				glDepthMask(GL_TRUE);
 				//glEnable(GL_DEPTH_TEST);

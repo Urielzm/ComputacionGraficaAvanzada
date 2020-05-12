@@ -72,6 +72,9 @@ Model modelLamboFrontLeftWheel;
 Model modelLamboFrontRightWheel;
 Model modelLamboRearLeftWheel;
 Model modelLamboRearRightWheel;
+//FantasmaNivel3
+Model modelFantasma3;
+
 // Dart lego
 Model modelDartLegoBody;
 Model modelDartLegoHead;
@@ -91,6 +94,7 @@ Model dragonaitModelAnimate;
 Model garchompModelAnimate;
 //Cawboy
 Model cawboyModelAnimate;
+
 
 // Terrain model instance
 //Aqui instanciamos las diferentes alturas de los terrenos
@@ -131,6 +135,7 @@ glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixCawboy = glm::mat4(1.0f);
 glm::mat4 modelMatrixGarchomp = glm::mat4(1.0f);
 glm::mat4 modelMatrixDragonait = glm::mat4(1.0f);
+glm::mat4 modelMatrixlFantasma3 = glm::mat4(1.0f);
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
@@ -240,7 +245,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	skyboxSphere.setShader(&shaderSkybox);
 	skyboxSphere.setScale(glm::vec3(20.0f, 20.0f, 20.0f));
 
-	modelRock.loadModel("../models/rock/rock.obj");
+	//modelRock.loadModel("../models/rock/rock.obj");
+	//modelRock.loadModel("../models/Fantasma/Esqueleto1/Esqueleto1.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Torre/Pilar_de_castillo.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
+	modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 
 	modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
@@ -301,11 +311,16 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	//Garchomp
 	garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
+	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
 
 	//Dragonait
 	dragonaitModelAnimate.loadModel("../models/dragonait/practica2_2.fbx");
 	dragonaitModelAnimate.setShader(&shaderMulLighting);
+
+	//Fantasma3
+	modelFantasma3.loadModel("../models/Fantasma/Fantasma3/f1.obj");
+	modelFantasma3.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -698,12 +713,16 @@ void destroy() {
 	modelLamboRearRightWheel.destroy();
 	modelLamboRightDor.destroy();
 	modelRock.destroy();
+	//Fantasma3
+	modelFantasma3.destroy();
+	
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
 	cawboyModelAnimate.destroy();
 	garchompModelAnimate.destroy();
 	dragonaitModelAnimate.destroy();
+
 
 	// Textures Delete
 	//liberamos memoria, para que la compu recicle la memoria siempre que usemos textura hay que liberar memoria
@@ -888,6 +907,10 @@ void applicationLoop() {
 	bool psi = true;
 
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
+	
+	//Fantasma3
+	modelMatrixlFantasma3 = glm::translate(modelMatrixlFantasma3, glm::vec3(0.0, 0.0, 2.0));
+
 
 	modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 10.0, -5.0));
 
@@ -900,10 +923,13 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
+	//Cawboy
 	modelMatrixCawboy = glm::translate(modelMatrixCawboy, glm::vec3(-8.0, 0.0, 5));
 
+	//Garchomp
 	modelMatrixGarchomp = glm::translate(modelMatrixGarchomp, glm::vec3(-8.0, 0.0, 8));
 
+	//Dragonait
 	modelMatrixDragonait = glm::translate(modelMatrixDragonait, glm::vec3(15.0f, 0.0, -5.0f));
 	modelMatrixDragonait = glm::rotate(modelMatrixDragonait, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
@@ -1022,12 +1048,18 @@ void applicationLoop() {
 		//Rock render
 		matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
 		modelRock.render(matrixModelRock);
+
 		// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 		glActiveTexture(GL_TEXTURE0);
 
 		// Render for the aircraft model
 		modelMatrixAircraft[3][1] = terrain.getHeightTerrain(modelMatrixAircraft[3][0], modelMatrixAircraft[3][2]) + 2.0;
 		modelAircraft.render(modelMatrixAircraft);
+
+		//Render Fantasma 3
+		//Se agrega el 2 para ponerlo despegado del suelo
+		modelMatrixlFantasma3[3][1] = terrain.getHeightTerrain(modelMatrixlFantasma3[3][0], modelMatrixlFantasma3[3][2]) + 2.0;
+		modelFantasma3.render(modelMatrixlFantasma3);
 
 		// Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);

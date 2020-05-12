@@ -236,6 +236,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	skyboxSphere.setScale(glm::vec3(20.0f, 20.0f, 20.0f));
 
 	modelRock.loadModel("../models/rock/rock.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Zelda_sin_suelo.obj");
+	//modelRock.loadModel("../models/Human/human.obj");
 	modelRock.setShader(&shaderMulLighting);
 
 	modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
@@ -298,6 +300,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	//Dragonait
 	dragonaitModelAnimate.loadModel("../models/dragonait/practica2_2.fbx");
+	//dragonaitModelAnimate.loadModel("../models/Personaje_proyecto/source/Zelda.obj");
 	dragonaitModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
