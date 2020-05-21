@@ -448,7 +448,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Inicialización de los shaders
 	shader.initialize("../Shaders/colorShader.vs", "../Shaders/colorShader.fs");
 	shaderSkybox.initialize("../Shaders/skyBox.vs", "../Shaders/skyBox_fog.fs");
-	shaderMulLighting.initialize("../Shaders/iluminacion_textura_animation_fog.vs", "../Shaders/multipleLights_fog.fs");
+	shaderMulLighting.initialize("../Shaders/iluminacion_textura_animation_shadow.vs", "../Shaders/multipleLights_shadow.fs");
 	shaderTerrain.initialize("../Shaders/terrain_shadow.vs", "../Shaders/terrain_shadow.fs");
 	shaderParticlesFountain.initialize("../Shaders/particlesFountain.vs", "../Shaders/particlesFountain.fs");
 	shaderParticlesFire.initialize("../Shaders/particlesFire.vs", "../Shaders/particlesFire.fs", {"Position", "Velocity", "Age"});
@@ -987,15 +987,20 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	/*******************************************
 	 * Inicializacion del framebuffer para almacenar el buffer de profunidadad.
 	 *******************************************/
+
 	glGenFramebuffers(1, &depthMapFBO);//Genera un frame buffer
 	glGenTextures(1, &depthMap);//Genera una textura
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
 		SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//Configuración de filtering para minimizado y maximizado de texturas
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//Configuración del wrapping para que se repita vert y hor la textura
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//Configuración del wrapping para que se repita vert y hor la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);// Si las lineas sobrepasan las texturas de 1, se repiten las texturas
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);// Si las lineas sobrepasan las texturas de 1, se repiten las texturas
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor); //Hay que indicarle 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);// Se utiliza el framebuffer que se creó 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);//Se agrega textura 2D al frame buffer
 	glDrawBuffer(GL_NONE);//No queremos que se vea el buffer, No es un buffer de escritura ni lectura
@@ -1508,7 +1513,7 @@ void applicationLoop() {
 		 * Debug to view the texture view map
 		 *******************************************/
 		// reset viewport
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// render Depth map to quad for visual debugging
 		shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
 		shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
@@ -1517,22 +1522,22 @@ void applicationLoop() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-		boxViewDepth.render();
+		boxViewDepth.render();*/
 
 		/*******************************************
 		 * 2.- We render the normal objects
 		 *******************************************/
-		/*glViewport(0, 0, screenWidth, screenHeight);
+		glViewport(0, 0, screenWidth, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		prepareScene();
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		shaderMulLighting.setInt("shadowMap", 10);
-		shaderTerrain.setInt("shadowMap", 10);*/
+		shaderTerrain.setInt("shadowMap", 10);
 		/*******************************************
 		 * Skybox
 		 *******************************************/
-		/*GLint oldCullFaceMode;
+		GLint oldCullFaceMode;
 		GLint oldDepthFuncMode;
 		// deshabilita el modo del recorte de caras ocultas para ver las esfera desde adentro
 		glGetIntegerv(GL_CULL_FACE_MODE, &oldCullFaceMode);
@@ -1544,7 +1549,7 @@ void applicationLoop() {
 		skyboxSphere.render();
 		glCullFace(oldCullFaceMode);
 		glDepthFunc(oldDepthFuncMode);
-		renderScene();*/
+		renderScene();
 
 		/*******************************************
 		 * Creacion de colliders
