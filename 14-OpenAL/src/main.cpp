@@ -234,9 +234,12 @@ GLuint depthMap, depthMapFBO;
 
 /**********************
  * OpenAL config
+ * OpenAL funciona con un escuchante, un listener y un generador de sonido(gernera la fuen)
  */
 
 // OpenAL Defines
+//Definimos el numero de buffers que vamos a crear.
+//Para agregar una  cuarta, modificamos a 4.
 #define NUM_BUFFERS 4 //agregamos una 4 funete de audio, ponemos 4 en los dos
 #define NUM_SOURCES 4
 #define NUM_ENVIRONMENTS 1
@@ -254,10 +257,11 @@ ALfloat source1Vel[] = { 0.0, 0.0, 0.0 };
 ALfloat source2Pos[] = { 2.0, 0.0, 0.0 };
 ALfloat source2Vel[] = { 0.0, 0.0, 0.0 };
 //Source 3
+//Almacenamos la posicion y la velocidad del audio
 ALfloat source3Pos[] = { 0.0, 0.0, 0.0 };
 ALfloat source3Vel[] = { 0.0, 0.0, 0.0 };
 // Buffers
-ALuint buffer[NUM_BUFFERS];
+ALuint buffer[NUM_BUFFERS];//Arreglo de buffers, con el numero definido anteriormente
 ALuint source[NUM_SOURCES];
 ALuint environment[NUM_ENVIRONMENTS];
 // Configs
@@ -266,6 +270,7 @@ ALenum format;
 ALvoid *data;
 int ch;
 ALboolean loop;
+//Se agrega un true, por cada fuente.
 std::vector<bool> sourcesPlay = {true, true, true, true};
 
 // Se definen todos las funciones.
@@ -1074,6 +1079,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
 	buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
 	buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
+	//Creamos el buffer numero 3
 	buffer[3] = alutCreateBufferFromFile("../sounds/car_acel.wav");
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
@@ -1116,14 +1122,16 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcei(source[2], AL_LOOPING, AL_TRUE);
 	alSourcef(source[2], AL_MAX_DISTANCE, 500);
 
-
-	alSourcef(source[2], AL_PITCH, 1.0f);
-	alSourcef(source[2], AL_GAIN, 0.3f);
-	alSourcefv(source[2], AL_POSITION, source2Pos);
-	alSourcefv(source[2], AL_VELOCITY, source2Vel);
-	alSourcei(source[2], AL_BUFFER, buffer[2]);
-	alSourcei(source[2], AL_LOOPING, AL_TRUE);
-	alSourcef(source[2], AL_MAX_DISTANCE, 500);
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Así como la ganancia(de una señal, que tan fuerte se escucha)
+	//Cambiamos el indice del arreglo
+	alSourcef(source[3], AL_PITCH, 1.0f);//que tan rapido se reproduce el sonido
+	alSourcef(source[3], AL_GAIN, 1.0f);//ganancia, rango de 0 a 1, es decir 1, el volumen normal del audio
+	alSourcefv(source[3], AL_POSITION, source3Pos);//posicion de la fuente, cambia constantemente, con respeco al modelo
+	alSourcefv(source[3], AL_VELOCITY, source3Vel);//Velocidad, no se ocupa, pero hay que configurarla
+	alSourcei(source[3], AL_BUFFER, buffer[3]);//Buffer asosiado a esa fuente
+	alSourcei(source[3], AL_LOOPING, AL_TRUE);//Una vez que ya empezo a reproducir, si se va a repetir el sonido
+	alSourcef(source[3], AL_MAX_DISTANCE, 500);//Umbral, para saber que tanto nos alejamos, para que se escuche menos
 
 }
 
@@ -1366,16 +1374,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.1));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.1));
 		animationIndex = 0;
 	}
 
@@ -2015,6 +2023,14 @@ void applicationLoop() {
 		source2Pos[2] = modelMatrixDart[3].z;
 		alSourcefv(source[2], AL_POSITION, source2Pos);
 
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source3Pos[0] = modelMatrixLambo[3].x;
+		source3Pos[1] = modelMatrixLambo[3].y;
+		source3Pos[2] = modelMatrixLambo[3].z;
+		//Indicamos cual es la fuente de sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[3], AL_POSITION, source3Pos);
+
 		// Listener for the Thris person camera
 		listenerPos[0] = modelMatrixMayow[3].x;
 		listenerPos[1] = modelMatrixMayow[3].y;
@@ -2027,6 +2043,7 @@ void applicationLoop() {
 		listenerOri[0] = frontModel.x;
 		listenerOri[1] = frontModel.y;
 		listenerOri[2] = frontModel.z;
+		//En el caso de la canara en tercera persona tiene que ver hacia donde esta apuntando la camara.
 		listenerOri[3] = upModel.x;
 		listenerOri[4] = upModel.y;
 		listenerOri[5] = upModel.z;
@@ -2042,12 +2059,16 @@ void applicationLoop() {
 		listenerOri[3] = camera->getUp().x;
 		listenerOri[4] = camera->getUp().y;
 		listenerOri[5] = camera->getUp().z;*/
-		alListenerfv(AL_ORIENTATION, listenerOri);
 
+		//Se le tiene que configurar la camara con allistener
+		alListenerfv(AL_ORIENTATION, listenerOri);
+		//Vamos iterando sobre el arrreglo que creamos donde colocamos los true
+		//si es true, lo remplazas pro false y unicamente lo reproduce una vez
+		//Jugar con la logica por la colisión de un ibjeto
 		for(unsigned int i = 0; i < sourcesPlay.size(); i++){
 			if(sourcesPlay[i]){
 				sourcesPlay[i] = false;
-				alSourcePlay(source[i]);
+				alSourcePlay(source[i]);//el indice que queremos que reproduzca, 0,1,2,3, etc.
 			}
 		}
 	}
