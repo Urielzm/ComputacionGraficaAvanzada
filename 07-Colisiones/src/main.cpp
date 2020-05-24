@@ -167,6 +167,11 @@ float rotHelHelY = 0.0;
 int stateDoor = 0;
 float dorRotCount = 0.0;
 
+//variables de escala del Muro
+float escalaX = 10;
+float escalaY = 10;
+float escalaZ = 10;
+
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
 		24.41, 0, -34.57), glm::vec3(-10.15, 0, -54.10) };
@@ -742,6 +747,9 @@ void destroy() {
 	modelLamp2.destroy();
 	modelLampPost2.destroy();
 	nanosuitModel.destroy();
+	
+	//destruyendo objeto del muro
+	modelMuro.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -913,16 +921,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));	
 
 	if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.05));
 		animationIndex = 0;
 	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.05));
 		animationIndex = 0;
 	}
 	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -967,6 +975,10 @@ void applicationLoop() {
 	modelMatrixAircraft = glm::translate(modelMatrixAircraft, glm::vec3(10.0, 2.0, -17.5));
 
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(23.0, 0.0, 0.0));
+
+	//Modelo del muro
+	//Aquí y no importa porque más adelante se definira con respecto al mapa de alturas
+	modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 
@@ -1191,7 +1203,13 @@ void applicationLoop() {
 		modelMatrixAircraft[3][1] = terrain.getHeightTerrain(modelMatrixAircraft[3][0], modelMatrixAircraft[3][2]) + 2.0;
 		modelAircraft.render(modelMatrixAircraft);
 
-		// Helicopter
+		//Render del muro
+		glm::mat4 modelMatrixMuroBody = glm::mat4(modelMatrixMuro);
+		modelMatrixMuroBody[3][1] = terrain.getHeightTerrain(modelMatrixMuroBody[3][0], modelMatrixMuroBody[3][2]);
+		modelMatrixMuroBody = glm::scale(modelMatrixMuroBody, glm::vec3(escalaX, escalaY, escalaZ));
+		modelMuro.render(modelMatrixMuroBody);
+
+		// Render del Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
 		modelHeliChasis.render(modelMatrixHeliChasis);
 
@@ -1201,7 +1219,7 @@ void applicationLoop() {
 		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli, glm::vec3(0.0, 0.0, 0.249548));
 		modelHeliHeli.render(modelMatrixHeliHeli);
 
-		// Lambo car
+		// Render del Lambo
 		glDisable(GL_CULL_FACE);
 		glm::mat4 modelMatrixLamboChasis = glm::mat4(modelMatrixLambo);
 		modelMatrixLamboChasis[3][1] = terrain.getHeightTerrain(modelMatrixLamboChasis[3][0], modelMatrixLamboChasis[3][2]);
@@ -1241,10 +1259,13 @@ void applicationLoop() {
 			modelLampPost2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
 			modelLampPost2.render();
 		}
+
+		//Render del nanosuit
 		modelMatrixNanosuit[3][1] = terrain.getHeightTerrain(modelMatrixNanosuit[3][0], modelMatrixNanosuit[3][2]);
 		glm::mat4 modelMatrixNanosuitBody = glm::mat4(modelMatrixNanosuit);
 		modelMatrixNanosuitBody=glm::scale(modelMatrixNanosuitBody, glm::vec3(0.15,0.15,0.15));
 		nanosuitModel.render(modelMatrixNanosuitBody);
+
 		// Dart lego
 		// Se deshabilita el cull faces IMPORTANTE para la capa
 		glDisable(GL_CULL_FACE);
@@ -1366,6 +1387,19 @@ void applicationLoop() {
 		lamboCollider.e = modelLambo.getObb().e*glm::vec3(1.3, 1.3, 1.3);
 		// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix TranformaciÃ³n Original
 		addOrUpdateColliders(collidersOBB, "lambo", lamboCollider, modelMatrixLambo);
+
+		//Collider del muro
+		glm::mat4 modelMatrixColliderMuro = glm::mat4(modelMatrixMuro);
+		AbstractModel::OBB muroCollider;
+		muroCollider.u = glm::quat_cast(modelMatrixMuro);
+		modelMatrixColliderMuro[3][1] = terrain.getHeightTerrain(modelMatrixColliderMuro[3][0], modelMatrixColliderMuro[3][2]);
+		modelMatrixColliderMuro = glm::scale(modelMatrixColliderMuro, glm::vec3(escalaX, escalaY, escalaZ));
+		modelMatrixColliderMuro = glm::translate(modelMatrixColliderMuro, modelMuro.getObb().c);
+		muroCollider.c = glm::vec3(modelMatrixColliderMuro[3]);
+		muroCollider.e = modelMuro.getObb().e*glm::vec3(escalaX, escalaY, escalaZ);
+		// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix TranformaciÃ³n Original
+		addOrUpdateColliders(collidersOBB, "muro", muroCollider, modelMatrixMuro);
+
 
 		//Collider del la rock
 		AbstractModel::SBB rockCollider;
