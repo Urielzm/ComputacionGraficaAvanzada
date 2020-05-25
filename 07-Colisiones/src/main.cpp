@@ -174,9 +174,17 @@ float escalaZ = 10;
 
 //Muro posiciones
 //Vector de vectores de posicion
-std::vector<glm::vec3> muro1Position = { glm::vec3(10.0, 0.0, -12.0), glm::vec3(
-		5.0, 0.0, -12.0), glm::vec3(0.0, 0.0, -12.0) };
-std::vector<float> muro1Orientation = { 0.0, 0.0, 0.0 };
+std::vector<glm::vec3> muro1Position = {
+	glm::vec3(46.8, 0.0, -12.0),
+	glm::vec3(33.4, 0.0, -12.0),
+	glm::vec3(20, 0.0, -12.0),//Desplazando espacio 6.6 a la derecha, para la puerta
+	glm::vec3(0.0, 0.0, -12.0),//Muro central 
+	glm::vec3(-13.4, 0.0, -12.0),
+	glm::vec3(-26.8, 0.0, -12.0) 
+};
+
+//Vector de orientación de Muros
+std::vector<float> muro1Orientation = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -933,10 +941,10 @@ bool processInput(bool continueApplication) {
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.05));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.1));
 		animationIndex = 0;
 	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.05));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.1));
 		animationIndex = 0;
 	}
 	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -988,8 +996,12 @@ void applicationLoop() {
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
-	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	//rotate  viendolo de frente -90:  <--
+	//rotate  viendolo de frente -180:  ^
+	//rotate  viendolo de frente 90:  -->
+	//rotate  viendolo de frente 0:  v
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -30.0f));
+	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(0.0f), glm::vec3(0, 1, 0));
 
 	modelMatrixNanosuit = glm::translate(modelMatrixNanosuit, glm::vec3(13.0f, 0.05f, 10.0f));
 	modelMatrixNanosuit = glm::rotate(modelMatrixNanosuit, glm::radians(-90.0f), glm::vec3(0, 1, 0));
@@ -1426,7 +1438,7 @@ void applicationLoop() {
 		rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
 		addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
 
-		// Lamps1 colliders
+		// Muros1 colliders
 		for (int i = 0; i < muro1Position.size(); i++) {
 			AbstractModel::OBB muroCollider;
 			glm::mat4 modelMatrixCollidermuro = glm::mat4(1.0);
