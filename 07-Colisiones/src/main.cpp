@@ -172,6 +172,12 @@ float escalaX = 10;
 float escalaY = 10;
 float escalaZ = 10;
 
+//Muro posiciones
+//Vector de vectores de posicion
+std::vector<glm::vec3> muro1Position = { glm::vec3(10.0, 0.0, -12.0), glm::vec3(
+		5.0, 0.0, -12.0), glm::vec3(0.0, 0.0, -12.0) };
+std::vector<float> muro1Orientation = { 0.0, 0.0, 0.0 };
+
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
 		24.41, 0, -34.57), glm::vec3(-10.15, 0, -54.10) };
@@ -977,8 +983,8 @@ void applicationLoop() {
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(23.0, 0.0, 0.0));
 
 	//Modelo del muro
-	//Aquí y no importa porque más adelante se definira con respecto al mapa de alturas
-	modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
+	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
+	//modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 
@@ -1204,10 +1210,11 @@ void applicationLoop() {
 		modelAircraft.render(modelMatrixAircraft);
 
 		//Render del muro
-		glm::mat4 modelMatrixMuroBody = glm::mat4(modelMatrixMuro);
+		/*glm::mat4 modelMatrixMuroBody = glm::mat4(modelMatrixMuro);
 		modelMatrixMuroBody[3][1] = terrain.getHeightTerrain(modelMatrixMuroBody[3][0], modelMatrixMuroBody[3][2]);
 		modelMatrixMuroBody = glm::scale(modelMatrixMuroBody, glm::vec3(escalaX, escalaY, escalaZ));
-		modelMuro.render(modelMatrixMuroBody);
+		modelMuro.render(modelMatrixMuroBody);*/
+
 
 		// Render del Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
@@ -1238,6 +1245,15 @@ void applicationLoop() {
 		modelLamboRearRightWheel.render(modelMatrixLamboChasis);
 		// Se regresa el cull faces IMPORTANTE para las puertas
 		glEnable(GL_CULL_FACE);
+
+		//Render de las paredes del muro
+		for (int i = 0; i < muro1Position.size(); i++) {
+			muro1Position[i].y = terrain.getHeightTerrain(muro1Position[i].x, muro1Position[i].z);
+			modelMuro.setPosition(muro1Position[i]);
+			modelMuro.setScale(glm::vec3(escalaX, escalaY, escalaZ));
+			modelMuro.setOrientation(glm::vec3(0, muro1Orientation[i], 0));
+			modelMuro.render();
+		}
 
 		// Render the lamps
 		for (int i = 0; i < lamp1Position.size(); i++){
@@ -1389,7 +1405,7 @@ void applicationLoop() {
 		addOrUpdateColliders(collidersOBB, "lambo", lamboCollider, modelMatrixLambo);
 
 		//Collider del muro
-		glm::mat4 modelMatrixColliderMuro = glm::mat4(modelMatrixMuro);
+		/*glm::mat4 modelMatrixColliderMuro = glm::mat4(modelMatrixMuro);
 		AbstractModel::OBB muroCollider;
 		muroCollider.u = glm::quat_cast(modelMatrixMuro);
 		modelMatrixColliderMuro[3][1] = terrain.getHeightTerrain(modelMatrixColliderMuro[3][0], modelMatrixColliderMuro[3][2]);
@@ -1398,7 +1414,7 @@ void applicationLoop() {
 		muroCollider.c = glm::vec3(modelMatrixColliderMuro[3]);
 		muroCollider.e = modelMuro.getObb().e*glm::vec3(escalaX, escalaY, escalaZ);
 		// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix TranformaciÃ³n Original
-		addOrUpdateColliders(collidersOBB, "muro", muroCollider, modelMatrixMuro);
+		addOrUpdateColliders(collidersOBB, "muro", muroCollider, modelMatrixMuro);*/
 
 
 		//Collider del la rock
@@ -1409,6 +1425,23 @@ void applicationLoop() {
 		rockCollider.c = glm::vec3(modelMatrixColliderRock[3]);
 		rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
 		addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
+
+		// Lamps1 colliders
+		for (int i = 0; i < muro1Position.size(); i++) {
+			AbstractModel::OBB muroCollider;
+			glm::mat4 modelMatrixCollidermuro = glm::mat4(1.0);
+			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, muro1Position[i]);
+			modelMatrixCollidermuro = glm::rotate(modelMatrixCollidermuro, glm::radians(muro1Orientation[i]),
+				glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "muro1-" + std::to_string(i), muroCollider, modelMatrixCollidermuro);
+			// Set the orientation of collider before doing the scale
+			muroCollider.u = glm::quat_cast(modelMatrixCollidermuro);
+			modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, modelMuro.getObb().c);
+			muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
+			muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
+			std::get<0>(collidersOBB.find("muro1-" + std::to_string(i))->second) = muroCollider;
+		}
 
 		// Lamps1 colliders
 		for (int i = 0; i < lamp1Position.size(); i++){
