@@ -174,17 +174,80 @@ float escalaZ = 10;
 
 //Muro posiciones
 //Vector de vectores de posicion
+//Viendolo de frente X: Positiva -->
+//Viendolo de frente X: Negativa <--
 std::vector<glm::vec3> muro1Position = {
-	glm::vec3(46.8, 0.0, -12.0),
-	glm::vec3(33.4, 0.0, -12.0),
-	glm::vec3(20, 0.0, -12.0),//Desplazando espacio 6.6 a la derecha, para la puerta
-	glm::vec3(0.0, 0.0, -12.0),//Muro central 
-	glm::vec3(-13.4, 0.0, -12.0),
-	glm::vec3(-26.8, 0.0, -12.0) 
+	//Viendolo de frente
+
+	//Posiciones frontal
+	glm::vec3(80.4, 0.0, 50.0),
+	glm::vec3(67.0, 0.0, 50.0),
+	glm::vec3(53.6, 0.0, 50.0),
+	glm::vec3(40.2, 0.0, 50.0),
+	glm::vec3(26.8, 0.0, 50.0),
+	glm::vec3(13.4, 0.0, 50.0),
+	//glm::vec3(0.0, 0.0, 50.0),//Muro central --> Puerta
+	glm::vec3(-13.4, 0.0, 50.0),
+	glm::vec3(-26.8, 0.0, 50.0),
+	glm::vec3(-40.2, 0.0, 50.0),
+	glm::vec3(-53.6, 0.0, 50.0),
+	glm::vec3(-67.0, 0.0, 50.0),
+	glm::vec3(-80.4, 0.0, 50.0),
+
+	//Posiciones IZQUIERDA
+	glm::vec3(-84.8, 0.0, 43.0),
+	glm::vec3(-84.8, 0.0, 29.6),
+	glm::vec3(-84.8, 0.0, 16.2),
+	glm::vec3(-84.8, 0.0, 2.8),
+	glm::vec3(-84.8, 0.0, -10.6),
+	glm::vec3(-84.8, 0.0, -24.0),
+	glm::vec3(-84.8, 0.0, -37.4),
+	glm::vec3(-84.8, 0.0, -50.8),
+	glm::vec3(-84.8, 0.0, -64.2),
+	glm::vec3(-84.8, 0.0, -77.6),
+	glm::vec3(-84.8, 0.0, -91.0),
+
+	//Posiciones traceras
+	glm::vec3(-80.4, 0.0, -100.0),
+	glm::vec3(-67.0, 0.0, -100.0),
+	glm::vec3(-53.6, 0.0, -100.0),
+	glm::vec3(-40.2, 0.0, -100.0),
+	glm::vec3(-26.8, 0.0, -100.0),
+	glm::vec3(-13.4, 0.0, -100.0),
+	glm::vec3(0.0, 0.0, -100.0),//Muro central 
+	glm::vec3(13.4, 0.0, -100.0),
+	glm::vec3(26.8, 0.0, -100.0),
+	glm::vec3(40.2, 0.0, -100.0),
+	glm::vec3(53.6, 0.0, -100.0),
+	glm::vec3(67.0, 0.0, -100.0),
+	glm::vec3(80.4, 0.0, -100.0),
+	
+	//Posiciones DERECHA
+	glm::vec3(84.1, 0.0, -91.0),
+	glm::vec3(84.1, 0.0, -77.6),
+	glm::vec3(84.1, 0.0, -64.2),
+	glm::vec3(84.1, 0.0, -50.8),
+	glm::vec3(84.1, 0.0, -37.4),
+	glm::vec3(84.1, 0.0, -24.0),
+	glm::vec3(84.1, 0.0, -10.6),
+	glm::vec3(84.1, 0.0, 2.8),
+	glm::vec3(84.1, 0.0, 16.2),
+	glm::vec3(84.1, 0.0, 29.6),
+	glm::vec3(84.1, 0.0, 43.0)
 };
 
 //Vector de orientación de Muros
-std::vector<float> muro1Orientation = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+std::vector<float> muro1Orientation = {
+	//Viendolo de frente
+	//Orientaciones frontales:
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado IZQUIERDO
+	-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0,
+	//Orientacionestraceras
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado Derecho
+	90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90
+};
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
