@@ -250,7 +250,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Torre/Pilar_de_castillo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
-	modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
+	modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 
 	modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
@@ -312,6 +313,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Garchomp
 	garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
 	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
+	//garchompModelAnimate.loadModel("../models/Human/c1.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
 
 	//Dragonait
