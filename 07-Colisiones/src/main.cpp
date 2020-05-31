@@ -1308,7 +1308,8 @@ void applicationLoop() {
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp, lamp1Position[i]);
 			matrixAdjustLamp = glm::rotate(matrixAdjustLamp, glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
 			matrixAdjustLamp = glm::scale(matrixAdjustLamp, glm::vec3(1.0, 1.0, 1.0));
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0, 5.3585, 0));
+			//matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0, 5.3585, 0));
+			matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0.084333, 3.51245, 1.27987));
 			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
 			shaderMulLighting.setVectorFloat3("pointLights[" + std::to_string(i) + "].light.ambient", glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderMulLighting.setVectorFloat3("pointLights[" + std::to_string(i) + "].light.diffuse", glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
@@ -1476,8 +1477,8 @@ void applicationLoop() {
 			if (i < 3) {
 				lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x, lamp1Position[i].z);
 				modelLamp1.setPosition(lamp1Position[i]);
-				modelLamp1.setScale(glm::vec3(1.0, 1.0, 1.0));
-				modelLamp1.setOrientation(glm::vec3(15, lamp1Orientation[i], 0));
+				modelLamp1.setScale(glm::vec3(0.5, 0.5, 0.5));
+				modelLamp1.setOrientation(glm::vec3(0, lamp1Orientation[i], 0));
 				modelLamp1.render();
 			}
 			else {
@@ -1687,7 +1688,7 @@ void applicationLoop() {
 				addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i), lampCollider, modelMatrixColliderLamp);
 				// Set the orientation of collider before doing the scale
 				lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-				modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp, glm::vec3(1.0, 1.0, 1.0));
+				modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp, glm::vec3(0.5, 0.5, 0.5));
 				modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, modelLamp1.getObb().c);
 				lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
 				lampCollider.e = modelLamp1.getObb().e * glm::vec3(1.0, 1.0, 1.0);
