@@ -98,7 +98,8 @@ Model cawboyModelAnimate;
 
 // Terrain model instance
 //Aqui instanciamos las diferentes alturas de los terrenos
-Terrain terrain(-1, -1, 200, 8, "../Textures/pruebaTerreno4.png");
+//Terrain terrain(-1, -1, 200, 8, "../Textures/pruebaTerreno4.png");
+Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 /*Creamosl os identificadores de la textura, el back ground, r -> red  g es de green, 
@@ -311,9 +312,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	cawboyModelAnimate.setShader(&shaderMulLighting);
 
 	//Garchomp
-	garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
+	//garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
 	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
-	//garchompModelAnimate.loadModel("../models/Human/c1.fbx");
+	garchompModelAnimate.loadModel("../models/Human/c1.fbx");
+	//garchompModelAnimate.loadModel("../models/Explorador/Explorador.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
 
 	//Dragonait
@@ -644,7 +646,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainB.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBlendMap("../Textures/m4.png");
+	//Texture textureTerrainBlendMap("../Textures/m4.png");
+	Texture textureTerrainBlendMap("../Textures/p1.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBlendMap.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -944,8 +947,8 @@ void applicationLoop() {
 
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
-		if(currTime - lastTime < 0.016666667){
-			glfwPollEvents();
+		if(currTime - lastTime < 0.016666667){//1/0.016666=60.024
+			glfwPollEvents();//1/30=0.0333
 			continue;
 		}
 		lastTime = currTime;

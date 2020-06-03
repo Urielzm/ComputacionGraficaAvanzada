@@ -78,6 +78,8 @@ Model modelLamboRearLeftWheel;
 Model modelLamboRearRightWheel;
 //Modelo del muro
 Model modelMuro;
+//Modloe del laberinto
+Model modeloLaberinto;
 // Dart lego
 Model modelDartLegoBody;
 Model modelDartLegoHead;
@@ -99,6 +101,9 @@ Model modelAntorcha;
 Model mayowModelAnimate;
 //Model animate nano souit
 Model nanosuitModel;
+
+
+
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
 
@@ -137,6 +142,8 @@ glm::mat4 modelMatrixNanosuit = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuro = glm::mat4(1.0f);
 //Mtriz de la antorcha
 glm::mat4 modelMatrixAntorcha = glm::mat4(1.0f);
+//Matriz del laberinto
+glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
 
 
 int animationIndex = 1;
@@ -240,6 +247,16 @@ std::vector<glm::vec3> muro1Position = {
 	glm::vec3(84.1, 0.0, 43.0)
 };
 
+//Posiciones de laberinto
+std::vector<glm::vec3> laberintoPosition = {
+	glm::vec3(0.0, 0.0, 40.0),
+	glm::vec3(16, 0.0, 40.0)
+};
+//Vector de orientacion de los muros del laberinto
+std::vector<float> laberintoOrientation = {
+	0.0, 0.0
+};
+
 
 std::vector<glm::vec3> lamp1Position = {
 
@@ -323,7 +340,7 @@ std::vector<float> muro1Orientation = {
 	90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90
 };
 
-
+//Vector de orientacion de las lamparas
 std::vector<float> lamp1Orientation = {
 	//Orientación de las lamparas tipo1
 	-17.0, -82.67, 23.70,
@@ -499,11 +516,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
 
 	//Modelo del muro
-	modelMuro.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
+	modelMuro.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo2.obj");
 	modelMuro.setShader(&shaderMulLighting);
+	//Modelo del laberinto
+	modeloLaberinto.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo2.obj");
+	modeloLaberinto.setShader(&shaderMulLighting);
 
 	//Modelo de antocha
-	modelAntorcha.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
+	modelAntorcha.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha3.obj");
 	modelAntorcha.setShader(&shaderMulLighting);
 
 	//Lamp models
@@ -845,7 +865,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainB.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBlendMap("../Textures/blendMap.png");
+	//Texture textureTerrainBlendMap("../Textures/blendMap.png");
+	Texture textureTerrainBlendMap("../Textures/p2.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBlendMap.loadImage(true);
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1158,6 +1179,10 @@ void applicationLoop() {
 	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
 	//modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
 
+	//Modelo del laberinto
+	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
+	//modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(0.0, 0.0, 40.0));
+
 	//Modelo de la antorcha
 	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 52.0));
 	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 55.4));
@@ -1424,6 +1449,14 @@ void applicationLoop() {
 		modelMatrixMuroBody = glm::scale(modelMatrixMuroBody, glm::vec3(escalaX, escalaY, escalaZ));
 		modelMuro.render(modelMatrixMuroBody);*/
 
+		//Render del laberinto
+		/*glm::mat4 modelMatrixLaberintoBody = glm::mat4(modelMatrixLaberinto);
+		modelMatrixLaberintoBody[3][1] = terrain.getHeightTerrain(modelMatrixLaberintoBody[3][0], modelMatrixLaberintoBody[3][2]);
+		modelMatrixLaberintoBody = glm::scale(modelMatrixLaberintoBody, glm::vec3(1.0, 1.5, 1.0));
+		modeloLaberinto.render(modelMatrixLaberintoBody);*/
+
+		
+
 
 		// Render del Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
@@ -1463,6 +1496,16 @@ void applicationLoop() {
 			modelMuro.setOrientation(glm::vec3(0, muro1Orientation[i], 0));
 			modelMuro.render();
 		}
+
+		//Render de los muros del laberinto
+		for (int i = 0; i < laberintoPosition.size(); i++) {
+			laberintoPosition[i].y = terrain.getHeightTerrain(laberintoPosition[i].x, laberintoPosition[i].z);
+			modeloLaberinto.setPosition(laberintoPosition[i]);
+			modeloLaberinto.setScale(glm::vec3(1.0, 1.5, 1.0));
+			modeloLaberinto.setOrientation(glm::vec3(0, laberintoOrientation[i], 0));
+			modeloLaberinto.render();
+		}
+
 		//Render de las antorchas del muro
 		/*for (int i = 0; i < antorchasPosition.size(); i++) {
 			antorchasPosition[i].y = terrain.getHeightTerrain(antorchasPosition[i].x, antorchasPosition[i].z)+4.0;
@@ -1472,7 +1515,7 @@ void applicationLoop() {
 			modelAntorcha.render();
 		}*/
 
-		// Render the lamps
+		// Render de las lamparas y antorchas
 		for (int i = 0; i < lamp1Position.size(); i++){
 			if (i < 3) {
 				lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x, lamp1Position[i].z);
@@ -1675,6 +1718,22 @@ void applicationLoop() {
 			muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
 			muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
 			std::get<0>(collidersOBB.find("muro1-" + std::to_string(i))->second) = muroCollider;
+		}
+		// laberinto collider
+		for (int i = 0; i < laberintoPosition.size(); i++) {
+			AbstractModel::OBB laberintoCollider;
+			glm::mat4 modelMatrixColliderLaberinto = glm::mat4(1.0);
+			modelMatrixColliderLaberinto = glm::translate(modelMatrixColliderLaberinto, laberintoPosition[i]);
+			modelMatrixColliderLaberinto = glm::rotate(modelMatrixColliderLaberinto, glm::radians(laberintoOrientation[i]),
+				glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "laberinto1-" + std::to_string(i), laberintoCollider, modelMatrixColliderLaberinto);
+			// Set the orientation of collider before doing the scale
+			laberintoCollider.u = glm::quat_cast(modelMatrixColliderLaberinto);
+			modelMatrixColliderLaberinto = glm::scale(modelMatrixColliderLaberinto, glm::vec3(1.0, 1.5, 1.0));
+			modelMatrixColliderLaberinto = glm::translate(modelMatrixColliderLaberinto, modeloLaberinto.getObb().c);
+			laberintoCollider.c = glm::vec3(modelMatrixColliderLaberinto[3]);
+			laberintoCollider.e = modeloLaberinto.getObb().e * glm::vec3(1.0, 1.5, 1.0);
+			std::get<0>(collidersOBB.find("laberinto1-" + std::to_string(i))->second) = laberintoCollider;
 		}
 
 		// Lamps1 colliders
