@@ -899,10 +899,10 @@ bool processInput(bool continueApplication) {
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.2));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.2));
 		animationIndex = 0;
 	}
 
@@ -1456,7 +1456,8 @@ void applicationLoop() {
 				if (testSphereOBox(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
 					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+							<< jt->first << std::endl;//Colision de la esfera con el personaje
+					std::cout << "Hola" << std::endl;
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first, isCollision);
 				}

@@ -251,7 +251,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Torre/Pilar_de_castillo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
-	modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
+	modelRock.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 

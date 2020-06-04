@@ -184,10 +184,11 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 
 double deltaTime;
 double currTime, lastTime;
+bool dibujaRoca = true;
 
 // Colliders
-std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
-std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
+std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;//Collider de cajas
+std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;//Collider de esfera
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -926,10 +927,10 @@ bool processInput(bool continueApplication) {
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.2));
 		animationIndex = 0;
 	}else if (modelSelected == 3 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.2));
 		animationIndex = 0;
 	}
 
@@ -1182,8 +1183,11 @@ void applicationLoop() {
 		 * Custom objects obj
 		 *******************************************/
 		//Rock render
-		matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
-		modelRock.render(matrixModelRock);
+		if (dibujaRoca) {
+			matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
+			modelRock.render(matrixModelRock);
+		}
+		
 		// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 		glActiveTexture(GL_TEXTURE0);
 
@@ -1409,13 +1413,16 @@ void applicationLoop() {
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
 
 		//Collider del la rock
-		AbstractModel::SBB rockCollider;
-		glm::mat4 modelMatrixColliderRock= glm::mat4(matrixModelRock);
-		modelMatrixColliderRock = glm::scale(modelMatrixColliderRock, glm::vec3(1.0, 1.0, 1.0));
-		modelMatrixColliderRock = glm::translate(modelMatrixColliderRock, modelRock.getSbb().c);
-		rockCollider.c = glm::vec3(modelMatrixColliderRock[3]);
-		rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
-		addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
+		if (dibujaRoca) {
+			AbstractModel::SBB rockCollider;
+			glm::mat4 modelMatrixColliderRock = glm::mat4(matrixModelRock);
+			modelMatrixColliderRock = glm::scale(modelMatrixColliderRock, glm::vec3(1.0, 1.0, 1.0));
+			modelMatrixColliderRock = glm::translate(modelMatrixColliderRock, modelRock.getSbb().c);
+			rockCollider.c = glm::vec3(modelMatrixColliderRock[3]);
+			rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
+			addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
+		}
+		
 
 		// Lamps1 colliders
 		for (int i = 0; i < lamp1Position.size(); i++){
@@ -1500,15 +1507,18 @@ void applicationLoop() {
 			boxCollider.render(matrixCollider);
 		}
 
-		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		if (dibujaRoca) {
+			for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
-			matrixCollider = glm::scale(matrixCollider, glm::vec3(std::get<0>(it->second).ratio * 2.0f));
-			sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			sphereCollider.enableWireMode();
-			sphereCollider.render(matrixCollider);
+				glm::mat4 matrixCollider = glm::mat4(1.0);
+				matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
+				matrixCollider = glm::scale(matrixCollider, glm::vec3(std::get<0>(it->second).ratio * 2.0f));
+				sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+				sphereCollider.enableWireMode();
+				sphereCollider.render(matrixCollider);
+			}
 		}
+		
 
 		// Esto es para ilustrar la transformacion inversa de los coliders
 		/*glm::vec3 cinv = glm::inverse(mayowCollider.u) * glm::vec4(rockCollider.c, 1.0);
@@ -1569,19 +1579,17 @@ void applicationLoop() {
 			addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
 		}
 
-		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			bool isCollision = false;
-			std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.begin();
+		for (std::map<std::string,std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =collidersSBB.begin(); it != collidersSBB.end(); it++) {
+			bool isCollision = true;
+			std::map<std::string,std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =collidersOBB.begin();
+
 			for (; jt != collidersOBB.end(); jt++) {
-				if (testSphereOBox(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
-					isCollision = true;
+
+				if (testSphereOBox(std::get<0>(it->second),std::get<0>(jt->second))) {
+
+					std::cout << "Colision " << it->first << " with "<< jt->first << std::endl;//Esfera con el personaje
+					dibujaRoca = false;
+					isCollision = false;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first, isCollision);
 				}
 			}

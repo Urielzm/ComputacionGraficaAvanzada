@@ -3,6 +3,7 @@
 //glew include
 #include <GL/glew.h>
 
+
 //std includes
 #include <string>
 #include <iostream>
@@ -46,6 +47,7 @@
 
 int screenWidth;
 int screenHeight;
+bool dibujaJarron = true;
 
 GLFWwindow *window;
 
@@ -62,6 +64,7 @@ float distanceFromTarget = 7.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
+Box boxCollider2;
 Sphere sphereCollider(10, 10);
 
 // Models complex instances
@@ -80,6 +83,8 @@ Model modelLamboRearRightWheel;
 Model modelMuro;
 //Modloe del laberinto
 Model modeloLaberinto;
+//Model jarron
+Model modeloJarron;
 // Dart lego
 Model modelDartLegoBody;
 Model modelDartLegoHead;
@@ -101,8 +106,6 @@ Model modelAntorcha;
 Model mayowModelAnimate;
 //Model animate nano souit
 Model nanosuitModel;
-
-
 
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
@@ -130,7 +133,7 @@ bool exitApp = false;
 int lastMousePosX, offsetX = 0;
 int lastMousePosY, offsetY = 0;
 
-// Model matrix definitions
+// *******************************************Model matrix definitions************************************************
 glm::mat4 matrixModelRock = glm::mat4(1.0);
 glm::mat4 modelMatrixHeli = glm::mat4(1.0f);
 glm::mat4 modelMatrixLambo = glm::mat4(1.0);
@@ -144,6 +147,8 @@ glm::mat4 modelMatrixMuro = glm::mat4(1.0f);
 glm::mat4 modelMatrixAntorcha = glm::mat4(1.0f);
 //Matriz del laberinto
 glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
+//Matriz del jarron
+glm::mat4 modelMatrixJarron = glm::mat4(1.0f);
 
 
 int animationIndex = 1;
@@ -440,21 +445,40 @@ std::vector<float> lamp1Orientation = {
 
 // Lamps positions
 // 5 lamparas
-std::vector<glm::vec3> antorchasPosition = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
+/*std::vector<glm::vec3> antorchasPosition = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
 		24.41, 0, -34.57), glm::vec3(-10.15, 0, -54.10), glm::vec3(13.4, 0.0, 52.0) };
-std::vector<float> antorchasOrientation = { -17.0, -82.67, 23.70, 0.0 };
+std::vector<float> antorchasOrientation = { -17.0, -82.67, 23.70, 0.0 };*/
 
 std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 		glm::vec3(-52.73, 0, -3.90) };
 std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
-//Total hay 39 iluminaciones de pointlight
+
+//Vectores de posicion y orientacion de jarrones 
+std::vector<glm::vec3> jarronPosition = { 
+		glm::vec3(0.0, 0.0, 56.0),
+		glm::vec3(4.0, 0.0, 56.0),
+		glm::vec3(8.0, 0.0, 56.0),
+		glm::vec3(12.0, 0.0, 56.0),
+		glm::vec3(16.0, 0.0, 56.0),
+		glm::vec3(20.0, 0.0, 56.0)
+
+};
+//Vectores de orientacion de jarrones 
+std::vector<float> jarronOrientation = { 0,0,0,0,0,0 };
+
+//Vector de etiquetas de jarrones
+
+//Vector de indicadores de jarrones
+std::vector<int> jarronId = { 1, 1 };
+bool jarronE[] = { true, true, true, true , true , true };
 
 double deltaTime;
 double currTime, lastTime;
 
 // Colliders
-std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
-std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
+std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;//colliders de cajas
+std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;//colliders de esferas
+std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB2;//colliders de cajas2
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -532,12 +556,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	skyboxSphere.setShader(&shaderSkybox);
 	skyboxSphere.setScale(glm::vec3(20.0f, 20.0f, 20.0f));
 
-	//Iniciando las colisiones
+	//Iniciando las colisiones de las cajas
 	boxCollider.init();
 	boxCollider.setShader(&shader);
 	boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
 
-	//colision de esfera
+	//Iniciando las colisiones de las cajas 2
+	boxCollider2.init();
+	boxCollider2.setShader(&shader);
+	boxCollider2.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+
+	//Iniciando las colision de las esfera
 	sphereCollider.init();
 	sphereCollider.setShader(&shader);
 	sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
@@ -607,6 +636,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Modelo de antocha
 	modelAntorcha.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha3.obj");
 	modelAntorcha.setShader(&shaderMulLighting);
+
+	//Modelo de Jarron
+	modeloJarron.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
+	modeloJarron.setShader(&shaderMulLighting);
 
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
@@ -980,7 +1013,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainBlendMap.freeImage(bitmap);
 }
 
-void destroy() {
+void destroy() {//**************************************************Destruye los oabjetos******************************************* 
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	// --------- IMPORTANTE ----------
@@ -993,8 +1026,10 @@ void destroy() {
 	shaderTerrain.destroy();
 
 	// Basic objects Delete
+	//*********************Destruyendo los Colliders
 	skyboxSphere.destroy();
 	boxCollider.destroy();
+	boxCollider2.destroy();
 	sphereCollider.destroy();
 
 	// Terrains objects Delete
@@ -1234,8 +1269,6 @@ bool processInput(bool continueApplication) {
 		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0.02, 0.0, -0.02));
 		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, 1.45));
 	}
-		
-
 
 	glfwPollEvents();
 	return continueApplication;
@@ -1269,6 +1302,9 @@ void applicationLoop() {
 	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 52.0));
 	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 55.4));
 
+	//Modelo del jarron
+	modelMatrixJarron = glm::translate(modelMatrixJarron, glm::vec3(0.0, 0.0, 52.0));
+
 	//Modelo del Dart
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 
@@ -1277,7 +1313,7 @@ void applicationLoop() {
 	//rotate  viendolo de frente -180:  ^
 	//rotate  viendolo de frente 90:  -->
 	//rotate  viendolo de frente 0:  v
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 57.0));
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
 
 	modelMatrixNanosuit = glm::translate(modelMatrixNanosuit, glm::vec3(13.0f, 0.05f, 10.0f));
@@ -1302,6 +1338,7 @@ void applicationLoop() {
 		psi = processInput(true);
 
 		std::map<std::string, bool> collisionDetection;
+		std::map<std::string, bool> collisionDetection2;
 
 		// Variables donde se guardan las matrices de cada articulacion por 1 frame
 		std::vector<float> matrixDartJoints;
@@ -1537,8 +1574,24 @@ void applicationLoop() {
 		modelMatrixLaberintoBody = glm::scale(modelMatrixLaberintoBody, glm::vec3(1.0, 1.5, 1.0));
 		modeloLaberinto.render(modelMatrixLaberintoBody);*/
 
-		
+		/*if (dibujaJarron) {
+			//Render del Jarron
+			glm::mat4 modelMatrixJarronBody = glm::mat4(modelMatrixJarron);
+			modelMatrixJarronBody[3][1] = terrain.getHeightTerrain(modelMatrixJarronBody[3][0], modelMatrixJarronBody[3][2]);
+			modelMatrixJarronBody = glm::scale(modelMatrixJarronBody, glm::vec3(1.0, 1.0, 1.0));
+			modeloJarron.render(modelMatrixJarronBody);
+		}*/
 
+		//Render de los jarrones
+		for (int i = 0; i < jarronPosition.size(); i++) {
+			if (jarronE[i]) {
+				jarronPosition[i].y = terrain.getHeightTerrain(jarronPosition[i].x, jarronPosition[i].z);
+				modeloJarron.setPosition(jarronPosition[i]);
+				modeloJarron.setScale(glm::vec3(1.0, 1.0, 1.0));
+				modeloJarron.setOrientation(glm::vec3(0, jarronOrientation[i], 0));
+				modeloJarron.render();
+			}
+		}
 
 		// Render del Helicopter
 		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
@@ -1775,6 +1828,39 @@ void applicationLoop() {
 		// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix TranformaciÃ³n Original
 		addOrUpdateColliders(collidersOBB, "muro", muroCollider, modelMatrixMuro);*/
 
+		//Collider del jarron
+		/*if (dibujaJarron) {
+			glm::mat4 modelMatrixColliderJarron = glm::mat4(modelMatrixJarron);
+			AbstractModel::OBB jarronCollider;
+			jarronCollider.u = glm::quat_cast(modelMatrixJarron);
+			modelMatrixColliderJarron[3][1] = terrain.getHeightTerrain(modelMatrixColliderJarron[3][0], modelMatrixColliderJarron[3][2]);
+			modelMatrixColliderJarron = glm::scale(modelMatrixColliderJarron, glm::vec3(1.0, 1.0, 1.0));
+			modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, modeloJarron.getObb().c);
+			jarronCollider.c = glm::vec3(modelMatrixColliderJarron[3]);
+			jarronCollider.e = modeloJarron.getObb().e*glm::vec3(1.0, 1.0, 1.0);
+			// 1.- Arreglo de colliders, 2.- Etiqueta, 3.- Collider que creamos, 4.- Matrix Tranformacion Original
+			addOrUpdateColliders(collidersOBB2, "jarron", jarronCollider, modelMatrixJarron);
+		}*/
+		
+		// collinder de los jarrones
+		for (int i = 0; i < jarronPosition.size(); i++) {
+			if (jarronE[i]) {
+				AbstractModel::OBB jarronCollider;
+				glm::mat4 modelMatrixColliderJarron = glm::mat4(1.0);
+				modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, jarronPosition[i]);
+				modelMatrixColliderJarron = glm::rotate(modelMatrixColliderJarron, glm::radians(jarronOrientation[i]),
+					glm::vec3(0, 1, 0));
+				addOrUpdateColliders(collidersOBB2, "" + std::to_string(i), jarronCollider, modelMatrixColliderJarron);
+				// Set the orientation of collider before doing the scale
+				jarronCollider.u = glm::quat_cast(modelMatrixColliderJarron);
+				modelMatrixColliderJarron = glm::scale(modelMatrixColliderJarron, glm::vec3(1.0, 1.0, 1.0));
+				modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, modeloJarron.getObb().c);
+				jarronCollider.c = glm::vec3(modelMatrixColliderJarron[3]);
+				jarronCollider.e = modeloJarron.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+				std::get<0>(collidersOBB2.find("" + std::to_string(i))->second) = jarronCollider;
+			}
+		}
+		
 
 		//Collider del la rock
 		AbstractModel::SBB rockCollider;
@@ -1904,6 +1990,24 @@ void applicationLoop() {
 		/*******************************************
 		 * Render de colliders
 		 *******************************************/
+
+		 //Aqui se dibuja la caja 2
+		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+				collidersOBB2.begin(); it != collidersOBB2.end(); it++) {
+			int op;
+			std::istringstream(it->first) >> op;
+			if (jarronE[op]) {
+				glm::mat4 matrixCollider = glm::mat4(1.0);
+				matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
+				matrixCollider = matrixCollider * glm::mat4(std::get<0>(it->second).u);
+				matrixCollider = glm::scale(matrixCollider, std::get<0>(it->second).e * 2.0f);
+				boxCollider2.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+				boxCollider2.enableWireMode();
+				boxCollider2.render(matrixCollider);
+			}
+		}
+		
+
 		//Aqui se dibuja la caja
 		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
@@ -1918,12 +2022,12 @@ void applicationLoop() {
 		//Aqui la esfera
 		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
-			matrixCollider = glm::scale(matrixCollider, glm::vec3(std::get<0>(it->second).ratio * 2.0f));
-			sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			sphereCollider.enableWireMode();
-			sphereCollider.render(matrixCollider);
+				glm::mat4 matrixCollider = glm::mat4(1.0);
+				matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
+				matrixCollider = glm::scale(matrixCollider, glm::vec3(std::get<0>(it->second).ratio * 2.0f));
+				sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+				sphereCollider.enableWireMode();
+				sphereCollider.render(matrixCollider);
 		}
 
 		// Esto es para ilustrar la transformacion inversa de los coliders
@@ -1950,6 +2054,38 @@ void applicationLoop() {
 		 * Test Colisions
 		 *******************************************/
 		for (std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersOBB2.begin(); it != collidersOBB2.end(); it++) {//Recorre la primer lista de colliders
+			bool isCollision = false;
+			for (std::map<std::string,
+				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
+				if (it != jt
+					&& testOBBOBB(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
+							/*if (jt->first == "jarron") {
+								std::cout << "Colision " << it->first << " with "
+									<< jt->first << std::endl;
+								dibujaJarron = false;
+								//isCollision = false;
+							}*/
+					std::cout << "Colision " << it->first << " with "
+						<< jt->first << std::endl;
+					int op;
+					std::istringstream(it->first) >> op;
+					jarronE[op] = false;
+
+					//std::cout << jarronEtiqueta[0] << std::endl;
+					dibujaJarron = false;
+					isCollision = true;
+				}
+			}
+			addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
+		}
+
+		for (std::map<std::string,
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			bool isCollision = false;
@@ -1959,8 +2095,14 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
+					/*if (jt->first == "jarron") {
+						std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;
+						dibujaJarron = false;
+						//isCollision = false;
+					}*/
 					isCollision = true;
 				}
 			}
@@ -1977,8 +2119,8 @@ void applicationLoop() {
 				if (it != jt
 						&& testSphereSphereIntersection(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 					isCollision = true;
 				}
 			}
@@ -1995,8 +2137,8 @@ void applicationLoop() {
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first, isCollision);
 				}
@@ -2031,9 +2173,12 @@ void applicationLoop() {
 			}
 		}
 
+	
+
 		/*******************************************
 		 * Interpolation key frames with disconect objects
 		 *******************************************/
+		/*
 		if(record && modelSelected == 1){
 			matrixDartJoints.push_back(rotDartHead);
 			matrixDartJoints.push_back(rotDartLeftArm);
@@ -2088,7 +2233,7 @@ void applicationLoop() {
 			if (indexFrameDartNext > keyFramesDart.size() - 1)
 				indexFrameDartNext = 0;
 			modelMatrixDart = interpolate(keyFramesDart, indexFrameDart, indexFrameDartNext, 0, interpolationDart);
-		}
+		}*/
 
 		// Constantes de animaciones
 		rotHelHelY += 0.5;
