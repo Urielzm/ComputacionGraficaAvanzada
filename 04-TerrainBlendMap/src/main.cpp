@@ -252,7 +252,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Torre/Pilar_de_castillo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
-	modelRock.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
+	modelRock.loadModel("../models/Personaje_proyecto/Arco/Arco2.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 
@@ -316,6 +317,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
 	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
 	garchompModelAnimate.loadModel("../models/Human/c1.fbx");
+	//garchompModelAnimate.loadModel("../models/Personaje_proyecto/EsqueletoAnimado/untitled.fbx");
 	//garchompModelAnimate.loadModel("../models/Explorador/Explorador.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
 

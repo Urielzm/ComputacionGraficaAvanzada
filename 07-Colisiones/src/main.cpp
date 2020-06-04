@@ -85,6 +85,8 @@ Model modelMuro;
 Model modeloLaberinto;
 //Model jarron
 Model modeloJarron;
+//Modelo de la puerta
+Model modeloArco;
 // Dart lego
 Model modelDartLegoBody;
 Model modelDartLegoHead;
@@ -149,6 +151,8 @@ glm::mat4 modelMatrixAntorcha = glm::mat4(1.0f);
 glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
 //Matriz del jarron
 glm::mat4 modelMatrixJarron = glm::mat4(1.0f);
+//Matriz del arco
+glm::mat4 modelMatrixArco = glm::mat4(1.0f);
 
 
 int animationIndex = 1;
@@ -185,7 +189,7 @@ float dorRotCount = 0.0;
 
 //variables de escala del Muro
 float escalaX = 10;
-float escalaY = 10;
+float escalaY = 12;
 float escalaZ = 10;
 
 //Muro posiciones
@@ -641,6 +645,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modeloJarron.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
 	modeloJarron.setShader(&shaderMulLighting);
 
+	//Modelo del arco
+	modeloArco.loadModel("../models/Personaje_proyecto/Arco/Arco3.obj");
+	modeloArco.setShader(&shaderMulLighting);
+
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
 	//modelLamp1.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
@@ -693,6 +701,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	// Definiendo la textura a utilizar
 	Texture textureCesped("../Textures/cesped.jpg");
+	//Texture textureCesped("../Textures/Suelo1.jpg");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureCesped.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -852,7 +861,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureLandingPad.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBackground("../Textures/grassy2.png");
+	//Texture textureTerrainBackground("../Textures/grassy2.png");
+	Texture textureTerrainBackground("../Textures/Suelo1.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -948,7 +958,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainG.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainB("../Textures/path.png");
+	//Texture textureTerrainB("../Textures/path.png");
+	Texture textureTerrainB("../Textures/Sangre1.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainB.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1069,6 +1080,12 @@ void destroy() {//**************************************************Destruye los
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+
+	//Jarron
+	modeloJarron.destroy();
+
+	//Arco
+	modeloArco.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1303,7 +1320,10 @@ void applicationLoop() {
 	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 55.4));
 
 	//Modelo del jarron
-	modelMatrixJarron = glm::translate(modelMatrixJarron, glm::vec3(0.0, 0.0, 52.0));
+	//modelMatrixJarron = glm::translate(modelMatrixJarron, glm::vec3(0.0, 0.0, 52.0));
+
+	//Modelo del Arco
+	modelMatrixArco = glm::translate(modelMatrixArco, glm::vec3(0.0, 0.0, 52.0));
 
 	//Modelo del Dart
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
@@ -1561,6 +1581,12 @@ void applicationLoop() {
 		// Render for the aircraft model
 		modelMatrixAircraft[3][1] = terrain.getHeightTerrain(modelMatrixAircraft[3][0], modelMatrixAircraft[3][2]) + 2.0;
 		modelAircraft.render(modelMatrixAircraft);
+
+		//Render del Arco
+		glm::mat4 modelMatrixArcoBody = glm::mat4(modelMatrixArco);
+		modelMatrixArcoBody[3][1] = terrain.getHeightTerrain(modelMatrixArcoBody[3][0], modelMatrixArcoBody[3][2])+4.0;
+		modelMatrixArcoBody = glm::scale(modelMatrixArcoBody, glm::vec3(0.7, 0.7, 0.7));
+		modeloArco.render(modelMatrixArcoBody);
 
 		//Render del muro
 		/*glm::mat4 modelMatrixMuroBody = glm::mat4(modelMatrixMuro);
@@ -1881,7 +1907,7 @@ void applicationLoop() {
 			addOrUpdateColliders(collidersOBB, "muro1-" + std::to_string(i), muroCollider, modelMatrixCollidermuro);
 			// Set the orientation of collider before doing the scale
 			muroCollider.u = glm::quat_cast(modelMatrixCollidermuro);
-			modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+			modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY , escalaZ));
 			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, modelMuro.getObb().c);
 			muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
 			muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
