@@ -81,10 +81,10 @@ float distanceFromTarget = 7.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
+Box boxCollider2;
 Sphere sphereCollider(10, 10);
 Box boxViewDepth;
 Box boxLightViewBox;
-
 ShadowBox *shadowBox;
 
 // Models complex instances
@@ -115,11 +115,27 @@ Model modelLamp2;
 Model modelLampPost2;
 // Hierba
 Model modelGrass;
+
+
+//Antorcha
+Model modelAntorcha;
+//Modelo del muro
+Model modelMuro;
+//Modloe del laberinto
+Model modeloLaberinto;
+//Model jarron
+Model modeloJarron;
+//Modelo de la puerta
+Model modeloArco;
+
 // Fountain
+//Modelo de la fuente
 Model modelFountain;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+
+
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
@@ -147,7 +163,7 @@ bool exitApp = false;
 int lastMousePosX, offsetX = 0;
 int lastMousePosY, offsetY = 0;
 
-// Model matrix definitions
+// *******************************************Model matrix definitions************************************************
 glm::mat4 matrixModelRock = glm::mat4(1.0);
 glm::mat4 modelMatrixHeli = glm::mat4(1.0f);
 glm::mat4 modelMatrixLambo = glm::mat4(1.0);
@@ -155,6 +171,16 @@ glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
+//Matriz del muro
+glm::mat4 modelMatrixMuro = glm::mat4(1.0f);
+//Mtriz de la antorcha
+glm::mat4 modelMatrixAntorcha = glm::mat4(1.0f);
+//Matriz del laberinto
+glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
+//Matriz del jarron
+glm::mat4 modelMatrixJarron = glm::mat4(1.0f);
+//Matriz del arco
+glm::mat4 modelMatrixArco = glm::mat4(1.0f);
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -188,13 +214,279 @@ float rotHelHelY = 0.0;
 int stateDoor = 0;
 float dorRotCount = 0.0;
 
+//variables de escala del Muro
+float escalaX = 10;
+float escalaY = 12;
+float escalaZ = 10;
+
+//Muro posiciones
+//Vector de vectores de posicion
+//Viendolo de frente X: Positiva -->
+//Viendolo de frente X: Negativa <--
+std::vector<glm::vec3> muro1Position = {
+	//Viendolo de frente
+
+	//Posiciones frontal
+	glm::vec3(80.4, 0.0, 50.0),
+	glm::vec3(67.0, 0.0, 50.0),
+	glm::vec3(53.6, 0.0, 50.0),
+	glm::vec3(40.2, 0.0, 50.0),
+	glm::vec3(26.8, 0.0, 50.0),
+	glm::vec3(13.4, 0.0, 50.0),
+	//glm::vec3(0.0, 0.0, 50.0),//Muro central --> Puerta
+	glm::vec3(-13.4, 0.0, 50.0),
+	glm::vec3(-26.8, 0.0, 50.0),
+	glm::vec3(-40.2, 0.0, 50.0),
+	glm::vec3(-53.6, 0.0, 50.0),
+	glm::vec3(-67.0, 0.0, 50.0),
+	glm::vec3(-80.4, 0.0, 50.0),
+
+	//Posiciones IZQUIERDA
+	glm::vec3(-84.8, 0.0, 43.0),
+	glm::vec3(-84.8, 0.0, 29.6),
+	glm::vec3(-84.8, 0.0, 16.2),
+	glm::vec3(-84.8, 0.0, 2.8),
+	glm::vec3(-84.8, 0.0, -10.6),
+	glm::vec3(-84.8, 0.0, -24.0),
+	glm::vec3(-84.8, 0.0, -37.4),
+	glm::vec3(-84.8, 0.0, -50.8),
+	glm::vec3(-84.8, 0.0, -64.2),
+	glm::vec3(-84.8, 0.0, -77.6),
+	glm::vec3(-84.8, 0.0, -91.0),
+
+	//Posiciones traceras
+	glm::vec3(-80.4, 0.0, -100.0),
+	glm::vec3(-67.0, 0.0, -100.0),
+	glm::vec3(-53.6, 0.0, -100.0),
+	glm::vec3(-40.2, 0.0, -100.0),
+	glm::vec3(-26.8, 0.0, -100.0),
+	glm::vec3(-13.4, 0.0, -100.0),
+	glm::vec3(0.0, 0.0, -100.0),//Muro central 
+	glm::vec3(13.4, 0.0, -100.0),
+	glm::vec3(26.8, 0.0, -100.0),
+	glm::vec3(40.2, 0.0, -100.0),
+	glm::vec3(53.6, 0.0, -100.0),
+	glm::vec3(67.0, 0.0, -100.0),
+	glm::vec3(80.4, 0.0, -100.0),
+
+	//Posiciones DERECHA
+	glm::vec3(84.1, 0.0, -91.0),
+	glm::vec3(84.1, 0.0, -77.6),
+	glm::vec3(84.1, 0.0, -64.2),
+	glm::vec3(84.1, 0.0, -50.8),
+	glm::vec3(84.1, 0.0, -37.4),
+	glm::vec3(84.1, 0.0, -24.0),
+	glm::vec3(84.1, 0.0, -10.6),
+	glm::vec3(84.1, 0.0, 2.8),
+	glm::vec3(84.1, 0.0, 16.2),
+	glm::vec3(84.1, 0.0, 29.6),
+	glm::vec3(84.1, 0.0, 43.0)
+};
+
+//Vector de orientación de Muros
+std::vector<float> muro1Orientation = {
+	//Viendolo de frente
+	//Orientaciones frontales:
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado IZQUIERDO
+	-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0,
+	//Orientacionestraceras
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado Derecho
+	90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90
+};
+
+//Posiciones de laberinto
+std::vector<glm::vec3> laberintoPosition = {
+
+	glm::vec3(-48,0,40),
+	glm::vec3(-32,0,40),
+	glm::vec3(-16,0,40),
+	glm::vec3(0,0,	40),
+	glm::vec3(16,0,	40),
+	glm::vec3(32,0,	40),
+	glm::vec3(48,0,	40),
+	glm::vec3(64,0,	40),
+	glm::vec3(0	,0,32),
+	glm::vec3(0	,0,16),
+	glm::vec3(0	,0,0),
+	glm::vec3(0,0, -16),
+	glm::vec3(-8,0,	3.125),
+	glm::vec3(-24,0,	3.125),
+	glm::vec3(58.984375,0,32),
+	glm::vec3(58.984375,0,16),
+	glm::vec3(50.984375,0,7.8125),
+	glm::vec3(75.781250,0,	31.84570313),
+	glm::vec3(75.781250,0,	15.84375),
+	glm::vec3(75.781250,0, -0.15625),
+	glm::vec3(75.781250,0, -16.1562),
+	glm::vec3(67.781250,0, -10.9375),
+	glm::vec3(51.781250,0, -10.9375),
+	glm::vec3(35.781250,0, -10.9375),
+	glm::vec3(19.781250,0, -10.9375),
+	glm::vec3(11.72656250,0, -2.937),
+	glm::vec3(11.72656250,0, 13.0625),
+	glm::vec3(19.72656250,0, 21.0625),
+	glm::vec3(35.72656250,0, 21.0625),
+	glm::vec3(11.72656250,0, -18.9375),
+	glm::vec3(11.72656250,0, -34.9375),
+	glm::vec3(11.72656250,0, -50.9375),
+	glm::vec3(3.7265625,0,-58.9375),
+	glm::vec3(-12.078125,0, -58.9375),
+	glm::vec3(-0.3906250,0, -66.9375),
+	glm::vec3(-0.3906250,0, -82.9375),
+	glm::vec3(-8.3906250,0, -90.9375),
+	glm::vec3(-11.1171875,0, -90.9375),
+	glm::vec3(-480,0,	17.1875),
+	glm::vec3(-32,0,	17.1875),
+	glm::vec3(-43.359375, 0, 9.1875),
+	glm::vec3(-43.359375,0, -6.8125),
+	glm::vec3(-53.7109375,0, -14.8125),
+	glm::vec3(-69.7109375,0, -14.8125),
+	glm::vec3(-37.7109375,0, -14.8125),
+	glm::vec3(-21.7109375,0, -14.8125),
+	glm::vec3(-53.7109375,0, -24.578125),
+	glm::vec3(-69.7109375,0, -24.578125),
+	glm::vec3(-37.7109375,0, -24.578125),
+	glm::vec3(-21.7109375,0, -24.578125),
+	glm::vec3(-60.15625,0, -32.578125),
+	glm::vec3(-68.15625,0, -40.578125),
+	glm::vec3(-13.83203125,0, -32.578125),
+	glm::vec3(-5.8671875,0, -40.578125),
+	glm::vec3(-13.8671875,0, -40.578125),
+	glm::vec3(-29.8671875,0, -40.578125),
+	glm::vec3(-37.8671875,0, -48.578125),
+	glm::vec3(-37.8671875,0, -64.578125),
+	glm::vec3(-37.8671875,0, -80.578125),
+	glm::vec3(-29.8671875,0, -70.1171875),
+	glm::vec3(-45.8671875,0, -55.078125),
+	glm::vec3(-61.8671875,0, -55.078125),
+	glm::vec3(-61.8671875,0, -63.078125),
+	glm::vec3(-61.8671875,0, -79.078125),
+	glm::vec3(38.09570313 ,0,-25.78125),
+	glm::vec3(54.19140625 ,0,-25.78125),
+	glm::vec3(30.09570313 ,0,-33.78125),
+	glm::vec3(30.09570313 ,0,-49.78125),
+	glm::vec3(30.09570313 ,0,-65.78125),
+	glm::vec3(62.1015625,0, -33.78125),
+	glm::vec3(62.1015625,0, -49.78125),
+	glm::vec3(62.1015625,0, -65.78125),
+	glm::vec3(62.1015625,0, -81.78125),
+	glm::vec3(70.1015625,0, -89.78125),
+	glm::vec3(54.1015625,0, -89.78125),
+	glm::vec3(38.1015625,0, -89.78125),
+	glm::vec3(70.1015625,0, -56.640625),
+	glm::vec3(22.0859375,0, -73.8203125),
+	glm::vec3(14.0859375,0, -81.78125)
+};
+
+//Vector de orientacion de los muros del laberinto
+std::vector<float> laberintoOrientation = {
+	0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 0, 0, 90, 90, 0, 90, 90, 90, 90, 0, 0, 0, 0, 90, 90, 0, 0,
+	90, 90, 90, 0, 0, 90, 90, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 90, 0, 0, 0, 90, 90,
+	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90
+};
+
 // Lamps positions
-std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
-		24.41, 0, -34.57), glm::vec3(-10.15, 0, -54.10) };
-std::vector<float> lamp1Orientation = { -17.0, -82.67, 23.70 };
+std::vector<glm::vec3> lamp1Position = { 
+	glm::vec3(-7.03, 0, -19.14), 
+	glm::vec3(24.41, 0, -34.57), 
+	glm::vec3(-10.15, 0, -54.10),
+
+	//Antorchas frontales
+	//glm::vec3(80.4, 0.0, 52.0),
+	glm::vec3(67.0, 0.0, 52.0),
+	//glm::vec3(53.6, 0.0, 52.0),
+	glm::vec3(40.2, 0.0, 52.0),
+	//glm::vec3(26.8, 0.0, 52.0),
+	glm::vec3(13.4, 0.0, 52.0),
+	//glm::vec3(0.0, 0.0, 50.0),//Muro central --> Puerta
+	glm::vec3(-13.4, 0.0, 52.0),
+	//glm::vec3(-26.8, 0.0, 52.0),
+	glm::vec3(-40.2, 0.0, 52.0),
+	//glm::vec3(-53.6, 0.0, 52.0),
+	glm::vec3(-67.0, 0.0, 52.0),
+	//glm::vec3(-80.4, 0.0, 52.0),
+
+	//Antorchas IZQUIERDA
+	glm::vec3(-86.8, 0.0, 43.0),
+	//glm::vec3(-86.8, 0.0, 29.6),
+	glm::vec3(-86.8, 0.0, 16.2),
+	//glm::vec3(-86.8, 0.0, 2.8),
+	glm::vec3(-86.8, 0.0, -10.6),
+	//glm::vec3(-86.8, 0.0, -24.0),
+	glm::vec3(-86.8, 0.0, -37.4),
+	//glm::vec3(-86.8, 0.0, -50.8),
+	glm::vec3(-86.8, 0.0, -64.2),
+	//glm::vec3(-86.8, 0.0, -77.6),
+	glm::vec3(-86.8, 0.0, -91.0),
+
+	//Posiciones traceras
+	glm::vec3(-80.4, 0.0, -100.0),
+	//glm::vec3(-67.0, 0.0, -100.0),
+	glm::vec3(-53.6, 0.0, -100.0),
+	//glm::vec3(-40.2, 0.0, -100.0),
+	glm::vec3(-26.8, 0.0, -100.0),
+	//glm::vec3(-13.4, 0.0, -100.0),
+	glm::vec3(0.0, 0.0, -100.0),//Muro central
+	//glm::vec3(13.4, 0.0, -100.0),
+	glm::vec3(26.8, 0.0, -100.0),
+	//glm::vec3(40.2, 0.0, -100.0),
+	glm::vec3(53.6, 0.0, -100.0),
+	//glm::vec3(67.0, 0.0, -100.0),
+	glm::vec3(80.4, 0.0, -100.0),
+
+	//Antorchas DERECHA
+	//glm::vec3(86.1, 0.0, -91.0),
+	glm::vec3(86.1, 0.0, -77.6),
+	//glm::vec3(86.1, 0.0, -64.2),
+	glm::vec3(86.1, 0.0, -50.8),
+	//glm::vec3(86.1, 0.0, -37.4),
+	glm::vec3(86.1, 0.0, -24.0),
+	//glm::vec3(86.1, 0.0, -10.6),
+	glm::vec3(86.1, 0.0, 2.8),
+	//glm::vec3(86.1, 0.0, 16.2),
+	glm::vec3(86.1, 0.0, 29.6),
+	//glm::vec3(86.1, 0.0, 43.0)
+
+};
+std::vector<float> lamp1Orientation = { 
+	-17.0, -82.67, 23.70, 
+	//Antorchas Frontales
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado IZQUIERDO
+	-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, //-90.0, -90.0, -90.0, -90.0, -90.0,
+	//Orientacionestraceras
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//Orientaciones lado Derecho
+	90.0, 90.0, 90.0, 90.0, 90.0, 90.0 //90.0, 90.0, 90.0, 90.0, 90
+
+};
+
 std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 		glm::vec3(-52.73, 0, -3.90) };
 std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
+
+//Vectores de posicion y orientacion de jarrones 
+std::vector<glm::vec3> jarronPosition = {
+		glm::vec3(0.0, 0.0, 56.0),
+		glm::vec3(4.0, 0.0, 56.0),
+		glm::vec3(8.0, 0.0, 56.0),
+		glm::vec3(12.0, 0.0, 56.0),
+		glm::vec3(16.0, 0.0, 56.0),
+		glm::vec3(20.0, 0.0, 56.0)
+
+};
+//Vectores de orientacion de jarrones 
+std::vector<float> jarronOrientation = { 0,0,0,0,0,0 };
+
+//Vector de etiquetas de jarrones
+
+//Vector de indicadores de jarrones
+std::vector<int> jarronId = { 1, 1 };
+bool jarronE[] = { true, true, true, true , true , true };
+
+bool dibujaJarron = true;
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = {
@@ -226,8 +518,9 @@ float particleSize = 0.5, particleLifetime = 3.0;
 double currTimeParticlesAnimationFire, lastTimeParticlesAnimationFire;
 
 // Colliders
-std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
-std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
+std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;//colliders de cajas
+std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;//colliders de esferas
+std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB2;//colliders de cajas2
 
 // Framesbuffers
 GLuint depthMap, depthMapFBO;
@@ -509,10 +802,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	skyboxSphere.setShader(&shaderSkybox);
 	skyboxSphere.setScale(glm::vec3(100.0f, 100.0f, 100.0f));
 
+	//Iniciando las colisiones de las cajas 
 	boxCollider.init();
 	boxCollider.setShader(&shader);
 	boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
 
+	//Iniciando las colisiones de las cajas 2
+	boxCollider2.init();
+	boxCollider2.setShader(&shader);
+	boxCollider2.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+
+	//Iniciando las colisiones de las esferas
 	sphereCollider.init();
 	sphereCollider.setShader(&shader);
 	sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
@@ -573,6 +873,25 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoLeftLeg.setShader(&shaderMulLighting);
 	modelDartLegoRightLeg.loadModel("../models/LegoDart/LeoDart_right_leg.obj");
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
+
+	//Modelo del muro
+	modelMuro.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo2.obj");
+	modelMuro.setShader(&shaderMulLighting);
+	//Modelo del laberinto
+	modeloLaberinto.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo2.obj");
+	modeloLaberinto.setShader(&shaderMulLighting);
+
+	//Modelo de antocha
+	modelAntorcha.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha3.obj");
+	modelAntorcha.setShader(&shaderMulLighting);
+
+	//Modelo de Jarron
+	modeloJarron.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
+	modeloJarron.setShader(&shaderMulLighting);
+
+	//Modelo del arco
+	modeloArco.loadModel("../models/Personaje_proyecto/Arco/Arco3.obj");
+	modeloArco.setShader(&shaderMulLighting);
 
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
@@ -788,7 +1107,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureLandingPad.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBackground("../Textures/grassy2.png");
+	//Texture textureTerrainBackground("../Textures/grassy2.png");
+	Texture textureTerrainBackground("../Textures/Suelo1.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -884,7 +1204,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainG.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainB("../Textures/path.png");
+	//Texture textureTerrainB("../Textures/path.png");
+	Texture textureTerrainB("../Textures/Sangre1.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainB.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -916,7 +1237,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainB.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBlendMap("../Textures/blendMap.png");
+	//Texture textureTerrainBlendMap("../Textures/blendMap.png");
+	Texture textureTerrainBlendMap("../Textures/p2.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBlendMap.loadImage(true);
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1152,6 +1474,7 @@ void destroy() {
 	// Basic objects Delete
 	skyboxSphere.destroy();
 	boxCollider.destroy();
+	boxCollider2.destroy();
 	sphereCollider.destroy();
 	boxViewDepth.destroy();
 
@@ -1184,6 +1507,14 @@ void destroy() {
 	modelLampPost2.destroy();
 	modelGrass.destroy();
 	modelFountain.destroy();
+	//Destruyendo el modelo de la antorcha
+	modelAntorcha.destroy();
+	//destruyendo objeto del muro
+	modelMuro.destroy();
+	//Jarron
+	modeloJarron.destroy();
+	//Arco
+	modeloArco.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1374,16 +1705,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(2.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-2.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.1));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.1));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.1));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.1));
 		animationIndex = 0;
 	}
 
@@ -1399,6 +1730,25 @@ void applicationLoop() {
 	glm::vec3 target;
 	float angleTarget;
 
+	//Modelo del muro
+	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
+	//modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
+
+	//Modelo del laberinto
+	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
+	//modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(0.0, 0.0, 40.0));
+
+	//Modelo de la antorcha
+	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 52.0));
+	//modelMatrixAntorcha = glm::translate(modelMatrixAntorcha, glm::vec3(13.4, 0.0, 55.4));
+
+	//Modelo del jarron
+	//modelMatrixJarron = glm::translate(modelMatrixJarron, glm::vec3(0.0, 0.0, 52.0));
+
+	//Modelo del Arco
+	modelMatrixArco = glm::translate(modelMatrixArco, glm::vec3(0.0, 0.0, 52.0));
+
+	//Modelo de la roca
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
 
 	modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 10.0, -5.0));
@@ -1408,9 +1758,13 @@ void applicationLoop() {
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(23.0, 0.0, 0.0));
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
-
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
-	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	//Modelo de Mayow
+		//rotate  viendolo de frente -90:  <--
+		//rotate  viendolo de frente -180:  ^
+		//rotate  viendolo de frente 90:  -->
+		//rotate  viendolo de frente 0:  v
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
+	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
 
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(5.0, 0.0, -40.0));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]) + 0.2;
@@ -1448,6 +1802,7 @@ void applicationLoop() {
 		psi = processInput(true);
 
 		std::map<std::string, bool> collisionDetection;
+		std::map<std::string, bool> collisionDetection2;
 
 		// Variables donde se guardan las matrices de cada articulacion por 1 frame
 		std::vector<float> matrixDartJoints;
@@ -1591,12 +1946,14 @@ void applicationLoop() {
 		 *******************************************/
 		shaderMulLighting.setInt("pointLightCount", lamp1Position.size() + lamp2Orientation.size());
 		shaderTerrain.setInt("pointLightCount", lamp1Position.size() + lamp2Orientation.size());
+
 		for (int i = 0; i < lamp1Position.size(); i++){
 			glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp, lamp1Position[i]);
 			matrixAdjustLamp = glm::rotate(matrixAdjustLamp, glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-			matrixAdjustLamp = glm::scale(matrixAdjustLamp, glm::vec3(0.5, 0.5, 0.5));
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0, 10.3585, 0));
+			matrixAdjustLamp = glm::scale(matrixAdjustLamp, glm::vec3(1.0, 1.0, 1.0));
+			//matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0, 10.3585, 0));
+			matrixAdjustLamp = glm::translate(matrixAdjustLamp, glm::vec3(0.084333, 3.51245, 1.27987));
 			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
 			shaderMulLighting.setVectorFloat3("pointLights[" + std::to_string(i) + "].light.ambient", glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderMulLighting.setVectorFloat3("pointLights[" + std::to_string(i) + "].light.diffuse", glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
@@ -1748,8 +2105,61 @@ void applicationLoop() {
 		rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
 		addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
 
+		// collinder de los jarrones
+		for (int i = 0; i < jarronPosition.size(); i++) {
+			if (jarronE[i]) {
+				AbstractModel::OBB jarronCollider;
+				glm::mat4 modelMatrixColliderJarron = glm::mat4(1.0);
+				modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, jarronPosition[i]);
+				modelMatrixColliderJarron = glm::rotate(modelMatrixColliderJarron, glm::radians(jarronOrientation[i]),
+					glm::vec3(0, 1, 0));
+				addOrUpdateColliders(collidersOBB2, "" + std::to_string(i), jarronCollider, modelMatrixColliderJarron);
+				// Set the orientation of collider before doing the scale
+				jarronCollider.u = glm::quat_cast(modelMatrixColliderJarron);
+				modelMatrixColliderJarron = glm::scale(modelMatrixColliderJarron, glm::vec3(1.0, 1.0, 1.0));
+				modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, modeloJarron.getObb().c);
+				jarronCollider.c = glm::vec3(modelMatrixColliderJarron[3]);
+				jarronCollider.e = modeloJarron.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+				std::get<0>(collidersOBB2.find("" + std::to_string(i))->second) = jarronCollider;
+			}
+		}
+
+		// Muros1 colliders
+		for (int i = 0; i < muro1Position.size(); i++) {
+			AbstractModel::OBB muroCollider;
+			glm::mat4 modelMatrixCollidermuro = glm::mat4(1.0);
+			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, muro1Position[i]);
+			modelMatrixCollidermuro = glm::rotate(modelMatrixCollidermuro, glm::radians(muro1Orientation[i]),
+				glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "muro1-" + std::to_string(i), muroCollider, modelMatrixCollidermuro);
+			// Set the orientation of collider before doing the scale
+			muroCollider.u = glm::quat_cast(modelMatrixCollidermuro);
+			modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, modelMuro.getObb().c);
+			muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
+			muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
+			std::get<0>(collidersOBB.find("muro1-" + std::to_string(i))->second) = muroCollider;
+		}
+
+		// laberinto collider
+		for (int i = 0; i < laberintoPosition.size(); i++) {
+			AbstractModel::OBB laberintoCollider;
+			glm::mat4 modelMatrixColliderLaberinto = glm::mat4(1.0);
+			modelMatrixColliderLaberinto = glm::translate(modelMatrixColliderLaberinto, laberintoPosition[i]);
+			modelMatrixColliderLaberinto = glm::rotate(modelMatrixColliderLaberinto, glm::radians(laberintoOrientation[i]),
+				glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "laberinto1-" + std::to_string(i), laberintoCollider, modelMatrixColliderLaberinto);
+			// Set the orientation of collider before doing the scale
+			laberintoCollider.u = glm::quat_cast(modelMatrixColliderLaberinto);
+			modelMatrixColliderLaberinto = glm::scale(modelMatrixColliderLaberinto, glm::vec3(1.0, 1.5, 1.0));
+			modelMatrixColliderLaberinto = glm::translate(modelMatrixColliderLaberinto, modeloLaberinto.getObb().c);
+			laberintoCollider.c = glm::vec3(modelMatrixColliderLaberinto[3]);
+			laberintoCollider.e = modeloLaberinto.getObb().e * glm::vec3(1.0, 1.5, 1.0);
+			std::get<0>(collidersOBB.find("laberinto1-" + std::to_string(i))->second) = laberintoCollider;
+		}
+
 		// Lamps1 colliders
-		for (int i = 0; i < lamp1Position.size(); i++){
+		/*for (int i = 0; i < lamp1Position.size(); i++){
 			AbstractModel::OBB lampCollider;
 			glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
 			modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, lamp1Position[i]);
@@ -1763,6 +2173,41 @@ void applicationLoop() {
 			lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
 			lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
 			std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) = lampCollider;
+		}*/
+
+		// Lamps1 colliders
+		for (int i = 0; i < lamp1Position.size(); i++) {
+			if (i < 3) {
+				AbstractModel::OBB lampCollider;
+				glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
+				modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, lamp1Position[i]);
+				modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp, glm::radians(lamp1Orientation[i]),
+					glm::vec3(0, 1, 0));
+				addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i), lampCollider, modelMatrixColliderLamp);
+				// Set the orientation of collider before doing the scale
+				lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
+				modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp, glm::vec3(0.5, 0.5, 0.5));
+				modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, modelLamp1.getObb().c);
+				lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
+				lampCollider.e = modelLamp1.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+				std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) = lampCollider;
+
+			}
+			else {
+				AbstractModel::OBB antorchaCollider;
+				glm::mat4 modelMatrixColliderAntorcha = glm::mat4(1.0);
+				modelMatrixColliderAntorcha = glm::translate(modelMatrixColliderAntorcha, lamp1Position[i]);
+				modelMatrixColliderAntorcha = glm::rotate(modelMatrixColliderAntorcha, glm::radians(lamp1Orientation[i]),
+					glm::vec3(0, 1, 0));
+				addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i), antorchaCollider, modelMatrixColliderAntorcha);
+				// Set the orientation of collider before doing the scale
+				antorchaCollider.u = glm::quat_cast(modelMatrixColliderAntorcha);
+				modelMatrixColliderAntorcha = glm::scale(modelMatrixColliderAntorcha, glm::vec3(1.0, 1.0, 1.0));
+				modelMatrixColliderAntorcha = glm::translate(modelMatrixColliderAntorcha, modelAntorcha.getObb().c);
+				antorchaCollider.c = glm::vec3(modelMatrixColliderAntorcha[3]);
+				antorchaCollider.e = modelAntorcha.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+				std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) = antorchaCollider;
+			}
 		}
 
 		// Lamps2 colliders
@@ -1801,6 +2246,23 @@ void applicationLoop() {
 		/*******************************************
 		 * Render de colliders
 		 *******************************************/
+		//Aqui se dibuja la caja 2
+		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersOBB2.begin(); it != collidersOBB2.end(); it++) {
+			int op;
+			std::istringstream(it->first) >> op;
+			if (jarronE[op]) {
+				glm::mat4 matrixCollider = glm::mat4(1.0);
+				matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
+				matrixCollider = matrixCollider * glm::mat4(std::get<0>(it->second).u);
+				matrixCollider = glm::scale(matrixCollider, std::get<0>(it->second).e * 2.0f);
+				boxCollider2.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+				boxCollider2.enableWireMode();
+				boxCollider2.render(matrixCollider);
+			}
+		}
+
+		//Aqui se dibuja la caja 1
 		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
@@ -1812,6 +2274,7 @@ void applicationLoop() {
 			boxCollider.render(matrixCollider);
 		}
 
+		//Aqui se dibuja la esfera
 		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
@@ -1845,6 +2308,39 @@ void applicationLoop() {
 		/*******************************************
 		 * Test Colisions
 		 *******************************************/
+
+		for (std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersOBB2.begin(); it != collidersOBB2.end(); it++) {//Recorre la primer lista de colliders
+			bool isCollision = false;
+			for (std::map<std::string,
+				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
+				if (it != jt
+					&& testOBBOBB(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
+							/*if (jt->first == "jarron") {
+								std::cout << "Colision " << it->first << " with "
+									<< jt->first << std::endl;
+								dibujaJarron = false;
+								//isCollision = false;
+							}*/
+					std::cout << "Colision " << it->first << " with "
+						<< jt->first << std::endl;
+					int op;
+					std::istringstream(it->first) >> op;
+					jarronE[op] = false;
+
+					//std::cout << jarronEtiqueta[0] << std::endl;
+					dibujaJarron = false;
+					isCollision = true;
+				}
+			}
+			addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
+		}
+
 		for (std::map<std::string,
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
@@ -1855,8 +2351,8 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 					isCollision = true;
 				}
 			}
@@ -1873,8 +2369,8 @@ void applicationLoop() {
 				if (it != jt
 						&& testSphereSphereIntersection(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 					isCollision = true;
 				}
 			}
@@ -1891,8 +2387,8 @@ void applicationLoop() {
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first, isCollision);
 				}
@@ -2082,6 +2578,12 @@ void prepareScene(){
 
 	modelAircraft.setShader(&shaderMulLighting);
 
+	modelAntorcha.setShader(&shaderMulLighting);
+	modelMuro.setShader(&shaderMulLighting);
+	modeloLaberinto.setShader(&shaderMulLighting);
+	modeloArco.setShader(&shaderMulLighting);
+	modeloJarron.setShader(&shaderMulLighting);
+
 	terrain.setShader(&shaderTerrain);
 
 	// Helicopter
@@ -2127,6 +2629,12 @@ void prepareDepthScene(){
 
 	modelAircraft.setShader(&shaderDepth);
 
+	modelAntorcha.setShader(&shaderDepth);
+	modelMuro.setShader(&shaderDepth);
+	modeloLaberinto.setShader(&shaderDepth);
+	modeloArco.setShader(&shaderDepth);
+	modeloJarron.setShader(&shaderDepth);
+
 	terrain.setShader(&shaderDepth);
 
 	// Helicopter
@@ -2171,6 +2679,7 @@ void renderScene(bool renderParticles){
 	glm::mat4 modelCesped = glm::mat4(1.0);
 	modelCesped = glm::translate(modelCesped, glm::vec3(0.0, 0.0, 0.0));
 	modelCesped = glm::scale(modelCesped, glm::vec3(200.0, 0.001, 200.0));
+
 	// Se activa la textura del background
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID);
@@ -2202,16 +2711,69 @@ void renderScene(bool renderParticles){
 	//Rock render
 	matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
 	modelRock.render(matrixModelRock);
-	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
-	glActiveTexture(GL_TEXTURE0);
+	
+
+	//Render del Arco
+	glm::mat4 modelMatrixArcoBody = glm::mat4(modelMatrixArco);
+	modelMatrixArcoBody[3][1] = terrain.getHeightTerrain(modelMatrixArcoBody[3][0], modelMatrixArcoBody[3][2]) + 4.0;
+	modelMatrixArcoBody = glm::scale(modelMatrixArcoBody, glm::vec3(0.7, 0.7, 0.7));
+	modeloArco.render(modelMatrixArcoBody);
+
+	//Render de los jarrones
+	for (int i = 0; i < jarronPosition.size(); i++) {
+		if (jarronE[i]) {
+			jarronPosition[i].y = terrain.getHeightTerrain(jarronPosition[i].x, jarronPosition[i].z);
+			modeloJarron.setPosition(jarronPosition[i]);
+			modeloJarron.setScale(glm::vec3(1.0, 1.0, 1.0));
+			modeloJarron.setOrientation(glm::vec3(0, jarronOrientation[i], 0));
+			modeloJarron.render();
+		}
+	}
+
+	//Render de las paredes del muro
+	for (int i = 0; i < muro1Position.size(); i++) {
+		muro1Position[i].y = terrain.getHeightTerrain(muro1Position[i].x, muro1Position[i].z);
+		modelMuro.setPosition(muro1Position[i]);
+		modelMuro.setScale(glm::vec3(escalaX, escalaY, escalaZ));
+		modelMuro.setOrientation(glm::vec3(0, muro1Orientation[i], 0));
+		modelMuro.render();
+	}
+
+	//Render de los muros del laberinto
+	for (int i = 0; i < laberintoPosition.size(); i++) {
+		laberintoPosition[i].y = terrain.getHeightTerrain(laberintoPosition[i].x, laberintoPosition[i].z);
+		modeloLaberinto.setPosition(laberintoPosition[i]);
+		modeloLaberinto.setScale(glm::vec3(1.0, 1.5, 1.0));
+		modeloLaberinto.setOrientation(glm::vec3(0, laberintoOrientation[i], 0));
+		modeloLaberinto.render();
+	}
 
 	// Render the lamps
-	for (int i = 0; i < lamp1Position.size(); i++){
+	/*for (int i = 0; i < lamp1Position.size(); i++){
 		lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x, lamp1Position[i].z);
 		modelLamp1.setPosition(lamp1Position[i]);
 		modelLamp1.setScale(glm::vec3(0.5, 0.5, 0.5));
 		modelLamp1.setOrientation(glm::vec3(0, lamp1Orientation[i], 0));
 		modelLamp1.render();
+	}*/
+
+	// Render de las lamparas y antorchas
+	for (int i = 0; i < lamp1Position.size(); i++) {
+		if (i < 3) {
+			lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x, lamp1Position[i].z);
+			modelLamp1.setPosition(lamp1Position[i]);
+			modelLamp1.setScale(glm::vec3(0.5, 0.5, 0.5));
+			modelLamp1.setOrientation(glm::vec3(0, lamp1Orientation[i], 0));
+			modelLamp1.render();
+		}
+		else {
+			lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x, lamp1Position[i].z) + 4.0;
+			modelAntorcha.setPosition(lamp1Position[i]);
+			modelAntorcha.setScale(glm::vec3(1.0, 1.0, 1.0));
+			modelAntorcha.setOrientation(glm::vec3(15, lamp1Orientation[i], 0));
+			modelAntorcha.render();
+		}
+
 	}
 
 	for (int i = 0; i < lamp2Position.size(); i++){
@@ -2225,6 +2787,9 @@ void renderScene(bool renderParticles){
 		modelLampPost2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
 		modelLampPost2.render();
 	}
+
+	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
+	glActiveTexture(GL_TEXTURE0);
 
 	// Grass
 	glDisable(GL_CULL_FACE);
