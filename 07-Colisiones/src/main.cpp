@@ -48,6 +48,7 @@
 int screenWidth;
 int screenHeight;
 bool dibujaJarron = true;
+int op = 0;
 
 GLFWwindow *window;
 
@@ -60,6 +61,9 @@ Shader shaderMulLighting;
 Shader shaderTerrain;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
+//Camara para primera persona
+std::shared_ptr<FirstPersonCamera> camera2(new FirstPersonCamera());
+
 float distanceFromTarget = 7.0;
 
 Sphere skyboxSphere(20, 20);
@@ -670,6 +674,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
 
+	camera->setPosition(glm::vec3(0.0, 0.0, 0.0));
+
 	// Definimos el tamanio de la imagen
 	int imageWidth, imageHeight;
 	FIBITMAP *bitmap;
@@ -1155,13 +1161,30 @@ bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
+	//Movimientos de las camaras
+	
 
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 		camera->mouseMoveCamera(0.0, offsetY, deltaTime);
+	//offsetX = 0;
+	//offsetY = 0;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera2->moveFrontCamera(true, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera2->moveFrontCamera(false, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera2->moveRightCamera(false, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera2->moveRightCamera(true, deltaTime);
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		camera2->mouseMoveCamera(offsetX, offsetY, deltaTime);
+
 	offsetX = 0;
 	offsetY = 0;
+	
+	
 
 	// Seleccionar modelo
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
@@ -1287,6 +1310,15 @@ bool processInput(bool continueApplication) {
 		modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(0, 0, 1.45));
 	}
 
+	
+	//Para cambiar de camara
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+		op = 1;
+	}
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+		op = 0;
+	}
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -1394,7 +1426,15 @@ void applicationLoop() {
 		camera->setCameraTarget(target);
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
-		view = camera->getViewMatrix();
+
+		//view = camera->getViewMatrix();
+		if (op == 0) {
+			view = camera2->getViewMatrix();
+		}
+		else {
+			view = camera->getViewMatrix();
+			
+		}
 
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
@@ -2264,6 +2304,8 @@ void applicationLoop() {
 		// Constantes de animaciones
 		rotHelHelY += 0.5;
 		animationIndex = 1;
+
+		
 
 		/*******************************************
 		 * State machines

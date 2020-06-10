@@ -23,7 +23,7 @@ void main()
         float t = Time - StartTime;
 
         if( t < ParticleLifetime ) {
-            pos = VertexInitVel * t + Gravity * t * t;
+			pos = VertexInitVel * t + Gravity * t * t;
             Transp = 1.0 - t / ParticleLifetime;
         }
     }

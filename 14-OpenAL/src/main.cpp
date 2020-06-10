@@ -51,11 +51,13 @@
 //Shadow box include
 #include "Headers/ShadowBox.h"
 
+
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 int screenWidth;
 int screenHeight;
-
+int op = 0; //Para cambio de camara
+int cuentaJarrones = 0;
 const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
 GLFWwindow *window;
@@ -77,6 +79,9 @@ Shader shaderViewDepth;
 Shader shaderDepth;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
+//Camara para primera persona
+std::shared_ptr<FirstPersonCamera> camera2(new FirstPersonCamera());
+
 float distanceFromTarget = 7.0;
 
 Sphere skyboxSphere(20, 20);
@@ -109,14 +114,14 @@ Model modelDartLegoLeftHand;
 Model modelDartLegoRightHand;
 Model modelDartLegoLeftLeg;
 Model modelDartLegoRightLeg;
+//Modelo del fantasma
+Model modelFantasma;
 // Lamps
 Model modelLamp1;
 Model modelLamp2;
 Model modelLampPost2;
 // Hierba
 Model modelGrass;
-
-
 //Antorcha
 Model modelAntorcha;
 //Modelo del muro
@@ -127,10 +132,27 @@ Model modeloLaberinto;
 Model modeloJarron;
 //Modelo de la puerta
 Model modeloArco;
-
 // Fountain
 //Modelo de la fuente
 Model modelFountain;
+//Modelo de la puerta cerrada
+Model modelPuertaCerrada;
+
+//Modelos de los letreros
+//Modelo de letrero Fin
+Model modelLetreroFin;
+//Modelo de letrero Inicio
+Model modelLetreroInicio;
+//Modelo de letrero Conitunar
+Model modelLetreroContinuar;
+//Modelo de letrero Completo
+Model modelLetreroCompleto;
+
+//Modelo de la puerta Final
+Model modelMarco;
+Model modelPuertaIzquierda;
+Model modelPuertaDerecha;
+
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
@@ -181,11 +203,31 @@ glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
 glm::mat4 modelMatrixJarron = glm::mat4(1.0f);
 //Matriz del arco
 glm::mat4 modelMatrixArco = glm::mat4(1.0f);
+//Matriz de la puerta cerrada
+glm::mat4 modelMatrixPuertaCerrda = glm::mat4(1.0f);
+//Matriz del fantasma
+glm::mat4 modelMatrixFantasma = glm::mat4(1.0f);
+
+//Mtrices para los letreros
+//Matriz del letrero de fin
+glm::mat4 modelMatrixLetreroFin = glm::mat4(1.0f);
+glm::mat4 modelMatrixLetreroContinuar = glm::mat4(1.0f);
+glm::mat4 modelMatrixLetreroInicio = glm::mat4(1.0f);
+glm::mat4 modelMatrixLetreroCompleto = glm::mat4(1.0f);
+
+
+//Matriz de la puerta
+glm::mat4 modelMatrixPuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixPuertaIzquierda = glm::mat4(1.0f);
+glm::mat4 modelMatrixPuertaDerecha = glm::mat4(1.0f);
+glm::mat4 modelMatrixPuertaMarco = glm::mat4(1.0f);
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 2;
 bool enableCountSelected = true;
+
+float rotBuzzLeftArm = 0.0, rotBuzzRightArm = 0.0;
 
 // Variables to animations keyframes
 bool saveFrame = false, availableSave = true;
@@ -206,6 +248,7 @@ int indexFrameDartNext = 1;
 float interpolationDart = 0.0;
 int maxNumPasosDart = 200;
 int numPasosDart = 0;
+int ganador=0;
 
 // Var animate helicopter
 float rotHelHelY = 0.0;
@@ -218,6 +261,30 @@ float dorRotCount = 0.0;
 float escalaX = 10;
 float escalaY = 12;
 float escalaZ = 10;
+
+//variables de escala del Muro
+float escalaXp = 7;
+float escalaYp = 10;
+float escalaZp = 1;
+
+//variables de escala del Muro
+float escalaXA = 10.2;
+float escalaYA = 10;
+float escalaZA = 5;
+
+//puerta abierta
+float abrir = 0.0;
+
+//Vida del personaje
+float vida = 10.0;
+bool vivo = true;
+float vidaFantasma = 2.0;
+bool fantasmaVivo = true;
+//Variables para reiniciar el juego
+bool inicioFin = true;
+bool juegoTerminado = false;
+bool trasladaPersonaje = false;
+bool complet = false;
 
 //Muro posiciones
 //Vector de vectores de posicion
@@ -337,8 +404,8 @@ std::vector<glm::vec3> laberintoPosition = {
 	glm::vec3(-0.3906250,0, -82.9375),
 	glm::vec3(-8.3906250,0, -90.9375),
 	glm::vec3(-11.1171875,0, -90.9375),
-	glm::vec3(-480,0,	17.1875),
-	glm::vec3(-32,0,	17.1875),
+	glm::vec3(-48,0,	17.1875),
+	glm::vec3(-32.390625,0,	17.1875),
 	glm::vec3(-43.359375, 0, 9.1875),
 	glm::vec3(-43.359375,0, -6.8125),
 	glm::vec3(-53.7109375,0, -14.8125),
@@ -377,14 +444,21 @@ std::vector<glm::vec3> laberintoPosition = {
 	glm::vec3(38.1015625,0, -89.78125),
 	glm::vec3(70.1015625,0, -56.640625),
 	glm::vec3(22.0859375,0, -73.8203125),
-	glm::vec3(14.0859375,0, -81.78125)
+	glm::vec3(14.0859375,0, -81.78125),
+	glm::vec3(-76.9609375,0, 2.34375),
+	glm::vec3(-60.5859375,0, 2.34375),
+	glm::vec3(-80.8671875,0, -69.140625),
+	glm::vec3(75.0078125,0, -70.703125),
+	glm::vec3(19.15625,0, -90.9375),
+	glm::vec3(-64,0, 17.1875),
+	glm::vec3(-79,0, 17.1875)
 };
 
 //Vector de orientacion de los muros del laberinto
 std::vector<float> laberintoOrientation = {
 	0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 0, 0, 90, 90, 0, 90, 90, 90, 90, 0, 0, 0, 0, 90, 90, 0, 0,
 	90, 90, 90, 0, 0, 90, 90, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 90, 0, 0, 0, 90, 90,
-	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90
+	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90,0,0,0,0, 90,0,0
 };
 
 // Lamps positions
@@ -483,18 +557,18 @@ std::vector<float> jarronOrientation = { 0,0,0,0,0,0 };
 //Vector de etiquetas de jarrones
 
 //Vector de indicadores de jarrones
-std::vector<int> jarronId = { 1, 1 };
+//std::vector<int> jarronId = { 1, 1 };
 bool jarronE[] = { true, true, true, true , true , true };
 
 bool dibujaJarron = true;
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = {
-		{"aircraft", glm::vec3(10.0, 0.0, -17.5)},
-		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
+		{"aircraft", glm::vec3(-10.0, 0.0, 60.0)},
+		{"lambo", glm::vec3(10.0, 0.0, 60.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
-		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
-		{"fire", glm::vec3(0.0, 0.0, 7.0)}
+		{"fountain", glm::vec3(-14.0625, 0.0, -93.75)},
+		{"fire", glm::vec3(-12.0, 0.0, 56.0)}
 };
 
 double deltaTime;
@@ -524,6 +598,8 @@ std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > col
 
 // Framesbuffers
 GLuint depthMap, depthMapFBO;
+
+
 
 /**********************
  * OpenAL config
@@ -733,8 +809,11 @@ void initParticleBuffersFire() {
 	glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 }
 
+
+
 // Implementacion de todas las funciones.
 void init(int width, int height, std::string strTitle, bool bFullScreen) {
+	
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -772,6 +851,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+	
 
 	// Init glew
 	glewExperimental = GL_TRUE;
@@ -874,6 +955,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoRightLeg.loadModel("../models/LegoDart/LeoDart_right_leg.obj");
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
 
+	//Modelo del fantasma
+	modelFantasma.loadModel("../models/Fantasma/Fantasma3/f1.obj");
+	modelFantasma.setShader(&shaderMulLighting);
+
 	//Modelo del muro
 	modelMuro.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo2.obj");
 	modelMuro.setShader(&shaderMulLighting);
@@ -893,6 +978,18 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modeloArco.loadModel("../models/Personaje_proyecto/Arco/Arco3.obj");
 	modeloArco.setShader(&shaderMulLighting);
 
+	//Modelo de la parede cerrada
+	modelPuertaCerrada.loadModel("../models/PuertaFinal/PuertaCerrada.obj");
+	modelPuertaCerrada.setShader(&shaderMulLighting);
+
+	//Puerta
+	modelMarco.loadModel("../models/PuertaFinal/Marco.obj");
+	modelMarco.setShader(&shaderMulLighting);
+	modelPuertaDerecha.loadModel("../models/PuertaFinal/PuertaDerecha.obj");
+	modelPuertaDerecha.setShader(&shaderMulLighting);
+	modelPuertaIzquierda.loadModel("../models/PuertaFinal/PuertaIzquierda.obj");
+	modelPuertaIzquierda.setShader(&shaderMulLighting);
+
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
 	modelLamp1.setShader(&shaderMulLighting);
@@ -909,8 +1006,23 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelFountain.loadModel("../models/fountain/fountain.obj");
 	modelFountain.setShader(&shaderMulLighting);
 
+	//Modelos de los letreros
+	//Letrero de fin
+	modelLetreroFin.loadModel("../models/Texto/LetreroDeFin.obj");
+	modelLetreroFin.setShader(&shaderMulLighting);
+	//Letrero de continuar
+	modelLetreroContinuar.loadModel("../models/Texto/letrasParaReinicio.obj");
+	modelLetreroContinuar.setShader(&shaderMulLighting);
+	//Letrero de inicio
+	modelLetreroInicio.loadModel("../models/Texto/LetrasMissionInicio.obj");
+	modelLetreroInicio.setShader(&shaderMulLighting);
+	//Letrero de completo
+	modelLetreroCompleto.loadModel("../models/Texto/LetrasMissionPassed.obj");
+	modelLetreroCompleto.setShader(&shaderMulLighting);
+
 	//Mayow
-	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	//mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	mayowModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
@@ -1515,6 +1627,22 @@ void destroy() {
 	modeloJarron.destroy();
 	//Arco
 	modeloArco.destroy();
+	//Puerta cerrada
+	modelPuertaCerrada.destroy();
+	//Famntasma
+	modelFantasma.destroy();
+
+	//Puerta
+	modelMarco.destroy();
+	modelPuertaDerecha.destroy();
+	modelPuertaIzquierda.destroy();
+
+	//MOdelos de los letreros
+	//Letrero de fin
+	modelLetreroFin.destroy();
+	modelLetreroInicio.destroy();
+	modelLetreroCompleto.destroy();
+	modelLetreroContinuar.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1611,8 +1739,41 @@ bool processInput(bool continueApplication) {
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 		camera->mouseMoveCamera(0.0, offsetY, deltaTime);
+	//offsetX = 0;
+	//offsetY = 0;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera2->moveFrontCamera(true, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera2->moveFrontCamera(false, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera2->moveRightCamera(false, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera2->moveRightCamera(true, deltaTime);
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		camera2->mouseMoveCamera(offsetX, offsetY, deltaTime);
+
 	offsetX = 0;
 	offsetY = 0;
+
+	/*if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		rotBuzzLeftArm = (-1.57); abrir = 10;
+		rotBuzzRightArm = (-1.57);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
+		glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		rotBuzzLeftArm = 0.0;
+		rotBuzzRightArm = 0.0;
+		abrir = 0;
+	}
+		
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		rotBuzzRightArm -= 0.02;*/
 
 	// Seleccionar modelo
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
@@ -1704,31 +1865,105 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && vivo==true && complet == false){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
-	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.1));
 		animationIndex = 0;
-	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.1));
 		animationIndex = 0;
+	}
+	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && vivo == true) {
+		//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
+		animationIndex = 3;
+		
+	}
+	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS ) {
+		//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
+		
+		//animationIndex = 3;
+		if (vivo==false || complet==true) {
+			vivo = true;
+			//modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 60));
+			modelMatrixMayow = glm::translate(modelMatrixArco, glm::vec3(0, 0, 10));
+			modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
+			vida = 10;
+			vidaFantasma = 2;
+			//trasladaPersonaje = true;
+			//jarronE[] = { true, true, true, true , true , true };
+			for (int i = 0; i < jarronOrientation.size(); i++) {
+				jarronE[i] = true;
+			}
+			fantasmaVivo = true;
+			complet = false;
+			//abrir = 0;
+			rotBuzzLeftArm = (0.0); abrir = 0.0;
+			rotBuzzRightArm = (0.0);
+
+		}
+		
+		/*if (complet == true) {
+			modelMatrixMayow = glm::translate(modelMatrixArco, glm::vec3(0, 0, 10));
+			modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
+			complet = false;
+			vida = 10;
+			vidaFantasma = 2;
+			for (int i = 0; i < jarronOrientation.size(); i++) {
+				jarronE[i] = true;
+			}
+			cuentaJarrones = 0;
+			fantasmaVivo = true;
+
+		}*/
+		
+		//std::cout << ganador << std::endl;
+	}
+	//Para cambiar de camara
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+		op = 1;
+		//animationIndex = 3;
+	}
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+		op = 0;
 	}
 
 	glfwPollEvents();
 	return continueApplication;
 }
 
+/*const GLubyte letraA[20] = {
+	0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xff,  0xc0, 0xff,  0xc0, 0xc0, 0xc0,
+	0x61, 0x80, 0x3f, 0x00, 0x1e, 0x00
+};
+
+
+void mostrarTexto() {
+
+	glRasterPos3d(2, 0, 0);
+	glBitmap(10, 10, 0, 0, 0, 0, letraA);
+}*/
+
 void applicationLoop() {
 	bool psi = true;
-
 	glm::mat4 view;
 	glm::vec3 axis;
 	glm::vec3 target;
 	float angleTarget;
+
+	//Modelo del Fantasma
+	modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 45.703125));
+	modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	int state = 0;
+	float advanceCount = 0.0;
+	float rotCount = 0.0;
+	int numberAdvance = 0;
+	int maxAdvance = 0.0;
 
 	//Modelo del muro
 	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
@@ -1747,15 +1982,29 @@ void applicationLoop() {
 
 	//Modelo del Arco
 	modelMatrixArco = glm::translate(modelMatrixArco, glm::vec3(0.0, 0.0, 52.0));
+	
+	//Puerta Abierta
+	modelMatrixPuerta = glm::translate(modelMatrixPuerta, glm::vec3(-1.5625, 0.0, -94.5));
+	modelMatrixPuerta = glm::rotate(modelMatrixPuerta, glm::radians(90.0f), glm::vec3(0, 1, 0));
+	//modelMatrixPuerta[3][1] = terrain.getHeightTerrain(modelMatrixPuerta[3][0], modelMatrixPuerta[3][2]) + 0.2;
+	//modelMatrixPuerta = glm::scale(modelMatrixPuerta, glm::vec3(10.0f, 10.0f, 10.0f));
 
+
+	//Modelo de la puerta cerrada
+	modelMatrixPuertaCerrda = glm::translate(modelMatrixPuertaCerrda, glm::vec3(74.1953125, 0.0, 40.0));
+	//modelMatrixPuertaCerrda = glm::translate(modelMatrixPuertaCerrda, glm::vec3(0.0, 0.0, 52.0));
+	//modelMatrixPuertaCerrda = glm::scale(modelMatrixPuertaCerrda, glm::vec3(escalaXp, escalaYp, escalaZp));
+	
 	//Modelo de la roca
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
 
 	modelMatrixHeli = glm::translate(modelMatrixHeli, glm::vec3(5.0, 10.0, -5.0));
 
-	modelMatrixAircraft = glm::translate(modelMatrixAircraft, glm::vec3(10.0, 2.0, -17.5));
+	//Modelo del aircraft
+	modelMatrixAircraft = glm::translate(modelMatrixAircraft, glm::vec3(-10.0, 0.0, 60.0));
 
-	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(23.0, 0.0, 0.0));
+	//matriz del lambo
+	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(10.0, 0.0, 60.0));
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 	//Modelo de Mayow
@@ -1766,7 +2015,8 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
 
-	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(5.0, 0.0, -40.0));
+	//Modelo de la fuente
+	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(-14.0625, 0.0, -93.75));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]) + 0.2;
 	modelMatrixFountain = glm::scale(modelMatrixFountain, glm::vec3(10.0f, 10.0f, 10.0f));
 
@@ -1796,6 +2046,13 @@ void applicationLoop() {
 			glfwPollEvents();
 			continue;
 		}
+		//Para el texto
+		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		//glRasterPos2d(2, 0);
+		//glBitmap(10, 10, 0, 0, 0, 0, letraA);
+
+
 		lastTime = currTime;
 		TimeManager::Instance().CalculateFrameRate(true);
 		deltaTime = TimeManager::Instance().DeltaTime;
@@ -1831,7 +2088,15 @@ void applicationLoop() {
 		camera->setCameraTarget(target);
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
-		view = camera->getViewMatrix();
+
+		//view = camera->getViewMatrix();
+		if (op == 0) {
+			view = camera2->getViewMatrix();
+		}
+		else {
+			view = camera->getViewMatrix();
+
+		}
 
 		shadowBox->update(screenWidth, screenHeight);
 		shadowBox->getCenter();
@@ -2083,6 +2348,37 @@ void applicationLoop() {
 		dartLegoBodyCollider.e = modelDartLegoBody.getObb().e * glm::vec3(0.5, 0.5, 0.5);
 		addOrUpdateColliders(collidersOBB, "dart", dartLegoBodyCollider, modelMatrixDart);
 
+		//Collider del Fantasma
+		/*glm::mat4 modelmatrixColliderFantasma = glm::mat4(modelMatrixFantasma);
+		AbstractModel::OBB fantasmaoBodyCollider;
+		// Set the orientation of collider before doing the scale
+		fantasmaoBodyCollider.u = glm::quat_cast(modelMatrixFantasma);
+		modelmatrixColliderFantasma = glm::scale(modelmatrixColliderFantasma, glm::vec3(1.0, 1.0, 1.0));
+		modelmatrixColliderFantasma = glm::translate(modelmatrixColliderFantasma,
+			glm::vec3(modelFantasma.getObb().c.x,
+				modelFantasma.getObb().c.y,
+				modelFantasma.getObb().c.z));
+		fantasmaoBodyCollider.c = glm::vec3(modelmatrixColliderFantasma[3]);
+		fantasmaoBodyCollider.e = modelFantasma.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "Fantasma", fantasmaoBodyCollider, modelMatrixFantasma);*/
+
+		//Collider del fantasma
+		if (fantasmaVivo) {
+			glm::mat4 modelMatrixColliderFantasma = glm::mat4(modelMatrixFantasma);
+			AbstractModel::SBB fantasmaCollider;
+			modelMatrixColliderFantasma = glm::scale(modelMatrixColliderFantasma, glm::vec3(1.0, 1.0, 1.0));
+			//modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, modelFantasma.getSbb().c);
+			modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma,
+				glm::vec3(modelFantasma.getSbb().c.x,
+					modelFantasma.getSbb().c.y,
+					modelFantasma.getSbb().c.z));
+			fantasmaCollider.c = glm::vec3(modelMatrixColliderFantasma[3]);
+			fantasmaCollider.ratio = modelFantasma.getSbb().ratio * 1.0;
+			addOrUpdateColliders(collidersSBB, "fantasma", fantasmaCollider, modelMatrixFantasma);
+		}
+		
+
+
 		// Collider del aricraft
 		glm::mat4 modelMatrixColliderAircraft = glm::mat4(modelMatrixAircraft);
 		AbstractModel::OBB aircraftCollider;
@@ -2095,6 +2391,44 @@ void applicationLoop() {
 		aircraftCollider.c = glm::vec3(modelMatrixColliderAircraft[3]);
 		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
+
+		// Collider de la puerta cerrada
+		glm::mat4 modelMatrixColliderPuertaCerrada = glm::mat4(modelMatrixPuertaCerrda);
+		AbstractModel::OBB puertaCerradaCollider;
+		// Set the orientation of collider before doing the scale
+		puertaCerradaCollider.u = glm::quat_cast(modelMatrixPuertaCerrda);
+		modelMatrixColliderPuertaCerrada = glm::scale(modelMatrixColliderPuertaCerrada, glm::vec3(escalaXp, escalaYp, escalaZp));
+		modelMatrixColliderPuertaCerrada = glm::translate(modelMatrixColliderPuertaCerrada, modelPuertaCerrada.getObb().c);
+		puertaCerradaCollider.c = glm::vec3(modelMatrixColliderPuertaCerrada[3]);
+		puertaCerradaCollider.e = modelPuertaCerrada.getObb().e * glm::vec3(escalaXp, escalaYp, escalaZp);
+		addOrUpdateColliders(collidersOBB, "puertaCerrada", puertaCerradaCollider, modelMatrixPuertaCerrda);
+
+		// Collider de la puerta abierta derecha
+		glm::mat4 modelMatrixColliderPuertaAbierta = glm::mat4(modelMatrixPuerta);
+		AbstractModel::OBB puertaAbiertaaCollider;
+		// Set the orientation of collider before doing the scale
+		puertaAbiertaaCollider.u = glm::quat_cast(modelMatrixPuerta);
+		modelMatrixColliderPuertaAbierta = glm::scale(modelMatrixColliderPuertaAbierta, glm::vec3(escalaXA, escalaYA, escalaZA));
+		modelMatrixColliderPuertaAbierta = glm::translate(modelMatrixColliderPuertaAbierta, modelMarco.getObb().c);
+		//modelMatrixColliderPuertaAbierta = glm::rotate(modelMatrixColliderPuertaAbierta, rotBuzzRightArm, glm::vec3(0, 1, 0));
+		puertaAbiertaaCollider.c = glm::vec3(modelMatrixColliderPuertaAbierta[3]);
+		puertaAbiertaaCollider.e = modelMarco.getObb().e * glm::vec3(escalaXA, escalaYA, escalaZA);
+		addOrUpdateColliders(collidersOBB, "puertaAbierta", puertaAbiertaaCollider, modelMatrixPuerta);
+
+		/*AbstractModel::OBB muroCollider;
+		glm::mat4 modelMatrixCollidermuro = glm::mat4(1.0);
+		modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro,glm::vec3( -1.5625, 0.0, -93.796875));
+		modelMatrixCollidermuro = glm::rotate(modelMatrixCollidermuro, glm::radians(90),glm::vec3(0, 1, 0));
+		addOrUpdateColliders(collidersOBB, "PuertaAbierta", muroCollider, modelMatrixCollidermuro);
+		// Set the orientation of collider before doing the scale
+		muroCollider.u = glm::quat_cast(modelMatrixCollidermuro);
+		modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+		modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, modelMuro.getObb().c);
+		muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
+		muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
+		std::get<0>(collidersOBB.find("muro1-" + std::to_string(i))->second) = muroCollider;*/
+
+		
 
 		//Collider del la rock
 		AbstractModel::SBB rockCollider;
@@ -2230,8 +2564,12 @@ void applicationLoop() {
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
 		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
-		modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
-				glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		//modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		//if (trasladaPersonaje == true) {
+			//modelmatrixColliderMayow = glm::translate(modelMatrixArco, glm::vec3(0,0,2));
+			//mayowModelAnimate.setPosition(modelMatrixMayow,glm::vec3());
+			//trasladaPersonaje = false;
+		//}
 		// Set the orientation of collider before doing the scale
 		mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
 		modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow, glm::vec3(0.021, 0.021, 0.021));
@@ -2239,7 +2577,7 @@ void applicationLoop() {
 				glm::vec3(mayowModelAnimate.getObb().c.x,
 						mayowModelAnimate.getObb().c.y,
 						mayowModelAnimate.getObb().c.z));
-		mayowCollider.e = mayowModelAnimate.getObb().e * glm::vec3(0.021, 0.021, 0.021) * glm::vec3(0.787401574, 0.787401574, 0.787401574);
+		mayowCollider.e = mayowModelAnimate.getObb().e * glm::vec3(0.021, 0.021, 0.021);//* glm::vec3(0.787401574, 0.787401574, 0.787401574);
 		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
 		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider, modelMatrixMayow);
 
@@ -2327,12 +2665,24 @@ void applicationLoop() {
 								dibujaJarron = false;
 								//isCollision = false;
 							}*/
+					if (it->first == "5") {
+						complet = true;
+					}
 					std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;
 					int op;
 					std::istringstream(it->first) >> op;
 					jarronE[op] = false;
-
+					cuentaJarrones = 0;
+					for (int i = 0; i <= jarronPosition.size();i++) {
+						if (jarronE[i]==false) {
+							cuentaJarrones++;
+						}
+					}
+					if (cuentaJarrones >= 4) {
+						rotBuzzLeftArm = (-1.57); abrir = 10;
+						rotBuzzRightArm = (-1.57);
+					}
 					//std::cout << jarronEtiqueta[0] << std::endl;
 					dibujaJarron = false;
 					isCollision = true;
@@ -2351,6 +2701,11 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
+					/*if (it->first=="" && it->first == "mayow") {
+						complet = true;
+						std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;
+					}*/
 					/*std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;*/
 					isCollision = true;
@@ -2387,8 +2742,25 @@ void applicationLoop() {
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					/*std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;*/
+					if (it->first=="fantasma") {
+						std::cout << "Colision " << it->first << " with "
+							<< jt->first << vida << std::endl;
+						if ((animationIndex == 1 || animationIndex == 0)&& fantasmaVivo== true) {
+							vida = vida - 1;
+							if (vida <= 0) {
+								vivo = false;
+							}
+						}
+						else if(animationIndex==3){
+							vidaFantasma = vidaFantasma - 1;
+							std::cout << "Vida fantasma"<<vidaFantasma << std::endl;
+							if (vidaFantasma <= 0) {
+								fantasmaVivo = false;
+							}
+						}
+						
+					}
+					
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first, isCollision);
 				}
@@ -2504,6 +2876,50 @@ void applicationLoop() {
 			break;
 		}
 
+		// State machine para el fantasma1
+		//if (fantasmaVivo) {
+		switch (state) {
+		case 0:
+			if (numberAdvance == 0)
+				maxAdvance = 15.0;
+			else if (numberAdvance == 1)
+				maxAdvance = 0.5;
+			else if (numberAdvance == 2)
+				maxAdvance = 30.0;
+			else if (numberAdvance == 3)
+				maxAdvance = 0.5;
+			else if (numberAdvance == 4)
+				maxAdvance = 30.0;
+			state = 1;
+			break;
+		case 1:
+			modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			advanceCount += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount > maxAdvance) {
+				advanceCount = 0;
+				numberAdvance++;
+				state = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			rotCount += 0.5f;
+			if (rotCount >= 45) {
+				rotCount = 0;
+				state = 0;
+				if (numberAdvance > 4)
+					numberAdvance = 1;
+			}
+			break;
+		}
+		//}
+		
+
 		glfwSwapBuffers(window);
 
 		/****************************+
@@ -2573,10 +2989,30 @@ void applicationLoop() {
 void prepareScene(){
 
 	skyboxSphere.setShader(&shaderSkybox);
-
+	//Roca
 	modelRock.setShader(&shaderMulLighting);
-
+	//Aircraft
 	modelAircraft.setShader(&shaderMulLighting);
+
+	//Puerta Cerrad
+	modelPuertaCerrada.setShader(&shaderMulLighting);
+	//Fantasma
+	modelFantasma.setShader(&shaderMulLighting);
+
+	//Modelos de los letreros
+	//Letrero de fin
+	modelLetreroFin.setShader(&shaderMulLighting);
+	//Letrero de inicio
+	modelLetreroInicio.setShader(&shaderMulLighting);
+	//Letrero de Completo
+	modelLetreroCompleto.setShader(&shaderMulLighting);
+	//Letrero de continuar
+	modelLetreroContinuar.setShader(&shaderMulLighting);
+
+	//Puerta Abierta
+	modelPuertaDerecha.setShader(&shaderMulLighting);
+	modelPuertaIzquierda.setShader(&shaderMulLighting);
+	modelMarco.setShader(&shaderMulLighting);
 
 	modelAntorcha.setShader(&shaderMulLighting);
 	modelMuro.setShader(&shaderMulLighting);
@@ -2629,11 +3065,27 @@ void prepareDepthScene(){
 
 	modelAircraft.setShader(&shaderDepth);
 
+	//ModelosAgregados
 	modelAntorcha.setShader(&shaderDepth);
 	modelMuro.setShader(&shaderDepth);
 	modeloLaberinto.setShader(&shaderDepth);
 	modeloArco.setShader(&shaderDepth);
 	modeloJarron.setShader(&shaderDepth);
+	modelPuertaCerrada.setShader(&shaderDepth);
+	//Puerta Abierta
+	modelPuertaDerecha.setShader(&shaderDepth);
+	modelPuertaIzquierda.setShader(&shaderDepth);
+	modelMarco.setShader(&shaderDepth);
+
+	//Modelos de los letreros
+	//Letrero de fin
+	modelLetreroFin.setShader(&shaderDepth);
+	//Letrero de inicio
+	modelLetreroInicio.setShader(&shaderDepth);
+	//Letrero de Completo
+	modelLetreroCompleto.setShader(&shaderDepth);
+	//Letrero de continuar
+	modelLetreroContinuar.setShader(&shaderDepth);
 
 	terrain.setShader(&shaderDepth);
 
@@ -2659,6 +3111,9 @@ void prepareDepthScene(){
 	modelDartLegoRightHand.setShader(&shaderDepth);
 	modelDartLegoLeftLeg.setShader(&shaderDepth);
 	modelDartLegoRightLeg.setShader(&shaderDepth);
+
+	//Modelo del fantasma
+	modelFantasma.setShader(&shaderDepth);
 
 	//Lamp models
 	modelLamp1.setShader(&shaderDepth);
@@ -2711,13 +3166,52 @@ void renderScene(bool renderParticles){
 	//Rock render
 	matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
 	modelRock.render(matrixModelRock);
-	
+
+	//Render de la puerta cerrada
+	//glm::mat4 modelMatrixPuertaCerradaBody = glm::mat4(modelMatrixPuertaCerrda);
+	//modelMatrixPuertaCerrda[3][1] = terrain.getHeightTerrain(modelMatrixPuertaCerrda[3][0], modelMatrixPuertaCerrda[3][2]);
+	//modelMatrixPuertaCerrda = glm::scale(modelMatrixPuertaCerrda, glm::vec3(2.0, 2.0, 2.0));//Este casi es incesario
+	modelMatrixPuertaCerrda[3][1] = terrain.getHeightTerrain(modelMatrixPuertaCerrda[3][0], modelMatrixPuertaCerrda[3][2]);
+	modelPuertaCerrada.setScale(glm::vec3(escalaXp, escalaYp, escalaZp));
+	modelPuertaCerrada.render(modelMatrixPuertaCerrda);
+
+	//Render del Letrero
+
+
 
 	//Render del Arco
 	glm::mat4 modelMatrixArcoBody = glm::mat4(modelMatrixArco);
 	modelMatrixArcoBody[3][1] = terrain.getHeightTerrain(modelMatrixArcoBody[3][0], modelMatrixArcoBody[3][2]) + 4.0;
 	modelMatrixArcoBody = glm::scale(modelMatrixArcoBody, glm::vec3(0.7, 0.7, 0.7));
 	modeloArco.render(modelMatrixArcoBody);
+
+	//Render de la puerta abierta
+	modelMatrixPuertaMarco = glm::mat4(modelMatrixPuerta);
+	modelMatrixPuertaMarco[3][1] = terrain.getHeightTerrain(modelMatrixPuertaMarco[3][0], modelMatrixPuertaMarco[3][2]);
+	modelMatrixPuertaMarco = glm::scale(modelMatrixPuertaMarco, glm::vec3(escalaXA, escalaYA, escalaZA));
+	//modelMarco.setScale(glm::vec3(10.0, 10.0, 10.0));
+	modelMarco.render(modelMatrixPuertaMarco);
+
+	modelMatrixPuertaIzquierda = glm::mat4(modelMatrixPuertaMarco);
+	modelMatrixPuertaIzquierda[3][1] = terrain.getHeightTerrain(modelMatrixPuertaIzquierda[3][0], modelMatrixPuertaIzquierda[3][2]);
+	modelMatrixPuertaIzquierda = glm::translate(modelMatrixPuertaIzquierda, glm::vec3(0.169327, 0.324083, -0.040858));
+	//modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+	modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, rotBuzzLeftArm, glm::vec3(0, 1, 0));
+	//modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, glm::radians(5.0f), glm::vec3(1, 0, 0));
+	modelMatrixPuertaIzquierda = glm::translate(modelMatrixPuertaIzquierda, glm::vec3(-0.169327, -0.324083, 0.040858));
+	modelPuertaIzquierda.render(modelMatrixPuertaIzquierda);
+
+	modelMatrixPuertaDerecha = glm::mat4(modelMatrixPuertaMarco);
+	modelMatrixPuertaDerecha[3][1] = terrain.getHeightTerrain(modelMatrixPuertaDerecha[3][0], modelMatrixPuertaDerecha[3][2]);
+	modelMatrixPuertaDerecha = glm::translate(modelMatrixPuertaDerecha, glm::vec3(-0.188654, 0.323743, -0.044574));
+	//modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+	modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, rotBuzzRightArm, glm::vec3(0, 1, 0));
+	//modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, glm::radians(5.0f), glm::vec3(1, 0, 0));
+	modelMatrixPuertaDerecha = glm::translate(modelMatrixPuertaDerecha, glm::vec3(0.188654, -0.323743, 0.044574));
+	modelPuertaDerecha.render(modelMatrixPuertaDerecha);
+	//Para desplazar el collider de la puerta abierta
+	modelMatrixPuerta[3][1] = terrain.getHeightTerrain(modelMatrixPuerta[3][0], modelMatrixPuerta[3][2])+abrir;
+	
 
 	//Render de los jarrones
 	for (int i = 0; i < jarronPosition.size(); i++) {
@@ -2856,15 +3350,91 @@ void renderScene(bool renderParticles){
 	// Se regresa el cull faces IMPORTANTE para la capa
 	glEnable(GL_CULL_FACE);
 
+	// Fantasma
+	// Se deshabilita el cull faces IMPORTANTE para la capa
+	glDisable(GL_CULL_FACE);
+	modelMatrixFantasma[3][1] = terrain.getHeightTerrain(modelMatrixFantasma[3][0], modelMatrixFantasma[3][2])+2.0;
+	glm::mat4 modelMatrixFantasmaBody = glm::mat4(modelMatrixFantasma);
+	modelMatrixFantasmaBody = glm::scale(modelMatrixFantasmaBody, glm::vec3(1.0, 1.0, 1.0));
+	if (fantasmaVivo) {
+		modelFantasma.render(modelMatrixFantasmaBody);
+	}
+	
+	// Se regresa el cull faces IMPORTANTE para la capa
+	glEnable(GL_CULL_FACE);
+
 	/*******************************************
 	 * Custom Anim objects obj
 	 *******************************************/
 	modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
-	mayowModelAnimate.setAnimationIndex(animationIndex);
+	
+	if (vivo) {
+		mayowModelAnimate.setAnimationIndex(animationIndex);
+	}
+	else {
+		mayowModelAnimate.setAnimationIndex(4);
+	}
 	mayowModelAnimate.render(modelMatrixMayowBody);
 
+	// Letrero
+	// Se deshabilita el cull faces IMPORTANTE para la capa
+	if (vivo == false) {
+		//glDisable(GL_CULL_FACE);
+		modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]);
+		glm::mat4 modelMatrixLetreroBody = glm::mat4(modelMatrixLetreroFin);
+		modelMatrixLetreroBody = glm::scale(modelMatrixLetreroBody, glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixLetreroBody = glm::translate(modelMatrixLetreroBody,
+			glm::vec3(modelMatrixMayow[3][0],
+				modelMatrixMayow[3][1]+2,
+				modelMatrixMayow[3][2]));
+		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelLetreroFin.render(modelMatrixLetreroBody);
+		// Se regresa el cull faces IMPORTANTE para la capa
+		//glEnable(GL_CULL_FACE);
+
+		//modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]) + 2.0;
+		modelMatrixLetreroInicio[3][1] = terrain.getHeightTerrain(modelMatrixLetreroInicio[3][0], modelMatrixLetreroInicio[3][2]);
+		glm::mat4 modelMatrixLetreroBody2 = glm::mat4(modelMatrixLetreroInicio);
+		modelMatrixLetreroBody2 = glm::scale(modelMatrixLetreroBody2, glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixLetreroBody2 = glm::translate(modelMatrixLetreroBody2,
+			glm::vec3(modelMatrixMayow[3][0],
+				modelMatrixMayow[3][1],
+				modelMatrixMayow[3][2]));
+		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelLetreroContinuar.render(modelMatrixLetreroBody2);
+		// Se regresa el cull faces IMPORTANTE para la capa
+		//glEnable(GL_CULL_FACE);
+	}
+	//std::cout << ganador << std::endl;
+	if (complet == true) {
+		//glDisable(GL_CULL_FACE);
+		modelMatrixLetreroCompleto [3][1] = terrain.getHeightTerrain(modelMatrixLetreroCompleto[3][0], modelMatrixLetreroCompleto[3][2]);
+		glm::mat4 modelMatrixLetreroBody = glm::mat4(modelMatrixLetreroCompleto);
+		modelMatrixLetreroBody = glm::scale(modelMatrixLetreroBody, glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixLetreroBody = glm::translate(modelMatrixLetreroBody,
+			glm::vec3(modelMatrixMayow[3][0],
+				modelMatrixMayow[3][1] + 2,
+				modelMatrixMayow[3][2]));
+		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelLetreroCompleto.render(modelMatrixLetreroBody);
+		// Se regresa el cull faces IMPORTANTE para la capa
+		//glEnable(GL_CULL_FACE);
+
+		//modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]) + 2.0;
+		modelMatrixLetreroInicio[3][1] = terrain.getHeightTerrain(modelMatrixLetreroInicio[3][0], modelMatrixLetreroInicio[3][2]);
+		glm::mat4 modelMatrixLetreroBody2 = glm::mat4(modelMatrixLetreroInicio);
+		modelMatrixLetreroBody2 = glm::scale(modelMatrixLetreroBody2, glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixLetreroBody2 = glm::translate(modelMatrixLetreroBody2,
+			glm::vec3(modelMatrixMayow[3][0],
+				modelMatrixMayow[3][1],
+				modelMatrixMayow[3][2]));
+		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelLetreroContinuar.render(modelMatrixLetreroBody2);
+		// Se regresa el cull faces IMPORTANTE para la capa
+		//glEnable(GL_CULL_FACE);
+	}
 	/**********
 	 * Update the position with alpha objects
 	 */

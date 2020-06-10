@@ -91,6 +91,11 @@ Model modelBuzzManoIzquierda;
 Model modelBuzzPieDerecho;
 Model modelBuzzPieIzquierdo;
 
+//Modelo de la puerta
+Model modelMarco;
+Model modelPuertaIzquierda;
+Model modelPuertaDerecha;
+
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID , textureLandingPadID; //creamos el identificador de la textura
 GLuint skyboxTextureID;
 
@@ -121,6 +126,9 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixBuzz = glm::mat4(1.0f);
+//Matriz de la puerta
+glm::mat4 modelMatrixPuerta = glm::mat4(1.0f);
+
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
@@ -316,6 +324,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelBuzzPieDerecho.setShader(&shaderMulLighting);
 	modelBuzzPieIzquierdo.loadModel("../models/buzz/pieIzquierdoBuzz.obj");
 	modelBuzzPieIzquierdo.setShader(&shaderMulLighting);
+
+	//Puerta
+	modelMarco.loadModel("../models/PuertaFinal/Marco.obj");
+	modelMarco.setShader(&shaderMulLighting);
+	modelPuertaDerecha.loadModel("../models/PuertaFinal/PuertaDerecha.obj");
+	modelPuertaDerecha.setShader(&shaderMulLighting);
+	modelPuertaIzquierda.loadModel("../models/PuertaFinal/PuertaIzquierda.obj");
+	modelPuertaIzquierda.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -559,6 +575,11 @@ void destroy() {//para poder eliminar los objetos que no utilizo y no se queden 
 	modelBuzzPieDerecho.destroy();
 	modelBuzzPieIzquierdo.destroy();
 
+	//Puerta
+	modelMarco.destroy();
+	modelPuertaDerecha.destroy();
+	modelPuertaIzquierda.destroy();
+
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &textureCespedID);
@@ -757,6 +778,7 @@ void applicationLoop() {
 
 	modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(27.5, 0, 30.0));
 	modelMatrixEclipse = glm::rotate(modelMatrixEclipse, glm::radians(180.0f), glm::vec3(0, 1, 0));
+	
 	int state = 0;
 	float advanceCount = 0.0;
 	float rotCount = 0.0;
@@ -781,6 +803,9 @@ void applicationLoop() {
 
 	//buzz
 	modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(23.0, 0.0, 8.0));
+
+	//Puerta
+	modelMatrixPuerta = glm::translate(modelMatrixPuerta, glm::vec3(15.0, 0.0, 9.0));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -1102,6 +1127,30 @@ void applicationLoop() {
 		modelMatrixBuzzRightLeg = glm::rotate(modelMatrixBuzzRightLeg, rotBuzzRightLeg, glm::vec3(1, 0, 0));
 		modelMatrixBuzzRightLeg = glm::translate(modelMatrixBuzzRightLeg, glm::vec3(0.08796, -0.305697, 0.020254));
 		modelBuzzPieDerecho.render(modelMatrixBuzzRightLeg);
+
+		glEnable(GL_CULL_FACE);
+
+		//Puerta
+		glDisable(GL_CULL_FACE);
+		glm::mat4 modelMatrixPuertaMarco = glm::mat4(modelMatrixPuerta);
+		modelMatrixPuertaMarco = glm::scale(modelMatrixPuertaMarco, glm::vec3(1.0, 1.0, 1.0));
+		modelMarco.render(modelMatrixPuertaMarco);
+
+		glm::mat4 modelMatrixPuertaIzquierda = glm::mat4(modelMatrixPuertaMarco);
+		modelMatrixPuertaIzquierda = glm::translate(modelMatrixPuertaIzquierda, glm::vec3(0.169327, 0.324083, -0.040858));
+		//modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+		modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, rotBuzzLeftArm, glm::vec3(0, 1, 0));
+		//modelMatrixPuertaIzquierda = glm::rotate(modelMatrixPuertaIzquierda, glm::radians(5.0f), glm::vec3(1, 0, 0));
+		modelMatrixPuertaIzquierda = glm::translate(modelMatrixPuertaIzquierda, glm::vec3(-0.169327, -0.324083, 0.040858));
+		modelPuertaIzquierda.render(modelMatrixPuertaIzquierda);
+
+		glm::mat4 modelMatrixPuertaDerecha = glm::mat4(modelMatrixPuertaMarco);
+		modelMatrixPuertaDerecha = glm::translate(modelMatrixPuertaDerecha, glm::vec3(-0.188654, 0.323743, -0.044574));
+		//modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, glm::radians(-5.0f), glm::vec3(1, 0, 0));
+		modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, rotBuzzRightArm, glm::vec3(0, 1, 0));
+		//modelMatrixPuertaDerecha = glm::rotate(modelMatrixPuertaDerecha, glm::radians(5.0f), glm::vec3(1, 0, 0));
+		modelMatrixPuertaDerecha = glm::translate(modelMatrixPuertaDerecha, glm::vec3(0.188654, -0.323743, 0.044574));
+		modelPuertaDerecha.render(modelMatrixPuertaDerecha);
 
 		glEnable(GL_CULL_FACE);
 

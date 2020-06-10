@@ -47,6 +47,7 @@
 int screenWidth;
 int screenHeight;
 
+
 GLFWwindow *window;
 
 Shader shader;
@@ -94,7 +95,7 @@ Model modelLamp2;
 Model modelLampPost2;
 // Hierba
 Model modelGrass;
-// Fountain
+// Fountain, es para el modelo de la fuente, pero no para las particulas
 Model modelFountain;
 // Model animate instance
 // Mayow
@@ -102,6 +103,7 @@ Model mayowModelAnimate;
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
 
+//Variables para las texturas
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
 GLuint textureParticleFountainID;
@@ -133,8 +135,9 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+//Matriz de la fuente, pero no de las particulas
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
-//agregando otra fuente
+//agregando otra fuente, pero no de las particulas 
 glm::mat4 modelMatrixFountain1 = glm::mat4(1.0f);
 
 int animationIndex = 1;
@@ -184,7 +187,8 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
 		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
-		{"fountain2", glm::vec3(40.0, 0.0, -40.0)}
+		{"fountain2", glm::vec3(40.0, 0.0, -40.0)},
+		{"fountain3", glm::vec3(20.0, 0.0, -40.0)}
 };
 
 double deltaTime;
@@ -224,6 +228,7 @@ void initParticleBuffers() {
 	glGenBuffers(1, &startTime); // Start time buffer
 
 	// Allocate space for all buffers
+	//Asignamos el tamaños de todos los buffers
 	//el tamaño del buffer = numero de particuals * 3 componentes (x, y, z) * tamaño de un flotante.
 	int size = nParticles * 3 * sizeof(float);
 	glBindBuffer(GL_ARRAY_BUFFER, initVel);
@@ -426,7 +431,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelGrass.loadModel("../models/grass/grassModel.obj");
 	modelGrass.setShader(&shaderMulLighting);
 
-	//Fountain
+	//Modelo de la fuente, pero no de las Particulas
 	modelFountain.loadModel("../models/fountain/fountain.obj");
 	modelFountain.setShader(&shaderMulLighting);
 
@@ -467,6 +472,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		skyboxTexture.freeImage(bitmap);
 	}
 
+	//**********************************************Texturas*****************************************
 	// Definiendo la textura a utilizar
 	Texture textureCesped("../Textures/cesped.jpg");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
@@ -595,8 +601,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureHighway.freeImage(bitmap);
 
-	// Definiendo la textura a utilizar
+	// Definiendo la textura a utilizar para ******************************************Particulas*********Fuente2***********************
 	Texture textureLandingPad("../Textures/landingPad.jpg");
+	//Texture textureLandingPad("../Textures/FuenteDeSangre.jpg");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureLandingPad.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -787,7 +794,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
 
-	Texture textureParticlesFountain("../Textures/bluewater.png");
+	// Definiendo la textura a utilizar para ******************************************Particulas***************Fuente1*****************
+	//Texture textureParticlesFountain("../Textures/bluewater.png");
+	Texture textureParticlesFountain("../Textures/FuenteDeSangre.jpg");
 	bitmap = textureParticlesFountain.loadImage();
 	data = textureParticlesFountain.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &textureParticleFountainID);
@@ -859,6 +868,7 @@ void destroy() {
 	modelLamp2.destroy();
 	modelLampPost2.destroy();
 	modelGrass.destroy();
+	//Modelo de la fuente, pero no de las particulas
 	modelFountain.destroy();
 
 	// Custom objects animate
@@ -1039,16 +1049,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-2.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.1));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.1));
 		animationIndex = 0;
 	}
 
@@ -1077,10 +1087,12 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
+	//Estableciendo las matrices de los Modelos de las particulas
+	//Primer fuente
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(5.0, 0.0, -40.0));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]) + 0.2;
 	modelMatrixFountain = glm::scale(modelMatrixFountain, glm::vec3(10.0f, 10.0f, 10.0f));
-
+	//Segunda Fuente
 	modelMatrixFountain1 = glm::translate(modelMatrixFountain1, glm::vec3(10.0, 0.0, -40.0));
 	modelMatrixFountain1[3][1] = terrain.getHeightTerrain(modelMatrixFountain1[3][0], modelMatrixFountain1[3][2]) + 0.2;
 	modelMatrixFountain1 = glm::scale(modelMatrixFountain1, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -1332,7 +1344,7 @@ void applicationLoop() {
 		modelGrass.render();
 		glEnable(GL_CULL_FACE);
 
-		// Fountain
+		// Dibujamos la fuente, pero no las particulas, se dibuja donde se define la f
 		glDisable(GL_CULL_FACE);
 		modelFountain.render(modelMatrixFountain);
 		glEnable(GL_CULL_FACE);
@@ -1493,7 +1505,7 @@ void applicationLoop() {
 				// Set the point size
 				glPointSize(10.0f);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
+				glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);//Colocamos la textura deseada.
 				shaderParticlesFountain.turnOn();
 				//se coloca el tiempo de ejecucion del sistema de particulas. 0 - 10 segundos
 				shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
@@ -1530,12 +1542,49 @@ void applicationLoop() {
 				// Set the point size
 				glPointSize(10.0f);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
+				glBindTexture(GL_TEXTURE_2D, textureLandingPadID);//Colocamos la textura deseada.
 				shaderParticlesFountain.turnOn();
 				//se coloca el tiempo de ejecucion del sistema de particulas. 0 - 10 segundos
 				shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
 				//se coloca el tiempo maximo de la paricula, en este caso el tiempo es 3.5 segundos
 				shaderParticlesFountain.setFloat("ParticleLifetime", 2.0f);
+				shaderParticlesFountain.setInt("ParticleTex", 0);
+				//se coloca la grabedad del sistema 
+				shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));
+				//Se coloca la matriz del modelo. 
+				shaderParticlesFountain.setMatrix4("model", 1, false, glm::value_ptr(modelMatrixParticlesFountain));
+				glBindVertexArray(VAOParticles);
+				//Como primitiva del sistema de particulas son puntos, cuantos puntos = nParticulas
+				glDrawArrays(GL_POINTS, 0, nParticles);
+				glDepthMask(GL_TRUE);
+				//glEnable(GL_DEPTH_TEST);
+				shaderParticlesFountain.turnOff();
+				/**********
+				 * End Render particles systems
+				 */
+			}
+			else if (it->second.first.compare("fountain3") == 0) {
+				/**********
+				* Init Render particles systems
+				*/
+				glm::mat4 modelMatrixParticlesFountain = glm::mat4(1.0);
+				modelMatrixParticlesFountain = glm::translate(modelMatrixParticlesFountain, it->second.second);
+				modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(modelMatrixParticlesFountain[3][0], modelMatrixParticlesFountain[3][2]) + 0.36 * 10.0;
+				modelMatrixParticlesFountain = glm::scale(modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
+				currTimeParticlesAnimation = TimeManager::Instance().GetTime();
+				if (currTimeParticlesAnimation - lastTimeParticlesAnimation > 15.0)
+					 lastTimeParticlesAnimation = currTimeParticlesAnimation;
+				//glDisable(GL_DEPTH_TEST);
+				glDepthMask(GL_FALSE);
+				// Set the point size
+				glPointSize(10.0f);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);//Colocamos la textura deseada.
+				shaderParticlesFountain.turnOn();
+				//se coloca el tiempo de ejecucion del sistema de particulas. 0 - 10 segundos
+				shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
+				//se coloca el tiempo maximo de la paricula, en este caso el tiempo es 3.5 segundos
+				shaderParticlesFountain.setFloat("ParticleLifetime", 5.0f);
 				shaderParticlesFountain.setInt("ParticleTex", 0);
 				//se coloca la grabedad del sistema 
 				shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));

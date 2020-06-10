@@ -253,7 +253,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
-	modelRock.loadModel("../models/Personaje_proyecto/Arco/Arco2.obj");
+	//modelRock.loadModel("../models/Personaje_proyecto/Arco/Arco2.obj");
+	modelRock.loadModel("../models/Texto/LetreroDeFin.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 
@@ -316,7 +317,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Garchomp
 	//garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
 	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
-	garchompModelAnimate.loadModel("../models/Human/c1.fbx");
+	//garchompModelAnimate.loadModel("../models/Human/c1.fbx");
+	garchompModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
 	//garchompModelAnimate.loadModel("../models/Personaje_proyecto/EsqueletoAnimado/untitled.fbx");
 	//garchompModelAnimate.loadModel("../models/Explorador/Explorador.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
@@ -1171,7 +1173,7 @@ void applicationLoop() {
 		modelMatrixGarchomp[3][1] = terrain.getHeightTerrain(modelMatrixGarchomp[3][0], modelMatrixGarchomp[3][2]);
 		glm::mat4 garchompModel = glm::mat4(modelMatrixGarchomp);
 		garchompModel = glm::scale(garchompModel, glm::vec3(0.006, 0.006, 0.006));
-		garchompModelAnimate.setAnimationIndex(varIndexAnimacion);
+		garchompModelAnimate.setAnimationIndex(4);
 		garchompModelAnimate.render(garchompModel);
 
 		//Dragonait
