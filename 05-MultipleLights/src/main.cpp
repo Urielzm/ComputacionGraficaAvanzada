@@ -106,12 +106,30 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
+/*std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
 		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
 		"../Textures/mp_bloodvalley/blood-valley_up.tga",
 		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
-		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+		//"../Textures/mp_bloodvalley/blood-valley_rt.tga",
+		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };*/
+
+/*std::string fileNames[6] = {
+	"../Textures/sky2/sky_ft.tga",
+	"../Textures/sky2/sky_bk.tga",
+	"../Textures/sky2/sky_up.tga",
+	"../Textures/sky2/sky_dw.tga",
+	"../Textures/sky2/sky_rt.tga",
+	"../Textures/sky2/sky_lt.tga" 
+};*/
+
+std::string fileNames[6] = {
+	"../Textures/sky3/eclipserojo_ft.tga",
+	"../Textures/sky3/eclipserojo_bk.tga",
+	"../Textures/sky3/eclipserojo_up.tga",
+	"../Textures/sky3/eclipserojo_dn.tga",
+	"../Textures/sky3/eclipserojo_rt.tga",
+	"../Textures/sky3/eclipserojo_lt.tga"
+};
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;

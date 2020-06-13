@@ -82,7 +82,9 @@ std::shared_ptr<Camera> camera(new ThirdPersonCamera());
 //Camara para primera persona
 std::shared_ptr<FirstPersonCamera> camera2(new FirstPersonCamera());
 
-float distanceFromTarget = 7.0;
+
+//Posición inical de la camara en tercera persona, que tan cerca del personaje esta
+float distanceFromTarget = 20.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
@@ -137,6 +139,8 @@ Model modeloArco;
 Model modelFountain;
 //Modelo de la puerta cerrada
 Model modelPuertaCerrada;
+//Modelo de la princesa Zelda
+Model modelPrincesa;
 
 //Modelos de los letreros
 //Modelo de letrero Fin
@@ -174,12 +178,21 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
+/*std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
 		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
 		"../Textures/mp_bloodvalley/blood-valley_up.tga",
 		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
 		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };*/
+
+std::string fileNames[6] = {
+	"../Textures/sky3/eclipserojo_ft.tga",
+	"../Textures/sky3/eclipserojo_bk.tga",
+	"../Textures/sky3/eclipserojo_up.tga",
+	"../Textures/sky3/eclipserojo_dn.tga",
+	"../Textures/sky3/eclipserojo_rt.tga",
+	"../Textures/sky3/eclipserojo_lt.tga"
+};
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;
@@ -207,6 +220,8 @@ glm::mat4 modelMatrixArco = glm::mat4(1.0f);
 glm::mat4 modelMatrixPuertaCerrda = glm::mat4(1.0f);
 //Matriz del fantasma
 glm::mat4 modelMatrixFantasma = glm::mat4(1.0f);
+//Matriz para la princesa
+glm::mat4 modelMatrixPrincesa = glm::mat4(1.0f);
 
 //Mtrices para los letreros
 //Matriz del letrero de fin
@@ -223,6 +238,7 @@ glm::mat4 modelMatrixPuertaDerecha = glm::mat4(1.0f);
 glm::mat4 modelMatrixPuertaMarco = glm::mat4(1.0f);
 
 int animationIndex = 1;
+//sourcesPlay[6] = false;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 2;
 bool enableCountSelected = true;
@@ -249,6 +265,8 @@ float interpolationDart = 0.0;
 int maxNumPasosDart = 200;
 int numPasosDart = 0;
 int ganador=0;
+//Activar audio de ataque
+//bool ataque = false;
 
 // Var animate helicopter
 float rotHelHelY = 0.0;
@@ -262,12 +280,12 @@ float escalaX = 10;
 float escalaY = 12;
 float escalaZ = 10;
 
-//variables de escala del Muro
+//variables de escala del Muro de contorno
 float escalaXp = 7;
 float escalaYp = 10;
 float escalaZp = 1;
 
-//variables de escala del Muro
+//variables de escala del Muro del laberinto
 float escalaXA = 10.2;
 float escalaYA = 10;
 float escalaZA = 5;
@@ -449,16 +467,17 @@ std::vector<glm::vec3> laberintoPosition = {
 	glm::vec3(-60.5859375,0, 2.34375),
 	glm::vec3(-80.8671875,0, -69.140625),
 	glm::vec3(75.0078125,0, -70.703125),
-	glm::vec3(19.15625,0, -90.9375),
+	glm::vec3(14.15625,0, -90.9375),
 	glm::vec3(-64,0, 17.1875),
-	glm::vec3(-79,0, 17.1875)
+	glm::vec3(-79,0, 17.1875),
+	glm::vec3(75.0078125,0, -41.40625)
 };
 
 //Vector de orientacion de los muros del laberinto
 std::vector<float> laberintoOrientation = {
 	0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 0, 0, 90, 90, 0, 90, 90, 90, 90, 0, 0, 0, 0, 90, 90, 0, 0,
 	90, 90, 90, 0, 0, 90, 90, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 90, 0, 0, 0, 90, 90,
-	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90,0,0,0,0, 90,0,0
+	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90,0,0,0,0, 90,0,0, 0
 };
 
 // Lamps positions
@@ -568,7 +587,8 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"lambo", glm::vec3(10.0, 0.0, 60.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
 		{"fountain", glm::vec3(-14.0625, 0.0, -93.75)},
-		{"fire", glm::vec3(-12.0, 0.0, 56.0)}
+		{"fire1", glm::vec3(15.4, 0.0, 54.0)},
+		{"fire2", glm::vec3(-11.4, 0.0, 54.0)}
 };
 
 double deltaTime;
@@ -608,11 +628,12 @@ GLuint depthMap, depthMapFBO;
 
 // OpenAL Defines
 //Definimos el numero de buffers que vamos a crear.
-//Para agregar una  cuarta, modificamos a 4.
-#define NUM_BUFFERS 4 //agregamos una 4 funete de audio, ponemos 4 en los dos
-#define NUM_SOURCES 4
+//Para agregar una  septima, modificamos a 7.
+#define NUM_BUFFERS 7 //agregamos una 6 funete de audio, ponemos 7 en los dos
+#define NUM_SOURCES 7
 #define NUM_ENVIRONMENTS 1
 // Listener
+//Para las fuente de sonido de nuestros mismos datos
 ALfloat listenerPos[] = { 0.0, 0.0, 4.0 };
 ALfloat listenerVel[] = { 0.0, 0.0, 0.0 };
 ALfloat listenerOri[] = { 0.0, 0.0, 1.0, 0.0, 1.0, 0.0 };
@@ -629,7 +650,19 @@ ALfloat source2Vel[] = { 0.0, 0.0, 0.0 };
 //Almacenamos la posicion y la velocidad del audio
 ALfloat source3Pos[] = { 0.0, 0.0, 0.0 };
 ALfloat source3Vel[] = { 0.0, 0.0, 0.0 };
+//Almacenamos la posicion y la velocidad del audio
+ALfloat source4Pos[] = { 0.0, 0.0, 0.0 };
+ALfloat source4Vel[] = { 0.0, 0.0, 0.0 };
+//Almacenamos la posicion y la velocidad del audio
+ALfloat source5Pos[] = { 0.0, 0.0, 0.0 };
+ALfloat source5Vel[] = { 0.0, 0.0, 0.0 };
+//Almacenamos la posicion y la velocidad del audio
+ALfloat source6Pos[] = { 0.0, 0.0, 0.0 };
+ALfloat source6Vel[] = { 0.0, 0.0, 0.0 };
+
+
 // Buffers
+//Arreglo de buffers, con el numero definido anteriormente
 ALuint buffer[NUM_BUFFERS];//Arreglo de buffers, con el numero definido anteriormente
 ALuint source[NUM_SOURCES];
 ALuint environment[NUM_ENVIRONMENTS];
@@ -639,8 +672,9 @@ ALenum format;
 ALvoid *data;
 int ch;
 ALboolean loop;
+
 //Se agrega un true, por cada fuente.
-std::vector<bool> sourcesPlay = {true, true, true, true};
+std::vector<bool> sourcesPlay = {true, true, true, true, true, true, false};
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -956,14 +990,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelDartLegoRightLeg.setShader(&shaderMulLighting);
 
 	//Modelo del fantasma
-	modelFantasma.loadModel("../models/Fantasma/Fantasma3/f1.obj");
+	modelFantasma.loadModel("../models/Fantasma/Fantasma3/f2.obj");
 	modelFantasma.setShader(&shaderMulLighting);
 
 	//Modelo del muro
 	modelMuro.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo2.obj");
 	modelMuro.setShader(&shaderMulLighting);
 	//Modelo del laberinto
-	modeloLaberinto.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo2.obj");
+	modeloLaberinto.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo3.obj");
 	modeloLaberinto.setShader(&shaderMulLighting);
 
 	//Modelo de antocha
@@ -978,7 +1012,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modeloArco.loadModel("../models/Personaje_proyecto/Arco/Arco3.obj");
 	modeloArco.setShader(&shaderMulLighting);
 
-	//Modelo de la parede cerrada
+	//Modelo de la puerta cerrada
 	modelPuertaCerrada.loadModel("../models/PuertaFinal/PuertaCerrada.obj");
 	modelPuertaCerrada.setShader(&shaderMulLighting);
 
@@ -989,6 +1023,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelPuertaDerecha.setShader(&shaderMulLighting);
 	modelPuertaIzquierda.loadModel("../models/PuertaFinal/PuertaIzquierda.obj");
 	modelPuertaIzquierda.setShader(&shaderMulLighting);
+
+	//Modelo de la pricesa
+	modelPrincesa.loadModel("../models/PrincesaZelda/PrincesaZelda.obj");
+	modelPrincesa.setShader(&shaderMulLighting);
 
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
@@ -1025,9 +1063,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	mayowModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
-	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
-	camera->setDistanceFromTarget(distanceFromTarget);
+	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));//
+	camera->setDistanceFromTarget(distanceFromTarget);//que tan lejos esta del personaje, este valor se establece previeamente. --> distanceFromTarget
 	camera->setSensitivity(1.0);
+	//Establecemos la camara con un angulo de inclinacion de 45 grados, los valores que se le pasan a la función estan en gradianes
+	camera->mouseMoveCamera(0.0, 0.4363, 0.4363);
 
 	// Definimos el tamanio de la imagen
 	int imageWidth, imageHeight;
@@ -1421,7 +1461,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	textureParticleFire.freeImage(bitmap);
 
-	std::uniform_real_distribution<float> distr01 = std::uniform_real_distribution<float>(0.0f, 1.0f);
+	std::uniform_real_distribution<float> distr01 = std::uniform_real_distribution<float>(0.0f, 0.01f);
 	std::mt19937 generator;
 	std::random_device rd;
 	generator.seed(rd());
@@ -1515,6 +1555,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
 	//Creamos el buffer numero 3
 	buffer[3] = alutCreateBufferFromFile("../sounds/car_acel.wav");
+	//buffer[3] = alutCreateBufferFromFile("../sounds/Help_me.wav");
+	//Creamos el buffer numero 4
+	buffer[4] = alutCreateBufferFromFile("../sounds/Help_me.wav");
+	//Creamos el buffer numero 5
+	buffer[5] = alutCreateBufferFromFile("../sounds/AmbienteGjost.wav");
+	//Creamos el buffer numero 6
+	buffer[6] = alutCreateBufferFromFile("../sounds/Espada.wav");
+
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
 		printf("- Error open files with alut %d !!\n", errorAlut);
@@ -1556,6 +1604,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcei(source[2], AL_LOOPING, AL_TRUE);
 	alSourcef(source[2], AL_MAX_DISTANCE, 500);
 
+	//Aceleracion
 	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
 	//Así como la ganancia(de una señal, que tan fuerte se escucha)
 	//Cambiamos el indice del arreglo
@@ -1564,8 +1613,41 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcefv(source[3], AL_POSITION, source3Pos);//posicion de la fuente, cambia constantemente, con respeco al modelo
 	alSourcefv(source[3], AL_VELOCITY, source3Vel);//Velocidad, no se ocupa, pero hay que configurarla
 	alSourcei(source[3], AL_BUFFER, buffer[3]);//Buffer asosiado a esa fuente
-	alSourcei(source[3], AL_LOOPING, AL_TRUE);//Una vez que ya empezo a reproducir, si se va a repetir el sonido
+	alSourcei(source[3], AL_LOOPING, AL_TRUE);//Una vez que ya empezo a reproducir, si se va a repetir el sonido, para que no se repita es al_false
 	alSourcef(source[3], AL_MAX_DISTANCE, 500);//Umbral, para saber que tanto nos alejamos, para que se escuche menos
+
+	//Help me
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Cambiamos el indice del arreglo
+	alSourcef(source[4], AL_PITCH, 1.0f);
+	alSourcef(source[4], AL_GAIN, 1.0f);
+	alSourcefv(source[4], AL_POSITION, source4Pos);
+	alSourcefv(source[4], AL_VELOCITY, source4Vel);
+	alSourcei(source[4], AL_BUFFER, buffer[4]);
+	alSourcei(source[4], AL_LOOPING, AL_TRUE);
+	alSourcef(source[4], AL_MAX_DISTANCE, 500);
+
+	//ambiente
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Cambiamos el indice del arreglo
+	alSourcef(source[5], AL_PITCH, 1.0f);
+	alSourcef(source[5], AL_GAIN, 1.0f);
+	alSourcefv(source[5], AL_POSITION, source5Pos);
+	alSourcefv(source[5], AL_VELOCITY, source5Vel);
+	alSourcei(source[5], AL_BUFFER, buffer[5]);
+	alSourcei(source[5], AL_LOOPING, AL_TRUE);
+	alSourcef(source[5], AL_MAX_DISTANCE, 3000);
+
+	//Espada
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Cambiamos el indice del arreglo
+	alSourcef(source[6], AL_PITCH, 1.0f);
+	alSourcef(source[6], AL_GAIN, 1.0f);
+	alSourcefv(source[6], AL_POSITION, source6Pos);
+	alSourcefv(source[6], AL_VELOCITY, source6Vel);
+	alSourcei(source[6], AL_BUFFER, buffer[6]);
+	alSourcei(source[6], AL_LOOPING, AL_FALSE);
+	alSourcef(source[6], AL_MAX_DISTANCE, 500);
 
 }
 
@@ -1636,6 +1718,9 @@ void destroy() {
 	modelMarco.destroy();
 	modelPuertaDerecha.destroy();
 	modelPuertaIzquierda.destroy();
+
+	//Princesa
+	modelPrincesa.destroy();
 
 	//MOdelos de los letreros
 	//Letrero de fin
@@ -1734,6 +1819,7 @@ bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
+	
 
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
@@ -1752,8 +1838,8 @@ bool processInput(bool continueApplication) {
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		camera2->mouseMoveCamera(offsetX, offsetY, deltaTime);
 
-	offsetX = 0;
-	offsetY = 0;
+	offsetX = 0;//el angulo que puedes desplazar
+	offsetY = 0;//el angulo que puedes desplazar
 
 	/*if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE &&
 		glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -1866,22 +1952,22 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && vivo==true && complet == false){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(5.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && vivo == true && complet == false){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-3.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-5.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.1));
-		animationIndex = 0;
+		animationIndex = 2;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.1));
-		animationIndex = 0;
+		animationIndex = 2;
 	}
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && vivo == true) {
 		//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 3;
-		
+		sourcesPlay[6] = true;
 	}
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS ) {
 		//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
@@ -1926,7 +2012,6 @@ bool processInput(bool continueApplication) {
 	//Para cambiar de camara
 	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
 		op = 1;
-		//animationIndex = 3;
 	}
 	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 		op = 0;
@@ -2006,6 +2091,9 @@ void applicationLoop() {
 	//matriz del lambo
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(10.0, 0.0, 60.0));
 
+	//Matriz de la princesa
+	modelMatrixPrincesa = glm::translate(modelMatrixPrincesa, glm::vec3(10.0, 0.0, 65.0));
+
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 	//Modelo de Mayow
 		//rotate  viendolo de frente -90:  <--
@@ -2065,7 +2153,7 @@ void applicationLoop() {
 		std::vector<float> matrixDartJoints;
 		std::vector<glm::mat4> matrixDart;
 
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f),//que tanto abarca la camara
 				(float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
 
 		if(modelSelected == 1){
@@ -2075,8 +2163,9 @@ void applicationLoop() {
 		}
 		else{
 			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
-			target = modelMatrixMayow[3];
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));//Angulo en x
+			target = glm::vec3(modelMatrixMayow[3].x, modelMatrixMayow[3].y+10, modelMatrixMayow[3].z);//Aqui se dice que tan distante del personaje
+			//target = modelMatrixMayow[3];
 		}
 
 		if(std::isnan(angleTarget))
@@ -2084,8 +2173,11 @@ void applicationLoop() {
 		if(axis.y < 0)
 			angleTarget = -angleTarget;
 		if(modelSelected == 1)
-			angleTarget -= glm::radians(90.0f);
+			angleTarget -= glm::radians(45.0f);
 		camera->setCameraTarget(target);
+		//camera->mouseMoveCamera(0.0,90,0.0);
+		//camera->setAngleArundTarteg(95);
+		//camera->mouseMoveCamera(0.0, 10, 0.5);
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
 
@@ -2157,9 +2249,9 @@ void applicationLoop() {
 		/*******************************************
 		 * Propiedades de neblina
 		 *******************************************/
-		shaderMulLighting.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
-		shaderTerrain.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
-		shaderSkybox.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+		shaderMulLighting.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
+		shaderTerrain.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
+		shaderSkybox.setVectorFloat3("fogColor", glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
 
 		/*******************************************
 		 * Propiedades Luz direccional
@@ -2362,6 +2454,19 @@ void applicationLoop() {
 		fantasmaoBodyCollider.e = modelFantasma.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "Fantasma", fantasmaoBodyCollider, modelMatrixFantasma);*/
 
+		glm::mat4 modelmatrixColliderPrincesa = glm::mat4(modelMatrixPrincesa);
+		AbstractModel::OBB princesaBodyCollider;
+		// Set the orientation of collider before doing the scale
+		princesaBodyCollider.u = glm::quat_cast(modelMatrixPrincesa);
+		modelmatrixColliderPrincesa = glm::scale(modelmatrixColliderPrincesa, glm::vec3(1.0, 1.0, 1.0));
+		modelmatrixColliderPrincesa = glm::translate(modelmatrixColliderPrincesa,
+			glm::vec3(modelPrincesa.getObb().c.x,
+				modelPrincesa.getObb().c.y,
+				modelPrincesa.getObb().c.z));
+		princesaBodyCollider.c = glm::vec3(modelmatrixColliderPrincesa[3]);
+		princesaBodyCollider.e = modelPrincesa.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "Princesa", princesaBodyCollider, modelMatrixPrincesa);
+
 		//Collider del fantasma
 		if (fantasmaVivo) {
 			glm::mat4 modelMatrixColliderFantasma = glm::mat4(modelMatrixFantasma);
@@ -2450,10 +2555,10 @@ void applicationLoop() {
 				addOrUpdateColliders(collidersOBB2, "" + std::to_string(i), jarronCollider, modelMatrixColliderJarron);
 				// Set the orientation of collider before doing the scale
 				jarronCollider.u = glm::quat_cast(modelMatrixColliderJarron);
-				modelMatrixColliderJarron = glm::scale(modelMatrixColliderJarron, glm::vec3(1.0, 1.0, 1.0));
+				modelMatrixColliderJarron = glm::scale(modelMatrixColliderJarron, glm::vec3(2.0, 2.0, 2.0));
 				modelMatrixColliderJarron = glm::translate(modelMatrixColliderJarron, modeloJarron.getObb().c);
 				jarronCollider.c = glm::vec3(modelMatrixColliderJarron[3]);
-				jarronCollider.e = modeloJarron.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+				jarronCollider.e = modeloJarron.getObb().e * glm::vec3(2.0, 2.0, 2.0);
 				std::get<0>(collidersOBB2.find("" + std::to_string(i))->second) = jarronCollider;
 			}
 		}
@@ -2665,21 +2770,22 @@ void applicationLoop() {
 								dibujaJarron = false;
 								//isCollision = false;
 							}*/
-					if (it->first == "5") {
-						complet = true;
-					}
+					//if (it->first == "5") {
+						//complet = true;
+					//}
 					std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;
 					int op;
 					std::istringstream(it->first) >> op;
 					jarronE[op] = false;
+
 					cuentaJarrones = 0;
 					for (int i = 0; i <= jarronPosition.size();i++) {
 						if (jarronE[i]==false) {
 							cuentaJarrones++;
 						}
 					}
-					if (cuentaJarrones >= 4) {
+					if (cuentaJarrones == 5) {
 						rotBuzzLeftArm = (-1.57); abrir = 10;
 						rotBuzzRightArm = (-1.57);
 					}
@@ -2708,6 +2814,9 @@ void applicationLoop() {
 					}*/
 					/*std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;*/
+					if (it->first == "Princesa" && jt->first=="mayow") {
+						complet = true;
+					}
 					isCollision = true;
 				}
 			}
@@ -2855,6 +2964,7 @@ void applicationLoop() {
 		// Constantes de animaciones
 		rotHelHelY += 0.5;
 		animationIndex = 1;
+		//sourcesPlay[6] = false;
 
 		/*******************************************
 		 * State machines
@@ -2943,6 +3053,30 @@ void applicationLoop() {
 		//Posicion y valor
 		alSourcefv(source[3], AL_POSITION, source3Pos);
 
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source4Pos[0] = modelMatrixFantasma[3].x;
+		source4Pos[1] = modelMatrixFantasma[3].y;
+		source4Pos[2] = modelMatrixFantasma[3].z;
+		//Indicamos cual es la fuente de sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[4], AL_POSITION, source4Pos);
+
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source5Pos[0] = 0.0;
+		source5Pos[1] = 0.0;
+		source5Pos[2] = 0.0;
+		//Indicamos cual es la fuente de sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[5], AL_POSITION, source5Pos);
+
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source6Pos[0] = modelMatrixMayow[3].x+1;
+		source6Pos[1] = modelMatrixMayow[3].y+1;
+		source6Pos[2] = modelMatrixMayow[3].z+1;
+		//Indicamos cual es la fuente de sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[6], AL_POSITION, source6Pos);
+
 		// Listener for the Thris person camera
 		listenerPos[0] = modelMatrixMayow[3].x;
 		listenerPos[1] = modelMatrixMayow[3].y;
@@ -2971,18 +3105,19 @@ void applicationLoop() {
 		listenerOri[3] = camera->getUp().x;
 		listenerOri[4] = camera->getUp().y;
 		listenerOri[5] = camera->getUp().z;*/
-
+		
 		//Se le tiene que configurar la camara con allistener
 		alListenerfv(AL_ORIENTATION, listenerOri);
 		//Vamos iterando sobre el arrreglo que creamos donde colocamos los true
 		//si es true, lo remplazas pro false y unicamente lo reproduce una vez
-		//Jugar con la logica por la colisión de un ibjeto
+		//Jugar con la logica por la colisión de un Objeto
 		for(unsigned int i = 0; i < sourcesPlay.size(); i++){
 			if(sourcesPlay[i]){
 				sourcesPlay[i] = false;
 				alSourcePlay(source[i]);//el indice que queremos que reproduzca, 0,1,2,3, etc.
 			}
 		}
+		
 	}
 }
 
@@ -3013,6 +3148,9 @@ void prepareScene(){
 	modelPuertaDerecha.setShader(&shaderMulLighting);
 	modelPuertaIzquierda.setShader(&shaderMulLighting);
 	modelMarco.setShader(&shaderMulLighting);
+
+	//Princesa
+	modelPrincesa.setShader(&shaderMulLighting);
 
 	modelAntorcha.setShader(&shaderMulLighting);
 	modelMuro.setShader(&shaderMulLighting);
@@ -3076,6 +3214,8 @@ void prepareDepthScene(){
 	modelPuertaDerecha.setShader(&shaderDepth);
 	modelPuertaIzquierda.setShader(&shaderDepth);
 	modelMarco.setShader(&shaderDepth);
+	//Princesa
+	modelPrincesa.setShader(&shaderDepth);
 
 	//Modelos de los letreros
 	//Letrero de fin
@@ -3086,6 +3226,7 @@ void prepareDepthScene(){
 	modelLetreroCompleto.setShader(&shaderDepth);
 	//Letrero de continuar
 	modelLetreroContinuar.setShader(&shaderDepth);
+
 
 	terrain.setShader(&shaderDepth);
 
@@ -3175,7 +3316,7 @@ void renderScene(bool renderParticles){
 	modelPuertaCerrada.setScale(glm::vec3(escalaXp, escalaYp, escalaZp));
 	modelPuertaCerrada.render(modelMatrixPuertaCerrda);
 
-	//Render del Letrero
+	//Render de la princesa
 
 
 
@@ -3218,7 +3359,7 @@ void renderScene(bool renderParticles){
 		if (jarronE[i]) {
 			jarronPosition[i].y = terrain.getHeightTerrain(jarronPosition[i].x, jarronPosition[i].z);
 			modeloJarron.setPosition(jarronPosition[i]);
-			modeloJarron.setScale(glm::vec3(1.0, 1.0, 1.0));
+			modeloJarron.setScale(glm::vec3(2.0, 2.0, 2.0));
 			modeloJarron.setOrientation(glm::vec3(0, jarronOrientation[i], 0));
 			modeloJarron.render();
 		}
@@ -3363,6 +3504,16 @@ void renderScene(bool renderParticles){
 	// Se regresa el cull faces IMPORTANTE para la capa
 	glEnable(GL_CULL_FACE);
 
+	// Princesa
+	// Se deshabilita el cull faces IMPORTANTE para la capa
+	glDisable(GL_CULL_FACE);
+	modelMatrixPrincesa[3][1] = terrain.getHeightTerrain(modelMatrixPrincesa[3][0], modelMatrixPrincesa[3][2]);
+	glm::mat4 modelMatrixPrincesaBody = glm::mat4(modelMatrixPrincesa);
+	modelMatrixPrincesaBody = glm::scale(modelMatrixPrincesaBody, glm::vec3(1.0, 1.0, 1.0));
+	modelPrincesa.render(modelMatrixPrincesaBody);
+	// Se regresa el cull faces IMPORTANTE para la capa
+	glEnable(GL_CULL_FACE);
+
 	/*******************************************
 	 * Custom Anim objects obj
 	 *******************************************/
@@ -3381,7 +3532,7 @@ void renderScene(bool renderParticles){
 	// Letrero
 	// Se deshabilita el cull faces IMPORTANTE para la capa
 	if (vivo == false) {
-		//glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]);
 		glm::mat4 modelMatrixLetreroBody = glm::mat4(modelMatrixLetreroFin);
 		modelMatrixLetreroBody = glm::scale(modelMatrixLetreroBody, glm::vec3(1.0, 1.0, 1.0));
@@ -3392,8 +3543,9 @@ void renderScene(bool renderParticles){
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
 		modelLetreroFin.render(modelMatrixLetreroBody);
 		// Se regresa el cull faces IMPORTANTE para la capa
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 
+		glDisable(GL_CULL_FACE);
 		//modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]) + 2.0;
 		modelMatrixLetreroInicio[3][1] = terrain.getHeightTerrain(modelMatrixLetreroInicio[3][0], modelMatrixLetreroInicio[3][2]);
 		glm::mat4 modelMatrixLetreroBody2 = glm::mat4(modelMatrixLetreroInicio);
@@ -3405,11 +3557,11 @@ void renderScene(bool renderParticles){
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
 		modelLetreroContinuar.render(modelMatrixLetreroBody2);
 		// Se regresa el cull faces IMPORTANTE para la capa
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 	}
 	//std::cout << ganador << std::endl;
 	if (complet == true) {
-		//glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		modelMatrixLetreroCompleto [3][1] = terrain.getHeightTerrain(modelMatrixLetreroCompleto[3][0], modelMatrixLetreroCompleto[3][2]);
 		glm::mat4 modelMatrixLetreroBody = glm::mat4(modelMatrixLetreroCompleto);
 		modelMatrixLetreroBody = glm::scale(modelMatrixLetreroBody, glm::vec3(1.0, 1.0, 1.0));
@@ -3420,8 +3572,9 @@ void renderScene(bool renderParticles){
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
 		modelLetreroCompleto.render(modelMatrixLetreroBody);
 		// Se regresa el cull faces IMPORTANTE para la capa
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 
+		glDisable(GL_CULL_FACE);
 		//modelMatrixLetreroFin[3][1] = terrain.getHeightTerrain(modelMatrixLetreroFin[3][0], modelMatrixLetreroFin[3][2]) + 2.0;
 		modelMatrixLetreroInicio[3][1] = terrain.getHeightTerrain(modelMatrixLetreroInicio[3][0], modelMatrixLetreroInicio[3][2]);
 		glm::mat4 modelMatrixLetreroBody2 = glm::mat4(modelMatrixLetreroInicio);
@@ -3433,7 +3586,7 @@ void renderScene(bool renderParticles){
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
 		modelLetreroContinuar.render(modelMatrixLetreroBody2);
 		// Se regresa el cull faces IMPORTANTE para la capa
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 	}
 	/**********
 	 * Update the position with alpha objects
@@ -3530,7 +3683,7 @@ void renderScene(bool renderParticles){
 			 * End Render particles systems
 			 */
 		}
-		else if(renderParticles && it->second.first.compare("fire") == 0){
+		else if(renderParticles && it->second.first.compare("fire1") == 0){
 			/**********
 			 * Init Render particles systems
 			 */
@@ -3557,7 +3710,7 @@ void renderScene(bool renderParticles){
 			shaderParticlesFire.setInt("Pass", 2);
 			glm::mat4 modelFireParticles = glm::mat4(1.0);
 			modelFireParticles = glm::translate(modelFireParticles, it->second.second);
-			modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
+			modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
 			shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 			shaderParticlesFire.turnOn();
@@ -3585,6 +3738,62 @@ void renderScene(bool renderParticles){
 			/**********
 			 * End Render particles systems
 			 */
+		}
+		else if (renderParticles && it->second.first.compare("fire2") == 0) {
+		/**********
+		 * Init Render particles systems
+		 */
+		 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+		 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+		 shaderParticlesFire.setInt("Pass", 1);
+		 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+		 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+		 glActiveTexture(GL_TEXTURE1);
+		 glBindTexture(GL_TEXTURE_1D, texId);
+		 glEnable(GL_RASTERIZER_DISCARD);
+		 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+		 glBeginTransformFeedback(GL_POINTS);
+		 glBindVertexArray(particleArray[1 - drawBuf]);
+		 glVertexAttribDivisor(0, 0);
+		 glVertexAttribDivisor(1, 0);
+		 glVertexAttribDivisor(2, 0);
+		 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+		 glEndTransformFeedback();
+		 glDisable(GL_RASTERIZER_DISCARD);
+
+		 shaderParticlesFire.setInt("Pass", 2);
+		 glm::mat4 modelFireParticles = glm::mat4(1.0);
+		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+		 shaderParticlesFire.turnOn();
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+		 glDepthMask(GL_FALSE);
+		 glBindVertexArray(particleArray[drawBuf]);
+		 glVertexAttribDivisor(0, 1);
+		 glVertexAttribDivisor(1, 1);
+		 glVertexAttribDivisor(2, 1);
+		 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+		 glBindVertexArray(0);
+		 glDepthMask(GL_TRUE);
+		 drawBuf = 1 - drawBuf;
+		 shaderParticlesFire.turnOff();
+
+		 /****************************+
+		  * Open AL sound data
+		  */
+		 source1Pos[0] = modelFireParticles[3].x;
+		 source1Pos[1] = modelFireParticles[3].y;
+		 source1Pos[2] = modelFireParticles[3].z;
+		 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+		 /**********
+		  * End Render particles systems
+		  */
 		}
 
 	}

@@ -187,7 +187,8 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
 		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
-		{"fire", glm::vec3(-10.0, 0.0, 5.0)}
+		{"fire", glm::vec3(-10.0, 0.0, 5.0)},
+		{"fire2", glm::vec3(10.0, 0.0, 5.0)}
 };
 
 double deltaTime;
@@ -939,7 +940,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureParticleFire.freeImage(bitmap);
 
 	//Se crean datos aleatorios en el plano xy para generar la posicion de las partiuculas.
-	std::uniform_real_distribution<float> distr01 = std::uniform_real_distribution<float>(0.0f, 1.0f);
+	std::uniform_real_distribution<float> distr01 = std::uniform_real_distribution<float>(0.0f, 0.001f);//Aqui se mueve el ancho del fuego
 	std::mt19937 generator;
 	std::random_device rd;
 	generator.seed(rd());
@@ -1236,16 +1237,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-3.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 1.0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -1.0));
 		animationIndex = 0;
 	}
 
@@ -1768,6 +1769,63 @@ void applicationLoop() {
 				/**********
 				 * End Render particles systems
 				 */
+			}
+			//Renderizar el sistema de particulas de fuego
+			else if (it->second.first.compare("fire2") == 0) {
+			/**********
+			 * Init Render particles systems
+			 */
+			 //Obtener el tiempo actual
+			 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+			 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+			 //Actualizar la posicion, velocidad y edad del sistema de particulas (Pass = 1)
+			 shaderParticlesFire.setInt("Pass", 1);
+			 //El tiempo de animación del sistema de partiuculas 
+			 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+			 //El incremento del tiempo DeltaT
+			 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+			 //Llamar al shader para actualizar los buffers Pass=1
+			 glActiveTexture(GL_TEXTURE1);
+			 glBindTexture(GL_TEXTURE_1D, texId);
+			 glEnable(GL_RASTERIZER_DISCARD);
+			 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+			 glBeginTransformFeedback(GL_POINTS);
+			 glBindVertexArray(particleArray[1 - drawBuf]);
+			 glVertexAttribDivisor(0, 0);
+			 glVertexAttribDivisor(1, 0);
+			 glVertexAttribDivisor(2, 0);
+			 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+			 glEndTransformFeedback();
+			 glDisable(GL_RASTERIZER_DISCARD);
+
+			 //Paso 2 Renderizar el sistema de particulas
+			 shaderParticlesFire.setInt("Pass", 2);
+			 //Enviar las transformaciones
+			 glm::mat4 modelFireParticles = glm::mat4(1.0);
+			 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+			 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
+			 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+			 //Estamos haciendo el render de las particulas
+			 shaderParticlesFire.turnOn();
+			 glActiveTexture(GL_TEXTURE0);
+			 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+			 glDepthMask(GL_FALSE);
+			 glBindVertexArray(particleArray[drawBuf]);
+			 glVertexAttribDivisor(0, 1);
+			 glVertexAttribDivisor(1, 1);
+			 glVertexAttribDivisor(2, 1);
+			 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+			 glBindVertexArray(0);
+			 glDepthMask(GL_TRUE);
+			 drawBuf = 1 - drawBuf;
+			 shaderParticlesFire.turnOff();
+
+			 /**********
+			  * End Render particles systems
+			  */
 			}
 
 		}
