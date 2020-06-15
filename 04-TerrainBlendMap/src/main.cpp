@@ -99,7 +99,8 @@ Model cawboyModelAnimate;
 // Terrain model instance
 //Aqui instanciamos las diferentes alturas de los terrenos
 //Terrain terrain(-1, -1, 200, 8, "../Textures/pruebaTerreno4.png");
-Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+//Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 200, 16, "../Textures/TerrenoP1.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 /*Creamosl os identificadores de la textura, el back ground, r -> red  g es de green, 
@@ -250,12 +251,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelRock.loadModel("../models/Fantasma/Esqueleto1/Esqueleto1.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/ParedConMusgo/Pared_con_musgo.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Torre/Pilar_de_castillo.obj");
-	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo.obj");
+	modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroYTorre/Muro/Muro_de_castillo2.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Antorcha/Antorcha.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Jarron/Jarron.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Arco/Arco2.obj");
 	//modelRock.loadModel("../models/Texto/LetrasMissionPassed.obj");
-	modelRock.loadModel("../models/PrincesaZelda/PrincesaZelda.obj");
+	//modelRock.loadModel("../models/PrincesaZelda/PrincesaZelda.obj");
 	//modelRock.loadModel("../models/Personaje_proyecto/Laberinto1/MuroTorreYChosa/Muro2.obj");
 	modelRock.setShader(&shaderMulLighting);
 
@@ -917,7 +918,10 @@ bool processInput(bool continueApplication) {
 void applicationLoop() {
 	bool psi = true;
 
+	
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
+	matrixModelRock = glm::scale(matrixModelRock, glm::vec3(50, 12, 10));
+	
 	
 	//Fantasma3
 	modelMatrixlFantasma3 = glm::translate(modelMatrixlFantasma3, glm::vec3(0.0, 0.0, 2.0));
@@ -1058,6 +1062,7 @@ void applicationLoop() {
 		 *******************************************/
 		//Rock render
 		matrixModelRock[3][1] = terrain.getHeightTerrain(matrixModelRock[3][0], matrixModelRock[3][2]);
+		//matrixModelRock = glm::scale(matrixModelRock, glm::vec3(10, 12, 10));
 		modelRock.render(matrixModelRock);
 
 		// Forze to enable the unit texture to 0 always ----------------- IMPORTANT

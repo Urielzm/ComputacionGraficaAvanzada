@@ -84,7 +84,7 @@ std::shared_ptr<FirstPersonCamera> camera2(new FirstPersonCamera());
 
 
 //Posición inical de la camara en tercera persona, que tan cerca del personaje esta
-float distanceFromTarget = 20.0;
+float distanceFromTarget = 30.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
@@ -163,7 +163,8 @@ Model mayowModelAnimate;
 
 
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
+//Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 200, 16, "../Textures/TerrenoP1.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
@@ -278,7 +279,7 @@ float dorRotCount = 0.0;
 //variables de escala del Muro
 float escalaX = 10;
 float escalaY = 12;
-float escalaZ = 10;
+float escalaZ = 5;
 
 //variables de escala del Muro de contorno
 float escalaXp = 7;
@@ -312,78 +313,82 @@ std::vector<glm::vec3> muro1Position = {
 	//Viendolo de frente
 
 	//Posiciones frontal
-	glm::vec3(80.4, 0.0, 50.0),
-	glm::vec3(67.0, 0.0, 50.0),
-	glm::vec3(53.6, 0.0, 50.0),
-	glm::vec3(40.2, 0.0, 50.0),
-	glm::vec3(26.8, 0.0, 50.0),
-	glm::vec3(13.4, 0.0, 50.0),
+	//glm::vec3(80.4, 0.0, 50.0),
+	//glm::vec3(67.0, 0.0, 50.0),
+	//glm::vec3(53.6, 0.0, 50.0),
+	glm::vec3(48.2, 0.0, 50.7),
+	//glm::vec3(26.8, 0.0, 50.0),
+	//glm::vec3(13.4, 0.0, 50.0),
 	//glm::vec3(0.0, 0.0, 50.0),//Muro central --> Puerta
-	glm::vec3(-13.4, 0.0, 50.0),
-	glm::vec3(-26.8, 0.0, 50.0),
-	glm::vec3(-40.2, 0.0, 50.0),
-	glm::vec3(-53.6, 0.0, 50.0),
-	glm::vec3(-67.0, 0.0, 50.0),
-	glm::vec3(-80.4, 0.0, 50.0),
+	//glm::vec3(-13.4, 0.0, 50.0),
+	//glm::vec3(-26.8, 0.0, 50.0),
+	glm::vec3(-44.2, 0.0, 50.7),
+	//glm::vec3(-53.6, 0.0, 50.0),
+	//glm::vec3(-67.0, 0.0, 50.0),
+	//glm::vec3(-80.4, 0.0, 50.0),
 
 	//Posiciones IZQUIERDA
-	glm::vec3(-84.8, 0.0, 43.0),
+	/*glm::vec3(-84.8, 0.0, 43.0),
 	glm::vec3(-84.8, 0.0, 29.6),
 	glm::vec3(-84.8, 0.0, 16.2),
 	glm::vec3(-84.8, 0.0, 2.8),
-	glm::vec3(-84.8, 0.0, -10.6),
-	glm::vec3(-84.8, 0.0, -24.0),
-	glm::vec3(-84.8, 0.0, -37.4),
+	glm::vec3(-84.8, 0.0, -10.6),*/
+	glm::vec3(-85.8, 0.0, -20.0),
+	/*glm::vec3(-84.8, 0.0, -37.4),
 	glm::vec3(-84.8, 0.0, -50.8),
 	glm::vec3(-84.8, 0.0, -64.2),
 	glm::vec3(-84.8, 0.0, -77.6),
-	glm::vec3(-84.8, 0.0, -91.0),
+	glm::vec3(-84.8, 0.0, -91.0),*/
 
 	//Posiciones traceras
-	glm::vec3(-80.4, 0.0, -100.0),
+	/*glm::vec3(-80.4, 0.0, -100.0),
 	glm::vec3(-67.0, 0.0, -100.0),
 	glm::vec3(-53.6, 0.0, -100.0),
 	glm::vec3(-40.2, 0.0, -100.0),
 	glm::vec3(-26.8, 0.0, -100.0),
-	glm::vec3(-13.4, 0.0, -100.0),
-	glm::vec3(0.0, 0.0, -100.0),//Muro central 
-	glm::vec3(13.4, 0.0, -100.0),
+	glm::vec3(-13.4, 0.0, -100.0),*/
+	glm::vec3(6.0, 0.0, -100.0),//Muro central 
+	/*glm::vec3(13.4, 0.0, -100.0),
 	glm::vec3(26.8, 0.0, -100.0),
 	glm::vec3(40.2, 0.0, -100.0),
 	glm::vec3(53.6, 0.0, -100.0),
 	glm::vec3(67.0, 0.0, -100.0),
-	glm::vec3(80.4, 0.0, -100.0),
+	glm::vec3(80.4, 0.0, -100.0),*/
 
 	//Posiciones DERECHA
-	glm::vec3(84.1, 0.0, -91.0),
+	/*glm::vec3(84.1, 0.0, -91.0),
 	glm::vec3(84.1, 0.0, -77.6),
 	glm::vec3(84.1, 0.0, -64.2),
 	glm::vec3(84.1, 0.0, -50.8),
-	glm::vec3(84.1, 0.0, -37.4),
-	glm::vec3(84.1, 0.0, -24.0),
-	glm::vec3(84.1, 0.0, -10.6),
+	glm::vec3(84.1, 0.0, -37.4),*/
+	glm::vec3(85.1, 0.0, -29.0),
+	/*glm::vec3(84.1, 0.0, -10.6),
 	glm::vec3(84.1, 0.0, 2.8),
 	glm::vec3(84.1, 0.0, 16.2),
 	glm::vec3(84.1, 0.0, 29.6),
-	glm::vec3(84.1, 0.0, 43.0)
+	glm::vec3(84.1, 0.0, 43.0)*/
+	glm::vec3(6.0, 0.0, 99.0),//Muro frontal
+	glm::vec3(-99.0, 0.0, -5.0),
+	glm::vec3(99.0, 0.0, -5.0)
 };
 
 //Vector de orientación de Muros
 std::vector<float> muro1Orientation = {
 	//Viendolo de frente
 	//Orientaciones frontales:
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	//Orientaciones lado IZQUIERDO
-	-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0,
-	//Orientacionestraceras
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	-90.0, //-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0, -90.0,
+	//Orientaciones traceras
+	0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	//Orientaciones lado Derecho
-	90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90
+	90.0, //90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90.0, 90
+	0.0,90.0,90.0
 };
 
 //Posiciones de laberinto
 std::vector<glm::vec3> laberintoPosition = {
-
+	//glm::vec3(6.8359375,0,34.375)
 	glm::vec3(-48,0,40),
 	glm::vec3(-32,0,40),
 	glm::vec3(-16,0,40),
@@ -475,6 +480,7 @@ std::vector<glm::vec3> laberintoPosition = {
 
 //Vector de orientacion de los muros del laberinto
 std::vector<float> laberintoOrientation = {
+	//0
 	0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 0, 0, 90, 90, 0, 90, 90, 90, 90, 0, 0, 0, 0, 90, 90, 0, 0,
 	90, 90, 90, 0, 0, 90, 90, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 90, 0, 0, 0, 90, 90,
 	90, 0, 0, 0, 90, 90, 0, 0, 90, 90, 90, 90, 90, 90, 90, 0, 0, 0, 0, 0, 90,0,0,0,0, 90,0,0, 0
@@ -498,11 +504,11 @@ std::vector<glm::vec3> lamp1Position = {
 	//glm::vec3(-26.8, 0.0, 52.0),
 	glm::vec3(-40.2, 0.0, 52.0),
 	//glm::vec3(-53.6, 0.0, 52.0),
-	glm::vec3(-67.0, 0.0, 52.0),
+	glm::vec3(-67.0, 0.0, 52.0)
 	//glm::vec3(-80.4, 0.0, 52.0),
 
 	//Antorchas IZQUIERDA
-	glm::vec3(-86.8, 0.0, 43.0),
+	/*glm::vec3(-86.8, 0.0, 43.0),
 	//glm::vec3(-86.8, 0.0, 29.6),
 	glm::vec3(-86.8, 0.0, 16.2),
 	//glm::vec3(-86.8, 0.0, 2.8),
@@ -540,7 +546,7 @@ std::vector<glm::vec3> lamp1Position = {
 	glm::vec3(86.1, 0.0, 2.8),
 	//glm::vec3(86.1, 0.0, 16.2),
 	glm::vec3(86.1, 0.0, 29.6),
-	//glm::vec3(86.1, 0.0, 43.0)
+	//glm::vec3(86.1, 0.0, 43.0)*/
 
 };
 std::vector<float> lamp1Orientation = { 
@@ -548,11 +554,11 @@ std::vector<float> lamp1Orientation = {
 	//Antorchas Frontales
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	//Orientaciones lado IZQUIERDO
-	-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, //-90.0, -90.0, -90.0, -90.0, -90.0,
+	//-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, //-90.0, -90.0, -90.0, -90.0, -90.0,
 	//Orientacionestraceras
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	//0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	//Orientaciones lado Derecho
-	90.0, 90.0, 90.0, 90.0, 90.0, 90.0 //90.0, 90.0, 90.0, 90.0, 90
+	//90.0, 90.0, 90.0, 90.0, 90.0, 90.0 //90.0, 90.0, 90.0, 90.0, 90
 
 };
 
@@ -1013,7 +1019,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modeloArco.setShader(&shaderMulLighting);
 
 	//Modelo de la puerta cerrada
-	modelPuertaCerrada.loadModel("../models/PuertaFinal/PuertaCerrada.obj");
+	modelPuertaCerrada.loadModel("../models/PuertaFinal/PuertaCerrada2.obj");
 	modelPuertaCerrada.setShader(&shaderMulLighting);
 
 	//Puerta
@@ -1066,8 +1072,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));//
 	camera->setDistanceFromTarget(distanceFromTarget);//que tan lejos esta del personaje, este valor se establece previeamente. --> distanceFromTarget
 	camera->setSensitivity(1.0);
-	//Establecemos la camara con un angulo de inclinacion de 45 grados, los valores que se le pasan a la función estan en gradianes
-	camera->mouseMoveCamera(0.0, 0.4363, 0.4363);
+	//Establecemos la camara con un angulo de inclinacion de 45 grados, los valores que se le pasan a la función estan en radianes 20°
+	//camera->mouseMoveCamera(0.0, 0.1745, 0.1745);
 
 	// Definimos el tamanio de la imagen
 	int imageWidth, imageHeight;
@@ -1292,7 +1298,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureTerrainBackground.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainR("../Textures/mud.png");
+	Texture textureTerrainR("../Textures/Acero.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainR.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -2261,6 +2267,11 @@ void applicationLoop() {
 		shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderMulLighting.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+		/*shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+		shaderMulLighting.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.05, 0.05, 0.05)));//Comportamiento del objeto en ausencia de luz
+		shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.6, 0.0, 0.0)));//Comportamiento del objeto al impactar la luz
+		shaderMulLighting.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.1, 0.0, 0.0)));//Brillo acumulado, depende de la posición de la luz y del espectador
+		shaderMulLighting.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));//Direccion*/
 
 		/*******************************************
 		 * Propiedades Luz direccional Terrain
@@ -2270,6 +2281,11 @@ void applicationLoop() {
 		shaderTerrain.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
 		shaderTerrain.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderTerrain.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+		/*shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+		shaderTerrain.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.05, 0.05, 0.05)));//Comportamiento del objeto en ausencia de luz
+		shaderTerrain.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.6, 0.0, 0.0)));//Comportamiento del objeto al impactar la luz
+		shaderTerrain.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.1, 0.0, 0.0)));//Brillo acumulado, depende de la posición de la luz y del espectador
+		shaderTerrain.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));//Direccion*/
 
 		/*******************************************
 		 * Propiedades SpotLights
@@ -2565,6 +2581,8 @@ void applicationLoop() {
 
 		// Muros1 colliders
 		for (int i = 0; i < muro1Position.size(); i++) {
+			muro1Position[i].y = terrain.getHeightTerrain(muro1Position[i].x, muro1Position[i].z);
+			//modelMuro.setPosition(muro1Position[i]);
 			AbstractModel::OBB muroCollider;
 			glm::mat4 modelMatrixCollidermuro = glm::mat4(1.0);
 			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, muro1Position[i]);
@@ -2573,10 +2591,68 @@ void applicationLoop() {
 			addOrUpdateColliders(collidersOBB, "muro1-" + std::to_string(i), muroCollider, modelMatrixCollidermuro);
 			// Set the orientation of collider before doing the scale
 			muroCollider.u = glm::quat_cast(modelMatrixCollidermuro);
-			modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+			if (i == 0) {
+				//modelMuro.setScale(glm::vec3(62, escalaY, escalaZ));
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(62, escalaY, escalaZ));
+			}else if (i == 1) {
+				//modelMuro.setScale(glm::vec3(62, escalaY, escalaZ));
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(62, escalaY, escalaZ));
+			}
+			else if (i == 2) {
+				//modelMuro.setScale(glm::vec3(110, escalaY, escalaZ));
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(110, escalaY, escalaZ));
+			}
+			else if (i == 3) {
+				//Muro Trasero
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(150, escalaY, escalaZ));
+			}
+			else if (i == 4) {
+				//modelMuro.setScale(glm::vec3(110, escalaY, escalaZ));
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(110, escalaY, escalaZ));
+			}
+			else if (i == 5) {
+				//Muro Trasero
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(150, escalaY, escalaZ));
+			}
+			else if (i == 6) {
+				//Muro Trasero
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(147, escalaY, escalaZ));
+			}
+			else if (i == 7) {
+				//Muro Trasero
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(147, escalaY, escalaZ));
+			}
+			else {
+				modelMatrixCollidermuro = glm::scale(modelMatrixCollidermuro, glm::vec3(escalaX, escalaY, escalaZ));
+			}
 			modelMatrixCollidermuro = glm::translate(modelMatrixCollidermuro, modelMuro.getObb().c);
 			muroCollider.c = glm::vec3(modelMatrixCollidermuro[3]);
-			muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
+			if (i == 0) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(62, escalaY, escalaZ);
+			}else if (i == 1) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(62, escalaY, escalaZ);
+			}
+			else if (i == 2) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(110, escalaY, escalaZ);
+			}
+			else if (i == 3) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(150, escalaY, escalaZ);
+			}
+			else if (i == 4) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(110, escalaY, escalaZ);
+			}
+			else if (i == 5) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(150, escalaY, escalaZ);
+			}
+			else if (i == 6) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(147, escalaY, escalaZ);
+			}
+			else if (i == 7) {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(147, escalaY, escalaZ);
+			}
+			else {
+				muroCollider.e = modelMuro.getObb().e * glm::vec3(escalaX, escalaY, escalaZ);
+			}
 			std::get<0>(collidersOBB.find("muro1-" + std::to_string(i))->second) = muroCollider;
 		}
 
@@ -2590,9 +2666,11 @@ void applicationLoop() {
 			addOrUpdateColliders(collidersOBB, "laberinto1-" + std::to_string(i), laberintoCollider, modelMatrixColliderLaberinto);
 			// Set the orientation of collider before doing the scale
 			laberintoCollider.u = glm::quat_cast(modelMatrixColliderLaberinto);
+			//modelMatrixColliderLaberinto = glm::scale(modelMatrixColliderLaberinto, glm::vec3(8.6, 1.5, 6.5));
 			modelMatrixColliderLaberinto = glm::scale(modelMatrixColliderLaberinto, glm::vec3(1.0, 1.5, 1.0));
 			modelMatrixColliderLaberinto = glm::translate(modelMatrixColliderLaberinto, modeloLaberinto.getObb().c);
 			laberintoCollider.c = glm::vec3(modelMatrixColliderLaberinto[3]);
+			//laberintoCollider.e = modeloLaberinto.getObb().e * glm::vec3(8.6, 1.5, 6.5);
 			laberintoCollider.e = modeloLaberinto.getObb().e * glm::vec3(1.0, 1.5, 1.0);
 			std::get<0>(collidersOBB.find("laberinto1-" + std::to_string(i))->second) = laberintoCollider;
 		}
@@ -3366,18 +3444,36 @@ void renderScene(bool renderParticles){
 	}
 
 	//Render de las paredes del muro
-	for (int i = 0; i < muro1Position.size(); i++) {
+	/*for (int i = 0; i < muro1Position.size(); i++) {
 		muro1Position[i].y = terrain.getHeightTerrain(muro1Position[i].x, muro1Position[i].z);
 		modelMuro.setPosition(muro1Position[i]);
-		modelMuro.setScale(glm::vec3(escalaX, escalaY, escalaZ));
+		if (i == 0) {
+			modelMuro.setScale(glm::vec3(62, escalaY, escalaZ));
+		}else if (i == 1) {
+			modelMuro.setScale(glm::vec3(62, escalaY, escalaZ));
+		}
+		else if (i == 2) {
+			modelMuro.setScale(glm::vec3(110, escalaY, escalaZ));
+		}
+		else if (i == 3) {
+			modelMuro.setScale(glm::vec3(132, escalaY, escalaZ));
+		}
+		else if (i == 4) {
+			modelMuro.setScale(glm::vec3(110, escalaY, escalaZ));
+		}
+		else {
+			modelMuro.setScale(glm::vec3(escalaX, escalaY, escalaZ));
+		}
 		modelMuro.setOrientation(glm::vec3(0, muro1Orientation[i], 0));
 		modelMuro.render();
-	}
+	}*/
 
 	//Render de los muros del laberinto
 	for (int i = 0; i < laberintoPosition.size(); i++) {
+		//laberintoPosition[i].y = terrain.getHeightTerrain(laberintoPosition[i].x, laberintoPosition[i].z)-10;
 		laberintoPosition[i].y = terrain.getHeightTerrain(laberintoPosition[i].x, laberintoPosition[i].z);
 		modeloLaberinto.setPosition(laberintoPosition[i]);
+		//modeloLaberinto.setScale(glm::vec3(8.6, 1.5, 6.5));
 		modeloLaberinto.setScale(glm::vec3(1.0, 1.5, 1.0));
 		modeloLaberinto.setOrientation(glm::vec3(0, laberintoOrientation[i], 0));
 		modeloLaberinto.render();
@@ -3766,6 +3862,7 @@ void renderScene(bool renderParticles){
 		 shaderParticlesFire.setInt("Pass", 2);
 		 glm::mat4 modelFireParticles = glm::mat4(1.0);
 		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
 		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
 		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
