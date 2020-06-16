@@ -221,6 +221,8 @@ glm::mat4 modelMatrixArco = glm::mat4(1.0f);
 glm::mat4 modelMatrixPuertaCerrda = glm::mat4(1.0f);
 //Matriz del fantasma
 glm::mat4 modelMatrixFantasma = glm::mat4(1.0f);
+//Matriz del fantasma 1
+glm::mat4 modelMatrixFantasma1 = glm::mat4(1.0f);
 //Matriz para la princesa
 glm::mat4 modelMatrixPrincesa = glm::mat4(1.0f);
 
@@ -494,17 +496,17 @@ std::vector<glm::vec3> lamp1Position = {
 
 	//Antorchas frontales
 	//glm::vec3(80.4, 0.0, 52.0),
-	glm::vec3(67.0, 0.0, 52.0),
+	glm::vec3(-48.8671875, 0, -54.5),
 	//glm::vec3(53.6, 0.0, 52.0),
-	glm::vec3(40.2, 0.0, 52.0),
+	glm::vec3(48.4375, 0.0, -25.0),
 	//glm::vec3(26.8, 0.0, 52.0),
-	glm::vec3(13.4, 0.0, 52.0),
+	glm::vec3(13.4, 0.0, 52.8),//Frontal Derecha
 	//glm::vec3(0.0, 0.0, 50.0),//Muro central --> Puerta
-	glm::vec3(-13.4, 0.0, 52.0),
+	glm::vec3(-13.4, 0.0, 52.8),//Frontal izquierda
 	//glm::vec3(-26.8, 0.0, 52.0),
-	glm::vec3(-40.2, 0.0, 52.0),
+	glm::vec3(-57.03125, 0.0, 17.8),
 	//glm::vec3(-53.6, 0.0, 52.0),
-	glm::vec3(-67.0, 0.0, 52.0)
+	glm::vec3(67.96875, 0.0, 40.7)
 	//glm::vec3(-80.4, 0.0, 52.0),
 
 	//Antorchas IZQUIERDA
@@ -552,7 +554,7 @@ std::vector<glm::vec3> lamp1Position = {
 std::vector<float> lamp1Orientation = { 
 	-17.0, -82.67, 23.70, 
 	//Antorchas Frontales
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	-180.0, -180.0, 0.0, 0.0, -180.0, -180.0, //0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	//Orientaciones lado IZQUIERDO
 	//-90.0, -90.0, -90.0, -90.0, -90.0, -90.0, //-90.0, -90.0, -90.0, -90.0, -90.0,
 	//Orientacionestraceras
@@ -579,6 +581,22 @@ std::vector<glm::vec3> jarronPosition = {
 //Vectores de orientacion de jarrones 
 std::vector<float> jarronOrientation = { 0,0,0,0,0,0 };
 
+//Vector posicion Fantasmas
+std::vector<glm::vec3> fantasmaPosition = {
+		glm::vec3(0.0, 0.0, 45.703125),
+		glm::vec3(-39.453125, 0.0, 22.0),
+		glm::vec3(67.578125, 0.0, -7.03125),
+		glm::vec3(48.046875, 0.0, -79.296875),
+		glm::vec3(-52, 0.0, -94.921875)
+
+};
+//Vectores de orientacion de fantasmas
+std::vector<float> fantasmaOrientation = { -90,-90,-90, -90, -90 };
+//Vector para ver si el tantasma esta vivo
+bool fantasmasVivos[] = { true, true, true, true, true};
+//Vector de vidas de los fantasmas
+std::vector<int> fantasmasVidas = { 2,2,2,2,2 };
+
 //Vector de etiquetas de jarrones
 
 //Vector de indicadores de jarrones
@@ -593,8 +611,8 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"lambo", glm::vec3(10.0, 0.0, 60.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
 		{"fountain", glm::vec3(-14.0625, 0.0, -93.75)},
-		{"fire1", glm::vec3(15.4, 0.0, 54.0)},
-		{"fire2", glm::vec3(-11.4, 0.0, 54.0)}
+		{"fire1", glm::vec3(15.4, 0.0, 55.0)},
+		{"fire2", glm::vec3(-11.4, 0.0, 55.0)}
 };
 
 double deltaTime;
@@ -1985,13 +2003,17 @@ bool processInput(bool continueApplication) {
 			modelMatrixMayow = glm::translate(modelMatrixArco, glm::vec3(0, 0, 10));
 			modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
 			vida = 10;
-			vidaFantasma = 2;
+
+			for (int i = 0; i < fantasmaPosition.size();i++) {
+				fantasmasVivos[i] = true;
+				fantasmasVidas[i] = 2;
+			}
 			//trasladaPersonaje = true;
 			//jarronE[] = { true, true, true, true , true , true };
 			for (int i = 0; i < jarronOrientation.size(); i++) {
 				jarronE[i] = true;
 			}
-			fantasmaVivo = true;
+			
 			complet = false;
 			//abrir = 0;
 			rotBuzzLeftArm = (0.0); abrir = 0.0;
@@ -2056,6 +2078,30 @@ void applicationLoop() {
 	int numberAdvance = 0;
 	int maxAdvance = 0.0;
 
+	int state1 = 0;
+	float advanceCount1 = 0.0;
+	float rotCount1 = 0.0;
+	int numberAdvance1 = 0;
+	int maxAdvance1 = 0.0;
+
+	int state2 = 0;
+	float advanceCount2 = 0.0;
+	float rotCount2 = 0.0;
+	int numberAdvance2 = 0;
+	int maxAdvance2 = 0.0;
+
+	int state3 = 0;
+	float advanceCount3 = 0.0;
+	float rotCount3 = 0.0;
+	int numberAdvance3 = 0;
+	int maxAdvance3 = 0.0;
+
+	int state4 = 0;
+	float advanceCount4 = 0.0;
+	float rotCount4 = 0.0;
+	int numberAdvance4 = 0;
+	int maxAdvance4 = 0.0;
+
 	//Modelo del muro
 	//Aquí Y no importa porque más adelante se definira con respecto al mapa de alturas
 	//modelMatrixMuro = glm::translate(modelMatrixMuro, glm::vec3(10.0, 0.0, -12.0));
@@ -2106,8 +2152,12 @@ void applicationLoop() {
 		//rotate  viendolo de frente -180:  ^
 		//rotate  viendolo de frente 90:  -->
 		//rotate  viendolo de frente 0:  v
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
+	//modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(-48.828125, 0.0, -72.65625));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
+	
+	
 
 	//Modelo de la fuente
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(-14.0625, 0.0, -93.75));
@@ -2484,7 +2534,7 @@ void applicationLoop() {
 		addOrUpdateColliders(collidersOBB, "Princesa", princesaBodyCollider, modelMatrixPrincesa);
 
 		//Collider del fantasma
-		if (fantasmaVivo) {
+		/*if (fantasmaVivo) {
 			glm::mat4 modelMatrixColliderFantasma = glm::mat4(modelMatrixFantasma);
 			AbstractModel::SBB fantasmaCollider;
 			modelMatrixColliderFantasma = glm::scale(modelMatrixColliderFantasma, glm::vec3(1.0, 1.0, 1.0));
@@ -2496,8 +2546,50 @@ void applicationLoop() {
 			fantasmaCollider.c = glm::vec3(modelMatrixColliderFantasma[3]);
 			fantasmaCollider.ratio = modelFantasma.getSbb().ratio * 1.0;
 			addOrUpdateColliders(collidersSBB, "fantasma", fantasmaCollider, modelMatrixFantasma);
+		}*/
+		// collinder de los fantasmas
+		for (int i = 0; i < fantasmaPosition.size(); i++) {
+			//if (jarronE[i]) {
+				/*AbstractModel::SBB fantasmaCollider;
+				glm::mat4 modelMatrixColliderFantasma = glm::mat4(1.0);
+				modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, fantasmaPosition[i]);
+				modelMatrixColliderFantasma = glm::rotate(modelMatrixColliderFantasma, glm::radians(fantasmaOrientation[i]),
+					glm::vec3(0, 1, 0));
+				addOrUpdateColliders(collidersSBB, "" + std::to_string(i), fantasmaCollider, modelMatrixColliderFantasma);
+				// Set the orientation of collider before doing the scale
+				fantasmaCollider.u = glm::quat_cast(modelMatrixColliderFantasma);
+				modelMatrixColliderFantasma = glm::scale(modelMatrixColliderFantasma, glm::vec3(2.0, 2.0, 2.0));
+				modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, modeloJarron.getObb().c);
+				fantasmaCollider.c = glm::vec3(modelMatrixColliderFantasma[3]);
+				fantasmaCollider.e = modeloJarron.getObb().e * glm::vec3(2.0, 2.0, 2.0);
+				std::get<0>(collidersSBB.find("" + std::to_string(i))->second) = fantasmaCollider;*/
+				//}
+			if (fantasmasVivos[i] == true) {
+				glm::mat4 modelMatrixColliderFantasma = glm::mat4(1.0);
+				AbstractModel::SBB fantasmaCollider;
+				modelMatrixColliderFantasma = glm::scale(modelMatrixColliderFantasma, glm::vec3(1.0, 1.0, 1.0));
+				//modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, modelFantasma.getSbb().c);
+				modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, fantasmaPosition[i]);
+				modelMatrixColliderFantasma = glm::rotate(modelMatrixColliderFantasma, glm::radians(fantasmaOrientation[i]), glm::vec3(0, 1, 0));
+				//glm::vec3(modelFantasma.getSbb().c.x, modelFantasma.getSbb().c.y, modelFantasma.getSbb().c.z));
+
+				fantasmaCollider.c = glm::vec3(modelMatrixColliderFantasma[3]);
+				fantasmaCollider.ratio = modelFantasma.getSbb().ratio * 1.0;
+				addOrUpdateColliders(collidersSBB, "fantasma" + std::to_string(i), fantasmaCollider, modelMatrixColliderFantasma);
+			}
 		}
-		
+
+		/*glm::mat4 modelMatrixColliderFantasma = glm::mat4(modelMatrixFantasma1);
+		AbstractModel::SBB fantasmaCollider;
+		modelMatrixColliderFantasma = glm::scale(modelMatrixColliderFantasma, glm::vec3(1.0, 1.0, 1.0));
+		//modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, modelFantasma.getSbb().c);
+		modelMatrixColliderFantasma = glm::translate(modelMatrixColliderFantasma, fantasmaPosition[0]);
+			/*glm::vec3(modelFantasma.getSbb().c.x,
+				modelFantasma.getSbb().c.y,
+				modelFantasma.getSbb().c.z));
+		fantasmaCollider.c = glm::vec3(modelMatrixColliderFantasma[3]);
+		fantasmaCollider.ratio = modelFantasma.getSbb().ratio * 1.0;
+		addOrUpdateColliders(collidersSBB, "fantasma1", fantasmaCollider, modelMatrixFantasma1);*/
 
 
 		// Collider del aricraft
@@ -2559,6 +2651,8 @@ void applicationLoop() {
 		rockCollider.c = glm::vec3(modelMatrixColliderRock[3]);
 		rockCollider.ratio = modelRock.getSbb().ratio * 1.0;
 		addOrUpdateColliders(collidersSBB, "rock", rockCollider, matrixModelRock);
+
+		
 
 		// collinder de los jarrones
 		for (int i = 0; i < jarronPosition.size(); i++) {
@@ -2929,23 +3023,98 @@ void applicationLoop() {
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					if (it->first=="fantasma") {
-						std::cout << "Colision " << it->first << " with "
-							<< jt->first << vida << std::endl;
-						if ((animationIndex == 1 || animationIndex == 0)&& fantasmaVivo== true) {
+					if (it->first=="fantasma0" && fantasmasVivos[0] == true) {
+						if (animationIndex == 1 || animationIndex == 0|| animationIndex == 2) {
 							vida = vida - 1;
+							std::cout << "Colision " << it->first << " with "
+								<< jt->first << vida << std::endl;
 							if (vida <= 0) {
 								vivo = false;
 							}
 						}
 						else if(animationIndex==3){
-							vidaFantasma = vidaFantasma - 1;
-							std::cout << "Vida fantasma"<<vidaFantasma << std::endl;
-							if (vidaFantasma <= 0) {
-								fantasmaVivo = false;
+							fantasmasVidas[0] = fantasmasVidas[0] - 1;
+							std::cout << "Vida fantasma"<< fantasmasVidas[0] << std::endl;
+							if (fantasmasVidas[0] <= 0) {
+								//fantasmaVivo = false;
+								fantasmasVivos[0] = false;
 							}
 						}
-						
+					}
+					if (it->first == "fantasma1" && fantasmasVivos[1] == true) {
+						if (animationIndex == 1 || animationIndex == 0 || animationIndex == 2) {
+							vida = vida - 1;
+							std::cout << "Colision " << it->first << " with "
+								<< jt->first << vida << std::endl;
+							if (vida <= 0) {
+								vivo = false;
+							}
+						}
+						else if (animationIndex == 3) {
+							fantasmasVidas[1] = fantasmasVidas[1] - 1;
+							std::cout << "Vida fantasma" << fantasmasVidas[1] << std::endl;
+							if (fantasmasVidas[1] <= 0) {
+								//fantasmaVivo = false;
+								fantasmasVivos[1] = false;
+							}
+						}
+					}
+					if (it->first == "fantasma2" && fantasmasVivos[2] == true) {
+
+						if (animationIndex == 1 || animationIndex == 0 || animationIndex == 2){
+							vida = vida - 1;
+							std::cout << "Colision " << it->first << " with "
+								<< jt->first << vida << std::endl;
+							if (vida <= 0) {
+								vivo = false;
+							}
+						}
+						else if (animationIndex == 3) {
+							fantasmasVidas[2] = fantasmasVidas[2] - 1;
+							std::cout << "Vida fantasma" << fantasmasVidas[2] << std::endl;
+							if (fantasmasVidas[2] <= 0) {
+								//fantasmaVivo = false;
+								fantasmasVivos[2] = false;
+							}
+						}
+					}
+					if (it->first == "fantasma3" && fantasmasVivos[3] == true) {
+
+						if (animationIndex == 1 || animationIndex == 0 || animationIndex == 2) {
+							vida = vida - 1;
+							std::cout << "Colision " << it->first << " with "
+								<< jt->first << vida << std::endl;
+							if (vida <= 0) {
+								vivo = false;
+							}
+						}
+						else if (animationIndex == 3) {
+							fantasmasVidas[3] = fantasmasVidas[3] - 1;
+							std::cout << "Vida fantasma" << fantasmasVidas[3] << std::endl;
+							if (fantasmasVidas[3] <= 0) {
+								//fantasmaVivo = false;
+								fantasmasVivos[3] = false;
+							}
+						}
+					}
+					if (it->first == "fantasma4" && fantasmasVivos[4] == true) {
+
+						if (animationIndex == 1 || animationIndex == 0 || animationIndex == 2) {
+							vida = vida - 1;
+							std::cout << "Colision " << it->first << " with "
+								<< jt->first << vida << std::endl;
+							if (vida <= 0) {
+								vivo = false;
+							}
+						}
+						else if (animationIndex == 3) {
+							fantasmasVidas[4] = fantasmasVidas[4] - 1;
+							std::cout << "Vida fantasma" << fantasmasVidas[4] << std::endl;
+							if (fantasmasVidas[4] <= 0) {
+								//fantasmaVivo = false;
+								fantasmasVivos[4] = false;
+							}
+						}
 					}
 					
 					isCollision = true;
@@ -3064,7 +3233,7 @@ void applicationLoop() {
 			break;
 		}
 
-		// State machine para el fantasma1
+		// State machine para el fantasma0
 		//if (fantasmaVivo) {
 		switch (state) {
 		case 0:
@@ -3081,7 +3250,23 @@ void applicationLoop() {
 			state = 1;
 			break;
 		case 1:
-			modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			if (numberAdvance==0) {
+				fantasmaPosition[0].x -= 0.5;
+			}
+			else if (numberAdvance==1) {
+				fantasmaPosition[0].z += 0.5;
+			}
+			else if (numberAdvance==2) {
+				fantasmaPosition[0].x += 0.5;
+			}
+			else if (numberAdvance==3) {
+				fantasmaPosition[0].z -= 0.5;
+			}
+			else if (numberAdvance==4) {
+				fantasmaPosition[0].x -= 0.5;
+			}
+			
 			advanceCount += 0.1;
 			//rotWheelsX += 0.05;
 			//rotWheelsY -= 0.02;
@@ -3095,7 +3280,8 @@ void applicationLoop() {
 			break;
 		case 2:
 			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
-			modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[0] += 1;
 			rotCount += 0.5f;
 			if (rotCount >= 45) {
 				rotCount = 0;
@@ -3105,7 +3291,285 @@ void applicationLoop() {
 			}
 			break;
 		}
+
+		// State machine para el fantasma1
+		//if (fantasmaVivo) {
+		switch (state1) {
+		case 0:
+			if (numberAdvance1 == 0)
+				maxAdvance1 = 7.0;
+			else if (numberAdvance1 == 1)
+				maxAdvance1 = 3.0;
+			else if (numberAdvance1 == 2)
+				maxAdvance1 = 14.0;
+			else if (numberAdvance1 == 3)
+				maxAdvance1 = 3.0;
+			else if (numberAdvance1 == 4)
+				maxAdvance1 = 14.0;
+			state1 = 1;
+			break;
+		case 1:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			if (numberAdvance1 == 0) {
+				fantasmaPosition[1].x -= 0.5;
+			}
+			else if (numberAdvance1 == 1) {
+				fantasmaPosition[1].z += 0.5;
+			}
+			else if (numberAdvance1 == 2) {
+				fantasmaPosition[1].x += 0.5;
+			}
+			else if (numberAdvance1 == 3) {
+				fantasmaPosition[1].z -= 0.5;
+			}
+			else if (numberAdvance1 == 4) {
+				fantasmaPosition[1].x -= 0.5;
+			}
+
+			advanceCount1 += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount1 > maxAdvance1) {
+				advanceCount1 = 0;
+				numberAdvance1++;
+				state1 = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[1] += 1;
+			rotCount1 += 0.5f;
+			if (rotCount1 >= 45) {
+				rotCount1 = 0;
+				state1 = 0;
+				if (numberAdvance1 > 4)
+					numberAdvance1 = 1;
+			}
+			break;
+		}
+		// State machine para el fantasma2
+		//if (fantasmaVivo) {
+		switch (state2) {
+		case 0:
+			if (numberAdvance2 == 0)
+				maxAdvance2 = 1.0;
+			else if (numberAdvance2 == 1)
+				maxAdvance2 = 8.0;
+			else if (numberAdvance2 == 2)
+				maxAdvance2 = 2.0;
+			else if (numberAdvance2 == 3)
+				maxAdvance2 = 8.0;
+			else if (numberAdvance2 == 4)
+				maxAdvance2 = 2.0;
+			state2 = 1;
+			break;
+		case 1:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			if (numberAdvance2 == 0) {
+				fantasmaPosition[2].x -= 0.5;
+			}
+			else if (numberAdvance2 == 1) {
+				fantasmaPosition[2].z += 0.5;
+			}
+			else if (numberAdvance2 == 2) {
+				fantasmaPosition[2].x += 0.5;
+			}
+			else if (numberAdvance2 == 3) {
+				fantasmaPosition[2].z -= 0.5;
+			}
+			else if (numberAdvance2 == 4) {
+				fantasmaPosition[2].x -= 0.5;
+			}
+
+			advanceCount2 += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount2 > maxAdvance2) {
+				advanceCount2 = 0;
+				numberAdvance2++;
+				state2 = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[2] += 1;
+			rotCount2 += 0.5f;
+			if (rotCount2 >= 45) {
+				rotCount2 = 0;
+				state2 = 0;
+				if (numberAdvance2 > 4)
+					numberAdvance2 = 1;
+			}
+			break;
+		}
+		// State machine para el fantasma3
+		//if (fantasmaVivo) {
+		switch (state3) {
+		case 0:
+			if (numberAdvance3 == 0)
+				maxAdvance3 = 2.0;
+			else if (numberAdvance3 == 1)
+				maxAdvance3 = 9.0;
+			else if (numberAdvance3 == 2)
+				maxAdvance3 = 4.0;
+			else if (numberAdvance3 == 3)
+				maxAdvance3 = 9.0;
+			else if (numberAdvance3 == 4)
+				maxAdvance3 = 4.0;
+			state3 = 1;
+			break;
+		case 1:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			if (numberAdvance3 == 0) {
+				fantasmaPosition[3].x -= 0.5;
+			}
+			else if (numberAdvance3 == 1) {
+				fantasmaPosition[3].z += 0.5;
+			}
+			else if (numberAdvance3 == 2) {
+				fantasmaPosition[3].x += 0.5;
+			}
+			else if (numberAdvance3 == 3) {
+				fantasmaPosition[3].z -= 0.5;
+			}
+			else if (numberAdvance3 == 4) {
+				fantasmaPosition[3].x -= 0.5;
+			}
+
+			advanceCount3 += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount3 > maxAdvance3) {
+				advanceCount3 = 0;
+				numberAdvance3++;
+				state3 = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[3] += 1;
+			rotCount3 += 0.5f;
+			if (rotCount3 >= 45) {
+				rotCount3 = 0;
+				state3 = 0;
+				if (numberAdvance3 > 4)
+					numberAdvance3 = 1;
+			}
+			break;
+		}
+
+		// State machine para el fantasma4
+		//if (fantasmaVivo) {
+		switch (state4) {
+		case 0:
+			if (numberAdvance4 == 0)
+				maxAdvance4 = 1.7;
+			else if (numberAdvance4 == 1)
+				maxAdvance4 = 7.0;
+			else if (numberAdvance4 == 2)
+				maxAdvance4 = 3.4;
+			else if (numberAdvance4 == 3)
+				maxAdvance4 = 7.0;
+			else if (numberAdvance4 == 4)
+				maxAdvance4 = 3.4;
+			state4 = 1;
+			break;
+		case 1:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			if (numberAdvance4 == 0) {
+				fantasmaPosition[4].x -= 0.5;
+			}
+			else if (numberAdvance4 == 1) {
+				fantasmaPosition[4].z += 0.5;
+			}
+			else if (numberAdvance4 == 2) {
+				fantasmaPosition[4].x += 0.5;
+			}
+			else if (numberAdvance4 == 3) {
+				fantasmaPosition[4].z -= 0.5;
+			}
+			else if (numberAdvance4 == 4) {
+				fantasmaPosition[4].x -= 0.5;
+			}
+
+			advanceCount4 += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount4 > maxAdvance4) {
+				advanceCount4 = 0;
+				numberAdvance4++;
+				state4 = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[4] += 1;
+			rotCount4 += 0.5f;
+			if (rotCount4 >= 45) {
+				rotCount4 = 0;
+				state4 = 0;
+				if (numberAdvance4 > 4)
+					numberAdvance4 = 1;
+			}
+			break;
+		}
 		//}
+		/*// State machine para el fantasma1
+		//if (fantasmaVivo) {
+		switch (state) {
+		case 0:
+			if (numberAdvance == 0)
+				maxAdvance = 15.0;
+			else if (numberAdvance == 1)
+				maxAdvance = 0.5;
+			else if (numberAdvance == 2)
+				maxAdvance = 30.0;
+			else if (numberAdvance == 3)
+				maxAdvance = 0.5;
+			else if (numberAdvance == 4)
+				maxAdvance = 30.0;
+			state = 1;
+			break;
+		case 1:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.5));
+			fantasmaPosition[0].x += 0.05;
+			advanceCount += 0.1;
+			//rotWheelsX += 0.05;
+			//rotWheelsY -= 0.02;
+			//if (rotWheelsY < 0)
+			//	rotWheelsY = 0;
+			if (advanceCount > maxAdvance) {
+				advanceCount = 0;
+				numberAdvance++;
+				state = 2;
+			}
+			break;
+		case 2:
+			//modelMatrixFantasma = glm::translate(modelMatrixFantasma, glm::vec3(0.0, 0.0, 0.025));
+			//modelMatrixFantasma = glm::rotate(modelMatrixFantasma, glm::radians(1.0f), glm::vec3(0, 1, 0));
+			fantasmaOrientation[0] += 1;
+			rotCount += 0.5f;
+			if (rotCount >= 45) {
+				rotCount = 0;
+				state = 0;
+				if (numberAdvance > 4)
+					numberAdvance = 1;
+			}
+			break;
+		}
+		//}*/
 		
 
 		glfwSwapBuffers(window);
@@ -3132,9 +3596,12 @@ void applicationLoop() {
 		alSourcefv(source[3], AL_POSITION, source3Pos);
 
 		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
-		source4Pos[0] = modelMatrixFantasma[3].x;
+		/*source4Pos[0] = modelMatrixFantasma[3].x;
 		source4Pos[1] = modelMatrixFantasma[3].y;
-		source4Pos[2] = modelMatrixFantasma[3].z;
+		source4Pos[2] = modelMatrixFantasma[3].z;*/
+		source4Pos[0] = fantasmaPosition[0].x;
+		source4Pos[1] = fantasmaPosition[0].y;
+		source4Pos[2] = fantasmaPosition[0].z;
 		//Indicamos cual es la fuente de sonido que queremos enviarle
 		//Posicion y valor
 		alSourcefv(source[4], AL_POSITION, source4Pos);
@@ -3431,6 +3898,7 @@ void renderScene(bool renderParticles){
 	//Para desplazar el collider de la puerta abierta
 	modelMatrixPuerta[3][1] = terrain.getHeightTerrain(modelMatrixPuerta[3][0], modelMatrixPuerta[3][2])+abrir;
 	
+	
 
 	//Render de los jarrones
 	for (int i = 0; i < jarronPosition.size(); i++) {
@@ -3587,18 +4055,33 @@ void renderScene(bool renderParticles){
 	// Se regresa el cull faces IMPORTANTE para la capa
 	glEnable(GL_CULL_FACE);
 
+	glDisable(GL_CULL_FACE);
+	//Render de los fantasmas
+	for (int i = 0; i < fantasmaPosition.size(); i++) {
+		if (fantasmasVivos[i]==true) {
+			fantasmaPosition[i].y = terrain.getHeightTerrain(fantasmaPosition[i].x, fantasmaPosition[i].z) + 2;
+			modelFantasma.setPosition(fantasmaPosition[i]);
+			modelFantasma.setScale(glm::vec3(1.0, 1.0, 1.0));
+			modelFantasma.setOrientation(glm::vec3(0, fantasmaOrientation[i], 0));
+			modelFantasma.render();
+		}
+	}
+	glEnable(GL_CULL_FACE);
+
 	// Fantasma
 	// Se deshabilita el cull faces IMPORTANTE para la capa
-	glDisable(GL_CULL_FACE);
+	/*glDisable(GL_CULL_FACE);
 	modelMatrixFantasma[3][1] = terrain.getHeightTerrain(modelMatrixFantasma[3][0], modelMatrixFantasma[3][2])+2.0;
 	glm::mat4 modelMatrixFantasmaBody = glm::mat4(modelMatrixFantasma);
 	modelMatrixFantasmaBody = glm::scale(modelMatrixFantasmaBody, glm::vec3(1.0, 1.0, 1.0));
 	if (fantasmaVivo) {
+		//modelFantasma.setPosition(glm::vec3(modelMatrixFantasma[3]));
 		modelFantasma.render(modelMatrixFantasmaBody);
 	}
-	
 	// Se regresa el cull faces IMPORTANTE para la capa
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);*/
+
+	
 
 	// Princesa
 	// Se deshabilita el cull faces IMPORTANTE para la capa
@@ -3806,7 +4289,7 @@ void renderScene(bool renderParticles){
 			shaderParticlesFire.setInt("Pass", 2);
 			glm::mat4 modelFireParticles = glm::mat4(1.0);
 			modelFireParticles = glm::translate(modelFireParticles, it->second.second);
-			modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+			modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 9.0;
 			shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 			shaderParticlesFire.turnOn();
@@ -3863,7 +4346,7 @@ void renderScene(bool renderParticles){
 		 glm::mat4 modelFireParticles = glm::mat4(1.0);
 		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
 		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
-		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 9.0;
 		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 		 shaderParticlesFire.turnOn();
