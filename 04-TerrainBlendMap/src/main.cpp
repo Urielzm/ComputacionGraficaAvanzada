@@ -320,7 +320,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//garchompModelAnimate.loadModel("../models/pokemon/Garchomp2.fbx");
 	//garchompModelAnimate.loadModel("../models/Fantasma/Esqueleto1/alerta2.fbx");
 	//garchompModelAnimate.loadModel("../models/Human/c1.fbx");
-	garchompModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
+	//garchompModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
+	garchompModelAnimate.loadModel("../models/Bender/Bender.fbx");
 	//garchompModelAnimate.loadModel("../models/Personaje_proyecto/EsqueletoAnimado/untitled.fbx");
 	//garchompModelAnimate.loadModel("../models/Explorador/Explorador.fbx");
 	garchompModelAnimate.setShader(&shaderMulLighting);
@@ -1179,7 +1180,7 @@ void applicationLoop() {
 		modelMatrixGarchomp[3][1] = terrain.getHeightTerrain(modelMatrixGarchomp[3][0], modelMatrixGarchomp[3][2]);
 		glm::mat4 garchompModel = glm::mat4(modelMatrixGarchomp);
 		garchompModel = glm::scale(garchompModel, glm::vec3(0.006, 0.006, 0.006));
-		garchompModelAnimate.setAnimationIndex(4);
+		garchompModelAnimate.setAnimationIndex(0);
 		garchompModelAnimate.render(garchompModel);
 
 		//Dragonait

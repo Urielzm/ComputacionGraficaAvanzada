@@ -51,7 +51,6 @@
 //Shadow box include
 #include "Headers/ShadowBox.h"
 
-
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 int screenWidth;
@@ -570,12 +569,12 @@ std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
 
 //Vectores de posicion y orientacion de jarrones 
 std::vector<glm::vec3> jarronPosition = {
-		glm::vec3(0.0, 0.0, 56.0),
-		glm::vec3(4.0, 0.0, 56.0),
-		glm::vec3(8.0, 0.0, 56.0),
-		glm::vec3(12.0, 0.0, 56.0),
-		glm::vec3(16.0, 0.0, 56.0),
-		glm::vec3(20.0, 0.0, 56.0)
+		glm::vec3(-48.4375, 0.0, -69.53125),
+		glm::vec3(48.4375, 0.0, -36.71875),
+		glm::vec3(67.578125, 0.0, 20.3125),
+		glm::vec3(-42.1875, 0.0, 23.046875),
+		glm::vec3(-26.953125, 0.0, -33.59375),
+		glm::vec3(0.0, 0.0, 56.0)
 
 };
 //Vectores de orientacion de jarrones 
@@ -610,9 +609,13 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 		{"aircraft", glm::vec3(-10.0, 0.0, 60.0)},
 		{"lambo", glm::vec3(10.0, 0.0, 60.0)},
 		{"heli", glm::vec3(5.0, 10.0, -5.0)},
-		{"fountain", glm::vec3(-14.0625, 0.0, -93.75)},
+		{"fountain", glm::vec3(0.0, 0.0, 52.0)},
 		{"fire1", glm::vec3(15.4, 0.0, 55.0)},
-		{"fire2", glm::vec3(-11.4, 0.0, 55.0)}
+		{"fire2", glm::vec3(-11.4, 0.0, 55.0)},
+		{"fire3", glm::vec3(-46.8671875, 0, -56.5)},
+		{"fire4", glm::vec3(50.4375, 0.0, -27.0)},
+		{"fire5", glm::vec3(-55.03125, 0.0, 15.8)},
+		{"fire6", glm::vec3(69.9, 0.0, 38.7)},
 };
 
 double deltaTime;
@@ -652,9 +655,9 @@ GLuint depthMap, depthMapFBO;
 
 // OpenAL Defines
 //Definimos el numero de buffers que vamos a crear.
-//Para agregar una  septima, modificamos a 7.
-#define NUM_BUFFERS 7 //agregamos una 6 funete de audio, ponemos 7 en los dos
-#define NUM_SOURCES 7
+//Para agregar una  septima, modificamos a 10.
+#define NUM_BUFFERS 9 //agregamos una 9 funete de audio, ponemos 10 en los dos
+#define NUM_SOURCES 9
 #define NUM_ENVIRONMENTS 1
 // Listener
 //Para las fuente de sonido de nuestros mismos datos
@@ -683,7 +686,12 @@ ALfloat source5Vel[] = { 0.0, 0.0, 0.0 };
 //Almacenamos la posicion y la velocidad del audio
 ALfloat source6Pos[] = { 0.0, 0.0, 0.0 };
 ALfloat source6Vel[] = { 0.0, 0.0, 0.0 };
-
+//Almacenamos la posicion y la velocidad del audio
+ALfloat source7Pos[] = { 0.0, 0.0, 0.0 };
+ALfloat source7Vel[] = { 0.0, 0.0, 0.0 };
+//Almacenamos la posicion y la velocidad del audio
+ALfloat source8Pos[] = { 0.0, 0.0, 0.0 };
+ALfloat source8Vel[] = { 0.0, 0.0, 0.0 };
 
 // Buffers
 //Arreglo de buffers, con el numero definido anteriormente
@@ -698,7 +706,7 @@ int ch;
 ALboolean loop;
 
 //Se agrega un true, por cada fuente.
-std::vector<bool> sourcesPlay = {true, true, true, true, true, true, false};
+std::vector<bool> sourcesPlay = {true, true, true, true, true, true, false, true, true};
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -754,7 +762,8 @@ void initParticleBuffers() {
 	delete[] data;
 	data = new GLfloat[nParticles];
 	float time = 0.0f;
-	float rate = 0.00075f;
+	//float rate = 0.00075f;
+	float rate = 0.001f;
 	for (unsigned int i = 0; i < nParticles; i++) {
 		data[i] = time;
 		time += rate;
@@ -1048,9 +1057,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelPuertaIzquierda.loadModel("../models/PuertaFinal/PuertaIzquierda.obj");
 	modelPuertaIzquierda.setShader(&shaderMulLighting);
 
-	//Modelo de la pricesa
-	modelPrincesa.loadModel("../models/PrincesaZelda/PrincesaZelda.obj");
-	modelPrincesa.setShader(&shaderMulLighting);
+	
 
 	//Lamp models
 	modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
@@ -1086,6 +1093,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.loadModel("../models/Zelda/source/ZELDA2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	//Modelo de la pricesa
+	//modelPrincesa.loadModel("../models/PrincesaZelda/PrincesaZelda.obj");
+	modelPrincesa.loadModel("../models/Bender/Bender.fbx");
+	modelPrincesa.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));//
 	camera->setDistanceFromTarget(distanceFromTarget);//que tan lejos esta del personaje, este valor se establece previeamente. --> distanceFromTarget
@@ -1445,7 +1457,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
 
-	Texture textureParticlesFountain("../Textures/bluewater.png");
+	//Texture textureParticlesFountain("../Textures/bluewater.png");
+	Texture textureParticlesFountain("../Textures/smokeTransparencia.png");
 	bitmap = textureParticlesFountain.loadImage();
 	data = textureParticlesFountain.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &textureParticleFountainID);
@@ -1574,7 +1587,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Config source 0
 	// Generate buffers, or else no sound will happen!
 	alGenBuffers(NUM_BUFFERS, buffer);
-	buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
+	buffer[0] = alutCreateBufferFromFile("../sounds/humo.wav");
 	buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
 	buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
 	//Creamos el buffer numero 3
@@ -1586,6 +1599,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	buffer[5] = alutCreateBufferFromFile("../sounds/AmbienteGjost.wav");
 	//Creamos el buffer numero 6
 	buffer[6] = alutCreateBufferFromFile("../sounds/Espada.wav");
+	//Creamos el buffer numero 7
+	buffer[7] = alutCreateBufferFromFile("../sounds/FondoDemoniaco.wav");
+	//Creamos el buffer numero 8
+	buffer[8] = alutCreateBufferFromFile("../sounds/NinaFantasma.wav");
 
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
@@ -1660,7 +1677,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcefv(source[5], AL_VELOCITY, source5Vel);
 	alSourcei(source[5], AL_BUFFER, buffer[5]);
 	alSourcei(source[5], AL_LOOPING, AL_TRUE);
-	alSourcef(source[5], AL_MAX_DISTANCE, 3000);
+	alSourcef(source[5], AL_MAX_DISTANCE, 3500);
 
 	//Espada
 	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
@@ -1670,8 +1687,30 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcefv(source[6], AL_POSITION, source6Pos);
 	alSourcefv(source[6], AL_VELOCITY, source6Vel);
 	alSourcei(source[6], AL_BUFFER, buffer[6]);
-	alSourcei(source[6], AL_LOOPING, AL_FALSE);
+	alSourcei(source[6], AL_LOOPING, AL_FALSE);//para que se repita una vez
 	alSourcef(source[6], AL_MAX_DISTANCE, 500);
+
+	//Fondo con Demonio
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Cambiamos el indice del arreglo
+	alSourcef(source[7], AL_PITCH, 1.0f);
+	alSourcef(source[7], AL_GAIN, 1.0f);
+	alSourcefv(source[7], AL_POSITION, source7Pos);
+	alSourcefv(source[7], AL_VELOCITY, source7Vel);
+	alSourcei(source[7], AL_BUFFER, buffer[7]);
+	alSourcei(source[7], AL_LOOPING, AL_TRUE);//para que se este repitiendo continuamente
+	alSourcef(source[7], AL_MAX_DISTANCE, 700);
+
+	//Nina fantasma
+	//Condfiguración de la fuente de sonido, el comportamiento de que tan fuerte se escucha
+	//Cambiamos el indice del arreglo
+	alSourcef(source[8], AL_PITCH, 1.0f);
+	alSourcef(source[8], AL_GAIN, 1.0f);
+	alSourcefv(source[8], AL_POSITION, source8Pos);
+	alSourcefv(source[8], AL_VELOCITY, source8Vel);
+	alSourcei(source[8], AL_BUFFER, buffer[8]);
+	alSourcei(source[8], AL_LOOPING, AL_TRUE);//para que se este repitiendo continuamente
+	alSourcef(source[8], AL_MAX_DISTANCE, 700);
 
 }
 
@@ -1755,6 +1794,9 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+
+	//Princesa
+	modelPrincesa.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1977,6 +2019,7 @@ bool processInput(bool continueApplication) {
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && vivo==true && complet == false){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(5.0f), glm::vec3(0, 1, 0));
+		//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(5.0f), glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && vivo == true && complet == false){
 		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-5.0f), glm::vec3(0, 1, 0));
@@ -2144,7 +2187,8 @@ void applicationLoop() {
 	modelMatrixLambo = glm::translate(modelMatrixLambo, glm::vec3(10.0, 0.0, 60.0));
 
 	//Matriz de la princesa
-	modelMatrixPrincesa = glm::translate(modelMatrixPrincesa, glm::vec3(10.0, 0.0, 65.0));
+	modelMatrixPrincesa = glm::translate(modelMatrixPrincesa, glm::vec3(-4.6875, 0.0, -94.140625));
+	modelMatrixPrincesa = glm::rotate(modelMatrixPrincesa, glm::radians(90.0f), glm::vec3(0, 1, 0));
 
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 	//Modelo de Mayow
@@ -2152,11 +2196,10 @@ void applicationLoop() {
 		//rotate  viendolo de frente -180:  ^
 		//rotate  viendolo de frente 90:  -->
 		//rotate  viendolo de frente 0:  v
-	//modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
-	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(-48.828125, 0.0, -72.65625));
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 60.0));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
-	
+	//modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(48.4375, 0.0, -25.0));
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-180.0f), glm::vec3(0, 1, 0));
 	
 
 	//Modelo de la fuente
@@ -2520,18 +2563,7 @@ void applicationLoop() {
 		fantasmaoBodyCollider.e = modelFantasma.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "Fantasma", fantasmaoBodyCollider, modelMatrixFantasma);*/
 
-		glm::mat4 modelmatrixColliderPrincesa = glm::mat4(modelMatrixPrincesa);
-		AbstractModel::OBB princesaBodyCollider;
-		// Set the orientation of collider before doing the scale
-		princesaBodyCollider.u = glm::quat_cast(modelMatrixPrincesa);
-		modelmatrixColliderPrincesa = glm::scale(modelmatrixColliderPrincesa, glm::vec3(1.0, 1.0, 1.0));
-		modelmatrixColliderPrincesa = glm::translate(modelmatrixColliderPrincesa,
-			glm::vec3(modelPrincesa.getObb().c.x,
-				modelPrincesa.getObb().c.y,
-				modelPrincesa.getObb().c.z));
-		princesaBodyCollider.c = glm::vec3(modelmatrixColliderPrincesa[3]);
-		princesaBodyCollider.e = modelPrincesa.getObb().e * glm::vec3(1.0, 1.0, 1.0);
-		addOrUpdateColliders(collidersOBB, "Princesa", princesaBodyCollider, modelMatrixPrincesa);
+		
 
 		//Collider del fantasma
 		/*if (fantasmaVivo) {
@@ -2596,11 +2628,13 @@ void applicationLoop() {
 		glm::mat4 modelMatrixColliderAircraft = glm::mat4(modelMatrixAircraft);
 		AbstractModel::OBB aircraftCollider;
 		// Set the orientation of collider before doing the scale
-		aircraftCollider.u = glm::quat_cast(modelMatrixAircraft);
-		modelMatrixColliderAircraft = glm::scale(modelMatrixColliderAircraft,
-				glm::vec3(1.0, 1.0, 1.0));
-		modelMatrixColliderAircraft = glm::translate(
-				modelMatrixColliderAircraft, modelAircraft.getObb().c);
+		modelMatrixColliderAircraft[3][1] = terrain.getHeightTerrain(modelMatrixColliderAircraft[3][0], modelMatrixColliderAircraft[3][2])+2;
+		aircraftCollider.u = glm::quat_cast(modelMatrixColliderAircraft);
+		modelMatrixColliderAircraft = glm::scale(modelMatrixColliderAircraft,glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderAircraft = glm::translate(modelMatrixColliderAircraft, 
+			glm::vec3(modelAircraft.getObb().c.x,
+				modelAircraft.getObb().c.y,
+				modelAircraft.getObb().c.z));
 		aircraftCollider.c = glm::vec3(modelMatrixColliderAircraft[3]);
 		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
@@ -2858,6 +2892,20 @@ void applicationLoop() {
 		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
 		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider, modelMatrixMayow);
 
+		//Collider para Bender
+		glm::mat4 modelmatrixColliderPrincesa = glm::mat4(modelMatrixPrincesa);
+		AbstractModel::OBB princesaBodyCollider;
+		// Set the orientation of collider before doing the scale
+		princesaBodyCollider.u = glm::quat_cast(modelmatrixColliderPrincesa);
+		modelmatrixColliderPrincesa = glm::scale(modelmatrixColliderPrincesa, glm::vec3(0.021, 0.021, 0.021));
+		modelmatrixColliderPrincesa = glm::translate(modelmatrixColliderPrincesa,
+			glm::vec3(modelPrincesa.getObb().c.x,
+				modelPrincesa.getObb().c.y,
+				modelPrincesa.getObb().c.z));
+		princesaBodyCollider.e = modelPrincesa.getObb().e * glm::vec3(0.021, 0.021, 0.021);
+		princesaBodyCollider.c = glm::vec3(modelmatrixColliderPrincesa[3]);
+		addOrUpdateColliders(collidersOBB, "Princesa", princesaBodyCollider, modelMatrixPrincesa);
+
 		/*******************************************
 		 * Render de colliders
 		 *******************************************/
@@ -2957,7 +3005,7 @@ void applicationLoop() {
 							cuentaJarrones++;
 						}
 					}
-					if (cuentaJarrones == 5) {
+					if (cuentaJarrones == 6) {
 						rotBuzzLeftArm = (-1.57); abrir = 10;
 						rotBuzzRightArm = (-1.57);
 					}
@@ -3577,9 +3625,9 @@ void applicationLoop() {
 		/****************************+
 		 * Open AL sound data
 		 */
-		source0Pos[0] = modelMatrixFountain[3].x;
-		source0Pos[1] = modelMatrixFountain[3].y;
-		source0Pos[2] = modelMatrixFountain[3].z;
+		source0Pos[0] = modelMatrixArco[3].x;
+		source0Pos[1] = modelMatrixArco[3].y;
+		source0Pos[2] = modelMatrixArco[3].z;
 		alSourcefv(source[0], AL_POSITION, source0Pos);
 
 		source2Pos[0] = modelMatrixDart[3].x;
@@ -3621,6 +3669,22 @@ void applicationLoop() {
 		//Indicamos cual es la fuente de sonido que queremos enviarle
 		//Posicion y valor
 		alSourcefv(source[6], AL_POSITION, source6Pos);
+
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source7Pos[0] = fantasmaPosition[3].x;
+		source7Pos[1] = fantasmaPosition[3].y;
+		source7Pos[2] = fantasmaPosition[3].z;
+		//Indicamos cual es la fuente de sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[7], AL_POSITION, source7Pos);
+
+		//indicarle cual es la posición del sonido, para este caso se la ponemos en el lamborghini.
+		source8Pos[0] = fantasmaPosition[1].x;
+		source8Pos[1] = fantasmaPosition[1].y;
+		source8Pos[2] = fantasmaPosition[1].z;
+		//Indicamos cual es la fuente de 1sonido que queremos enviarle
+		//Posicion y valor
+		alSourcefv(source[8], AL_POSITION, source8Pos);
 
 		// Listener for the Thris person camera
 		listenerPos[0] = modelMatrixMayow[3].x;
@@ -4055,8 +4119,8 @@ void renderScene(bool renderParticles){
 	// Se regresa el cull faces IMPORTANTE para la capa
 	glEnable(GL_CULL_FACE);
 
-	glDisable(GL_CULL_FACE);
 	//Render de los fantasmas
+	glDisable(GL_CULL_FACE);
 	for (int i = 0; i < fantasmaPosition.size(); i++) {
 		if (fantasmasVivos[i]==true) {
 			fantasmaPosition[i].y = terrain.getHeightTerrain(fantasmaPosition[i].x, fantasmaPosition[i].z) + 2;
@@ -4085,13 +4149,14 @@ void renderScene(bool renderParticles){
 
 	// Princesa
 	// Se deshabilita el cull faces IMPORTANTE para la capa
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 	modelMatrixPrincesa[3][1] = terrain.getHeightTerrain(modelMatrixPrincesa[3][0], modelMatrixPrincesa[3][2]);
 	glm::mat4 modelMatrixPrincesaBody = glm::mat4(modelMatrixPrincesa);
-	modelMatrixPrincesaBody = glm::scale(modelMatrixPrincesaBody, glm::vec3(1.0, 1.0, 1.0));
+	modelMatrixPrincesaBody = glm::scale(modelMatrixPrincesaBody, glm::vec3(0.021, 0.021, 0.021));
+	modelPrincesa.setAnimationIndex(0);
 	modelPrincesa.render(modelMatrixPrincesaBody);
 	// Se regresa el cull faces IMPORTANTE para la capa
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 
 	/*******************************************
 	 * Custom Anim objects obj
@@ -4120,6 +4185,7 @@ void renderScene(bool renderParticles){
 				modelMatrixMayow[3][1]+2,
 				modelMatrixMayow[3][2]));
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelMatrixLetreroBody = glm::rotate(modelMatrixMayow, glm::radians(180.0f), glm::vec3(0, 1, 0));
 		modelLetreroFin.render(modelMatrixLetreroBody);
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
@@ -4134,6 +4200,7 @@ void renderScene(bool renderParticles){
 				modelMatrixMayow[3][1],
 				modelMatrixMayow[3][2]));
 		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelMatrixLetreroBody2 = glm::rotate(modelMatrixMayow, glm::radians(180.0f), glm::vec3(0, 1, 0));
 		modelLetreroContinuar.render(modelMatrixLetreroBody2);
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
@@ -4146,9 +4213,9 @@ void renderScene(bool renderParticles){
 		modelMatrixLetreroBody = glm::scale(modelMatrixLetreroBody, glm::vec3(1.0, 1.0, 1.0));
 		modelMatrixLetreroBody = glm::translate(modelMatrixLetreroBody,
 			glm::vec3(modelMatrixMayow[3][0],
-				modelMatrixMayow[3][1] + 2,
+				modelMatrixMayow[3][1],
 				modelMatrixMayow[3][2]));
-		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		modelMatrixLetreroBody = glm::rotate(modelMatrixMayow, glm::radians(180.0f), glm::vec3(0, 1, 0));
 		modelLetreroCompleto.render(modelMatrixLetreroBody);
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
@@ -4162,7 +4229,8 @@ void renderScene(bool renderParticles){
 			glm::vec3(modelMatrixMayow[3][0],
 				modelMatrixMayow[3][1],
 				modelMatrixMayow[3][2]));
-		//modelMatrixLetreroBody = glm::rotate(modelMatrixLetreroBody, glm::radians(0.0f), glm::vec3(0, 1, 0));
+		//modelMatrixLetreroBody2 = glm::rotate(modelMatrixMayow, glm::radians(90.0f), glm::vec3(0, 1, 0));
+		modelMatrixLetreroBody2 = glm::rotate(modelMatrixMayow, glm::radians(180.0f), glm::vec3(0, 1, 0));
 		modelLetreroContinuar.render(modelMatrixLetreroBody2);
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
@@ -4236,7 +4304,7 @@ void renderScene(bool renderParticles){
 			 */
 			glm::mat4 modelMatrixParticlesFountain = glm::mat4(1.0);
 			modelMatrixParticlesFountain = glm::translate(modelMatrixParticlesFountain, it->second.second);
-			modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(modelMatrixParticlesFountain[3][0], modelMatrixParticlesFountain[3][2]) + 0.36 * 10.0;
+			modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(modelMatrixParticlesFountain[3][0], modelMatrixParticlesFountain[3][2]) + 7;
 			modelMatrixParticlesFountain = glm::scale(modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
 			currTimeParticlesAnimation = TimeManager::Instance().GetTime();
 			if(currTimeParticlesAnimation - lastTimeParticlesAnimation > 10.0)
@@ -4251,7 +4319,7 @@ void renderScene(bool renderParticles){
 			shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
 			shaderParticlesFountain.setFloat("ParticleLifetime", 3.5f);
 			shaderParticlesFountain.setInt("ParticleTex", 0);
-			shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));
+			shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -0.03f, 0.0f)));
 			shaderParticlesFountain.setMatrix4("model", 1, false, glm::value_ptr(modelMatrixParticlesFountain));
 			glBindVertexArray(VAOParticles);
 			glDrawArrays(GL_POINTS, 0, nParticles);
@@ -4347,6 +4415,234 @@ void renderScene(bool renderParticles){
 		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
 		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
 		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 9.0;
+		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+		 shaderParticlesFire.turnOn();
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+		 glDepthMask(GL_FALSE);
+		 glBindVertexArray(particleArray[drawBuf]);
+		 glVertexAttribDivisor(0, 1);
+		 glVertexAttribDivisor(1, 1);
+		 glVertexAttribDivisor(2, 1);
+		 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+		 glBindVertexArray(0);
+		 glDepthMask(GL_TRUE);
+		 drawBuf = 1 - drawBuf;
+		 shaderParticlesFire.turnOff();
+
+		 /****************************+
+		  * Open AL sound data
+		  */
+		 source1Pos[0] = modelFireParticles[3].x;
+		 source1Pos[1] = modelFireParticles[3].y;
+		 source1Pos[2] = modelFireParticles[3].z;
+		 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+		 /**********
+		  * End Render particles systems
+		  */
+		}
+		else if (renderParticles && it->second.first.compare("fire3") == 0) {
+		/**********
+		 * Init Render particles systems
+		 */
+		 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+		 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+		 shaderParticlesFire.setInt("Pass", 1);
+		 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+		 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+		 glActiveTexture(GL_TEXTURE1);
+		 glBindTexture(GL_TEXTURE_1D, texId);
+		 glEnable(GL_RASTERIZER_DISCARD);
+		 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+		 glBeginTransformFeedback(GL_POINTS);
+		 glBindVertexArray(particleArray[1 - drawBuf]);
+		 glVertexAttribDivisor(0, 0);
+		 glVertexAttribDivisor(1, 0);
+		 glVertexAttribDivisor(2, 0);
+		 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+		 glEndTransformFeedback();
+		 glDisable(GL_RASTERIZER_DISCARD);
+
+		 shaderParticlesFire.setInt("Pass", 2);
+		 glm::mat4 modelFireParticles = glm::mat4(1.0);
+		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+		 shaderParticlesFire.turnOn();
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+		 glDepthMask(GL_FALSE);
+		 glBindVertexArray(particleArray[drawBuf]);
+		 glVertexAttribDivisor(0, 1);
+		 glVertexAttribDivisor(1, 1);
+		 glVertexAttribDivisor(2, 1);
+		 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+		 glBindVertexArray(0);
+		 glDepthMask(GL_TRUE);
+		 drawBuf = 1 - drawBuf;
+		 shaderParticlesFire.turnOff();
+
+		 /****************************+
+		  * Open AL sound data
+		  */
+		 source1Pos[0] = modelFireParticles[3].x;
+		 source1Pos[1] = modelFireParticles[3].y;
+		 source1Pos[2] = modelFireParticles[3].z;
+		 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+		 /**********
+		  * End Render particles systems
+		  */
+		}
+		else if (renderParticles && it->second.first.compare("fire4") == 0) {
+		/**********
+		 * Init Render particles systems
+		 */
+		 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+		 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+		 shaderParticlesFire.setInt("Pass", 1);
+		 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+		 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+		 glActiveTexture(GL_TEXTURE1);
+		 glBindTexture(GL_TEXTURE_1D, texId);
+		 glEnable(GL_RASTERIZER_DISCARD);
+		 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+		 glBeginTransformFeedback(GL_POINTS);
+		 glBindVertexArray(particleArray[1 - drawBuf]);
+		 glVertexAttribDivisor(0, 0);
+		 glVertexAttribDivisor(1, 0);
+		 glVertexAttribDivisor(2, 0);
+		 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+		 glEndTransformFeedback();
+		 glDisable(GL_RASTERIZER_DISCARD);
+
+		 shaderParticlesFire.setInt("Pass", 2);
+		 glm::mat4 modelFireParticles = glm::mat4(1.0);
+		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+		 shaderParticlesFire.turnOn();
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+		 glDepthMask(GL_FALSE);
+		 glBindVertexArray(particleArray[drawBuf]);
+		 glVertexAttribDivisor(0, 1);
+		 glVertexAttribDivisor(1, 1);
+		 glVertexAttribDivisor(2, 1);
+		 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+		 glBindVertexArray(0);
+		 glDepthMask(GL_TRUE);
+		 drawBuf = 1 - drawBuf;
+		 shaderParticlesFire.turnOff();
+
+		 /****************************+
+		  * Open AL sound data
+		  */
+		 source1Pos[0] = modelFireParticles[3].x;
+		 source1Pos[1] = modelFireParticles[3].y;
+		 source1Pos[2] = modelFireParticles[3].z;
+		 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+		 /**********
+		  * End Render particles systems
+		  */
+		}
+		else if (renderParticles && it->second.first.compare("fire5") == 0) {
+		/**********
+		 * Init Render particles systems
+		 */
+		 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+		 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+		 shaderParticlesFire.setInt("Pass", 1);
+		 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+		 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+		 glActiveTexture(GL_TEXTURE1);
+		 glBindTexture(GL_TEXTURE_1D, texId);
+		 glEnable(GL_RASTERIZER_DISCARD);
+		 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+		 glBeginTransformFeedback(GL_POINTS);
+		 glBindVertexArray(particleArray[1 - drawBuf]);
+		 glVertexAttribDivisor(0, 0);
+		 glVertexAttribDivisor(1, 0);
+		 glVertexAttribDivisor(2, 0);
+		 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+		 glEndTransformFeedback();
+		 glDisable(GL_RASTERIZER_DISCARD);
+
+		 shaderParticlesFire.setInt("Pass", 2);
+		 glm::mat4 modelFireParticles = glm::mat4(1.0);
+		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
+		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
+
+		 shaderParticlesFire.turnOn();
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+		 glDepthMask(GL_FALSE);
+		 glBindVertexArray(particleArray[drawBuf]);
+		 glVertexAttribDivisor(0, 1);
+		 glVertexAttribDivisor(1, 1);
+		 glVertexAttribDivisor(2, 1);
+		 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+		 glBindVertexArray(0);
+		 glDepthMask(GL_TRUE);
+		 drawBuf = 1 - drawBuf;
+		 shaderParticlesFire.turnOff();
+
+		 /****************************+
+		  * Open AL sound data
+		  */
+		 source1Pos[0] = modelFireParticles[3].x;
+		 source1Pos[1] = modelFireParticles[3].y;
+		 source1Pos[2] = modelFireParticles[3].z;
+		 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+		 /**********
+		  * End Render particles systems
+		  */
+		}
+		else if (renderParticles && it->second.first.compare("fire6") == 0) {
+		/**********
+		 * Init Render particles systems
+		 */
+		 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+		 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
+
+		 shaderParticlesFire.setInt("Pass", 1);
+		 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+		 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+		 glActiveTexture(GL_TEXTURE1);
+		 glBindTexture(GL_TEXTURE_1D, texId);
+		 glEnable(GL_RASTERIZER_DISCARD);
+		 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+		 glBeginTransformFeedback(GL_POINTS);
+		 glBindVertexArray(particleArray[1 - drawBuf]);
+		 glVertexAttribDivisor(0, 0);
+		 glVertexAttribDivisor(1, 0);
+		 glVertexAttribDivisor(2, 0);
+		 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+		 glEndTransformFeedback();
+		 glDisable(GL_RASTERIZER_DISCARD);
+
+		 shaderParticlesFire.setInt("Pass", 2);
+		 glm::mat4 modelFireParticles = glm::mat4(1.0);
+		 modelFireParticles = glm::translate(modelFireParticles, it->second.second);
+		 //modelFireParticles = glm::translate(modelFireParticles, modelMatrixMayow[3]);
+		 modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]) + 7.0;
 		 shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 		 shaderParticlesFire.turnOn();
